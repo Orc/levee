@@ -1,0 +1,26 @@
+#! /bin/sh
+#
+# Mastodon buildfile for Levee (3.4m)
+#
+
+. ./Mastodon.inc
+exedir BIN
+
+make clean
+CC="$SYSCC" make || exit 1
+
+install -d $BIN/usr/bin
+install -d -o man -g man $BIN/usr/man/man1
+
+install -m 511 -o bin -g bin -s -c lev $BIN/usr/bin/levee
+install -m 444 -o man -g man -c lv.1 $BIN/usr/man/man1/levee.1
+
+(   cd $BIN/usr/bin
+#    ln -fs levee vi
+    ln levee lv
+)
+(   cd $BIN/usr/man/man1
+#    ln -fs levee.1 vi.1
+    ln levee.1 lv.1
+)
+exit 0
