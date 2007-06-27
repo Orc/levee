@@ -1,7 +1,7 @@
 /*
  * LEVEE, or Captain Video;  A vi clone
  *
- * Copyright (c) 1982-1997 David L Parsons
+ * Copyright (c) 1982-2007 David L Parsons
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, without or
@@ -179,7 +179,7 @@ int *a,*b;
 
 
 int PROC
-#if ST
+#if OS_ATARI
 cclass(c)
 register int c;
 {
@@ -199,7 +199,7 @@ register unsigned char c;
 	return 2;
     if (c == '' || c < ' ')
 	return 1;
-#if MSDOS==0
+#if !OS_DOS
     if (c & 0x80)
 	return 3;
 #endif
@@ -207,7 +207,7 @@ register unsigned char c;
 } /* cclass */
 #endif
 
-#if ST
+#if OS_ATARI
 /*
  * wildly machine-dependent code to make a beep
  */
@@ -233,7 +233,7 @@ beeper()
 	(*SOUND)[2] = sound[i];
     }
 } /* beeper */
-#endif /*ST*/
+#endif /*OS_ATARI*/
 
 
 VOID PROC
@@ -244,12 +244,12 @@ error()
     if (xerox)
 	rcb[0] = 0;
     xerox = FALSE;
-#if ST
+#if OS_ATARI
     Supexec(beeper);
 #else
     if (bell)
 	strput(BELL);
-#endif /*ST*/
+#endif /*OS_ATARI*/
 } /* error */
 
 
@@ -289,11 +289,12 @@ int base,offset;
     unsigned char c;
     
     for (c = 0;c<'z'-'`';c++)
-	if (contexts[c] > base)
+	if (contexts[c] > base) {
 	    if (contexts[c]+offset < base || contexts[c]+offset >= bufmax)
 		contexts[c] = -1;
 	    else
 		contexts[c] += offset;
+	}
 } /* fixmarkers */
 
 

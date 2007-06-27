@@ -1,7 +1,7 @@
 /*
  * LEVEE, or Captain Video;  A vi clone
  *
- * Copyright (c) 1982-1997 David L Parsons
+ * Copyright (c) 1982-2007 David L Parsons
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, without or
@@ -21,7 +21,7 @@
  * iRMX interface for levee (Intel C)
  */
 #include "levee.h"
-#if RMX
+#if OS_RMX
 
 extern char FkL, CurRT, CurLT, CurUP, CurDN;
 

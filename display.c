@@ -1,7 +1,7 @@
 /*
  * LEVEE, or Captain Video;  A vi clone
  *
- * Copyright (c) 1982-1997 David L Parsons
+ * Copyright (c) 1982-2007 David L Parsons
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, without or
@@ -22,15 +22,15 @@
 
 /* do a gotoXY -- allowing -1 for same row/column */
 
-#if TERMCAP | ST
+#if USE_TERMCAP | OS_ATARI
 
 #define MAXCOLS 160
 
-#if TERMCAP
+#if USE_TERMCAP
 #include "termcap.i"
 #endif
 
-#else /*!(TERMCAP | ST)*/
+#else /*!(USE_TERMCAP | OS_ATARI)*/
 
 #define MAXCOLS COLS
 
@@ -40,7 +40,7 @@ VOID PROC
 mvcur(y,x)
 int y,x;
 {
-#if TERMCAP_EMULATION || ANSI
+#if TERMCAP_EMULATION || TTY_ANSI
     static char gt[30];
 #endif
    
@@ -57,16 +57,14 @@ int y,x;
     if (x >= COLS)
 	x = COLS-1;
 
-#if TERMCAP
 #if TERMCAP_EMULATION
     tgoto(gt,y,x);
     strput(gt);
-#else
+#elif USE_TERMCAP
     strput( tgoto(CM, x, y) );
-#endif
-#elif ZTERM
+#elif TTY_ZTERM
     zgoto(x,y);
-#elif ANSI
+#elif TTY_ANSI
     {	register char *p = gt;		/* make a ansi gotoXY string */
 	*p++ = 033;
 	*p++ = '[';
@@ -76,7 +74,7 @@ int y,x;
 	*p++ = 'H';
 	WRITE_TEXT(1, gt, (p-gt));
     }
-#elif VT52
+#elif TTY_VT52
     CM[2] = y+32;
     CM[3] = x+32;
     strput(CM);
@@ -160,7 +158,7 @@ register unsigned c;
     	return 2;
     }
     else {
-#if MSDOS
+#if OS_DOS
 	out[0] = c;
 	return 1;
 #else
@@ -193,7 +191,7 @@ char *s;
 {
     int size,oxp = curpos.x;
     char buf[MAXCOLS+1];
-    register bi = 0;
+    register int bi = 0;
 
     while (*s && curpos.x < COLS) {
     	size = format(&buf[bi],*s++);
@@ -212,9 +210,9 @@ writeline(y,x,start)
 int y,x,start;
 {
     int endd,oxp;
-    register size;
+    register int size;
     char buf[MAXCOLS+1];
-    register bi = 0;
+    register int bi = 0;
     
     endd = fseekeol(start);
     if (start==0 || core[start-1] == EOL)
@@ -250,7 +248,7 @@ bool rest;
 {
     int sp;
     
-#if ST
+#if OS_ATARI
     /* turn the cursor off */
     asm(" clr.l  -(sp)     ");
     asm(" move.w #21,-(sp) ");
@@ -270,7 +268,7 @@ bool rest;
 	    printch('~'); strput(CE);
 	    y++;
 	}
-#if ST
+#if OS_ATARI
     /* turn the cursor back on */
     asm(" clr.w  -(sp)     ");
     asm(" move.w #1,-(sp)  ");

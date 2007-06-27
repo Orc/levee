@@ -1,7 +1,7 @@
 /*
  * LEVEE, or Captain Video;  A vi clone
  *
- * Copyright (c) 1982-1997 David L Parsons
+ * Copyright (c) 1982-2007 David L Parsons
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, without or
@@ -66,7 +66,7 @@ scan(length,tst,ch,src)
 int length;
 register char tst,ch,*src;
 {
-    register inc,l;
+    register int inc,l;
     
     if (length < 0)
 	inc = -1;

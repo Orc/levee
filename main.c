@@ -1,7 +1,7 @@
 /*
  * LEVEE, or Captain Video;  A vi clone
  *
- * Copyright (c) 1982-1997 David L Parsons
+ * Copyright (c) 1982-2007 David L Parsons
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, without or
@@ -21,11 +21,11 @@
 #include "levee.h"
 #include "extern.h"
 
-#if (SYS5 & !ST)	/* if system 5 compatable, it has signals */
+#if HAVE_SIGNAL_H
 #include <signal.h>
 #endif
 
-#if RMX
+#if OS_RMX
     extern alien token rq$get$task$tokens();	/* for unique files */
 #endif
 
@@ -35,26 +35,26 @@ stamp(s, template)
 char *s;
 char *template;
 {
-#if RMX
+#if OS_RMX
     token dummy;
 
     strcpy(s, ":work:");
     strcat(s, template);
     numtoa(&s[strlen(s)], rq$get$task$tokens(0,&dummy));
 #else
-#if MSDOS || ST
+#if OS_DOS || OS_ATARI
     char *p;
 #endif
 
-#if UNIX
+#if OS_UNIX
     strcpy(s, "/tmp/");
 #endif
 
-#if FLEXOS
+#if OS_FLEXOS
     s[0] = 0;
 #endif
 
-#if MSDOS
+#if OS_DOS
     if (p=getenv("TMP")) {
 	strcpy(s, p);
 	if (s[strlen(s)-1] != '\\')
@@ -63,7 +63,7 @@ char *template;
     else
 	s[0] = 0;
 #endif
-#if ST
+#if OS_ATARI
     if (p=getenv("_TMP")) {
 	strcpy(s, p);
 	if (s[strlen(s)-1] != '\\')
@@ -77,7 +77,7 @@ char *template;
 #endif
 }
 
-#if RMX|UNIX
+#if OS_RMX|OS_UNIX
 PROC void
 ctrlc()
 /* ctrlc: RMX control-C handler */
@@ -86,7 +86,7 @@ ctrlc()
 }
 #endif
 
-#if RMX
+#if OS_RMX
 PROC
 settty()
 /* settty: set up the terminal for raw input */
@@ -107,38 +107,38 @@ char **args;
 /* initialize: set up everything I can in levee */
 {
     int i;
-#if RMX
+#if OS_RMX
     int xmode = E_INIT, xquit;
 #else
     char *getenv();
-#if ST
+#if OS_ATARI
     extern int mapslash;
 #endif
 #endif
 
-#if UNIX
+#if OS_UNIX
     signal(SIGINT, ctrlc);
 #else
     signal(SIGINT, SIG_IGN);
 #endif
     initcon();
 
-#if RMX
+#if OS_RMX
     exception(0);
     dq$trap$cc(ctrlc,&i);
 #endif
 
-#if ZTERM
+#if TTY_ZTERM
     zconfig();
-#endif /*ZTERM*/
+#endif /*TTY_ZTERM*/
 
-#if ST
+#if OS_ATARI
     screensz(&LINES, &COLS);
     dofscroll = LINES/2;
 #endif
 
-#if RMX
-#if TERMCAP
+#if OS_RMX
+#if USE_TERMCAP
     {	FILE *tcf;
 	extern char termcap[];
 
@@ -148,15 +148,15 @@ char **args;
 	    fclose(tcf);			/* close the file */
 	}
     }
-#endif /*TERMCAP*/
+#endif /*USE_TERMCAP*/
     settty();
-#endif /*RMX*/
+#endif /*OS_RMX*/
 
-#if TERMCAP
+#if USE_TERMCAP
     tc_init();
 #endif
 
-    version(); strput(".  Copyright (c) 1983-1989 by David Parsons");
+    version(); strput(".  Copyright (c) 1983-2007 by David Parsons");
 
     if (!CA) {
 	lineonly = TRUE;
@@ -198,12 +198,12 @@ char **args;
     stamp(undotmp, "$tm");
     
     mvcur(LINES-1,0);
-#if ST
+#if OS_ATARI
     mapslash = getenv("mapslash") != 0L;
 #endif
-#if RMX
+#if OS_RMX
     do_file(":lvrc:", &xmode, &xquit);
-#else /*!RMX	system has a environment.. */
+#else /*!OS_RMX	system has a environment.. */
     {	char *p;
 	extern char *execstr;	/* [exec.c] */
 
@@ -272,7 +272,7 @@ exec_type emode;
     return noquit;
 }
 
-#if ST
+#if OS_ATARI
 long _STKSIZ = 4096;
 long _BLKSIZ = 4096;
 #endif
@@ -295,13 +295,13 @@ char **argv;
     unlink(undobuf);
     unlink(yankbuf);
 
-#if ZTERM
+#if TTY_ZTERM
     zclose();
 #endif
 
     fixcon();
 
-#if RMX
+#if OS_RMX
     strputs("\033]T:C15=3,C18=13,C20=5,C21=6,C23=4\033\\\n");
     dq$special(2,&fileno(stdin),&curr);
 #else

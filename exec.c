@@ -1,7 +1,7 @@
 /*
  * LEVEE, or Captain Video;  A vi clone
  *
- * Copyright (c) 1982-1997 David L Parsons
+ * Copyright (c) 1982-2007 David L Parsons
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, without or
@@ -92,7 +92,7 @@ VOID PROC
 args()
 /* args: print the argument list */
 {
-    register i;
+    register int i;
     mvcur(-1,0);
     for (i=0; i < argc; i++) {
 	if (curpos.x+strlen(argv[i]) >= COLS)
@@ -100,13 +100,13 @@ args()
 	else if (i > 0)
 	    printch(' ');
 	if (pc == i) {			/* highlight the current filename.. */
-#if ST|FLEXOS
+#if OS_ATARI|OS_FLEXOS
 	    strput("\033p");
 #else
 	    printch('[');
 #endif
 	    prints(argv[i]);
-#if ST|FLEXOS
+#if OS_ATARI|OS_FLEXOS
 	    strput("\033q");
 #else
 	    printch(']');
@@ -344,14 +344,14 @@ char * PROC
 getname()
 {
     extern int wilderr;
-#if ST
+#if OS_ATARI
     extern int mapslash;
     register char *p;
 #endif
     register char *name;
 
     if ( (name = getarg()) ) {
-	if (strcmp(name,"#") == 0)
+	if ( 0 == strcmp(name,"#") ) {
 	    if (*altnm)
 		name = altnm;
 	    else {
@@ -359,7 +359,8 @@ getname()
 		wilderr++;
 		return NULL;
 	    }
-#if ST
+	}
+#if OS_ATARI
 	if (mapslash)
 	    for (p=name; *p; p++)
 		if (*p == '/')
@@ -463,7 +464,7 @@ bool newbuf;
     else {		/* append stuff to the buffer */
 	fixupline(bseekeol(curr));
 	onright = bufmax-low;
-#if MSDOS
+#if OS_DOS
 	high = SIZE;
 	high -= onright;
 #else
@@ -524,12 +525,12 @@ backup(name)
 char *name;
 {
     char back[80];
-#if !UNIX
+#if !OS_UNIX
     char *p;
 #endif
 
     strcpy(back, name);
-#if UNIX
+#if OS_UNIX
     strcat(back, "~");
 #else
     p = strrchr(basename(back), '.');
@@ -587,7 +588,7 @@ oktoedit(writeold)
 /* check and see if it is ok to edit a new file */
 int writeold;	/* automatically write out changes? */
 {
-    if (modified && !affirm)
+    if (modified && !affirm) {
 	if (readonly) {
 	    errmsg(fisro);
 	    return NO;
@@ -601,6 +602,7 @@ int writeold;	/* automatically write out changes? */
 	    errmsg(fismod);
 	    return NO;
 	}
+    }
     return YES;
 } /* oktoedit */
 
@@ -966,13 +968,14 @@ bool *noquit;
 	    break;
 	case EX_XIT:
 	    clrmsg();
-	    if (modified)
+	    if (modified) {
 		if (readonly) {
 		    prints(fisro);
 		    break;
 		}
 		else if (!writefile())
 		    break;
+	    }
 
 	    if (!affirm && (argc-pc > 1)) {	/* any more files to edit? */
 		printch('(');
@@ -1076,16 +1079,16 @@ bool *noquit;
 	    zotscreen = YES;
 	    exprintln();
 	    if (*execstr) {
-#if ZTERM
+#if TTY_ZTERM
 		zclose();
 #endif
-#if FLEXOS|UNIX
+#if OS_FLEXOS|OS_UNIX
 		fixcon();
 #else
 		allowintr();
 #endif
 		system(execstr);
-#if FLEXOS|UNIX
+#if OS_FLEXOS|OS_UNIX
 		initcon();
 #else
 		nointr();

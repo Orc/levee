@@ -1,7 +1,7 @@
 /*
  * LEVEE, or Captain Video;  A vi clone
  *
- * Copyright (c) 1982-1997 David L Parsons
+ * Copyright (c) 1982-2007 David L Parsons
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, without or
@@ -22,7 +22,7 @@
  */
 #include "levee.h"
 
-#if ST
+#if OS_ATARI
 #include <atari\osbind.h>
 
 strput(s)
@@ -67,4 +67,4 @@ getKey()
 	c = (((unsigned)(key>>16))|0x80) & 0xff;
     return c;
 } /* getKey */
-#endif /*ST*/
+#endif /*OS_ATARI*/

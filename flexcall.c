@@ -1,7 +1,7 @@
 /*
  * LEVEE, or Captain Video;  A vi clone
  *
- * Copyright (c) 1982-1997 David L Parsons
+ * Copyright (c) 1982-2007 David L Parsons
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, without or
@@ -22,7 +22,7 @@
  */
 #include "levee.h"
 
-#if FLEXOS
+#if OS_FLEXOS
 #include <flexos.h>
 #include <ctype.h>
 

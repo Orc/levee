@@ -1,7 +1,7 @@
 /*
  * LEVEE, or Captain Video;  A vi clone
  *
- * Copyright (c) 1982-1997 David L Parsons
+ * Copyright (c) 1982-2007 David L Parsons
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, without or
@@ -483,7 +483,7 @@ bool down;
     else {
 	curr = bseekeol(max(0,nextline(FALSE, curr, count)));
 	i = bseekeol(max(0,nextline(FALSE, ptop, count)));
-	if (i < ptop)
+	if (i < ptop) {
 	    if (canUPSCROLL)
 		scrollback(i);
 	    else {
@@ -491,6 +491,7 @@ bool down;
 		setend();
 		redisplay(TRUE);
 	    }
+	}
     }
     strput(CURon);
     setpos(skipws(curr));	/* initialize new position - first nonwhite */

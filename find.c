@@ -1,7 +1,7 @@
 /*
  * LEVEE, or Captain Video;  A vi clone
  *
- * Copyright (c) 1982-1997 David L Parsons
+ * Copyright (c) 1982-2007 David L Parsons
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, without or
@@ -47,7 +47,7 @@ int PROC
 omatch(pattern, cp, endp)
 char *pattern, **cp, *endp;
 {
-    register flag;
+    register int flag;
     extern int ignorecase;
 
     switch (*pattern) {
@@ -60,9 +60,6 @@ char *pattern, **cp, *endp;
       case TOKENE:
 	  return !isalnum(**cp);
       case LITCHAR:
-#ifdef TOUPPER_FTN
-#undef toupper
-#endif
 	  if (ignorecase)
 	      flag = (toupper(**cp) == toupper(*(pattern+1)));
 	  else
@@ -140,7 +137,7 @@ VOID PROC
 patsize(pattern)
 register char **pattern;
 {
-    register count;
+    register int count;
     
     switch (**pattern) {
       case LITCHAR:

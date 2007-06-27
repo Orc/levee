@@ -1,7 +1,7 @@
 /*
  * LEVEE, or Captain Video;  A vi clone
  *
- * Copyright (c) 1982-1997 David L Parsons
+ * Copyright (c) 1982-2007 David L Parsons
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, without or
@@ -44,7 +44,7 @@ int endd, *size;
 bool PROC
 putfile(f, start, endd)
 register FILE *f;
-register start, endd;
+register int start, endd;
 {
     return write(fileno(f), core+start, endd-start) == (endd-start);
 }

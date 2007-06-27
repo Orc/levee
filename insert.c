@@ -1,7 +1,7 @@
 /*
  * LEVEE, or Captain Video;  A vi clone
  *
- * Copyright (c) 1982-1997 David L Parsons
+ * Copyright (c) 1982-2007 David L Parsons
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, without or
@@ -28,10 +28,10 @@ bool visual;
     char cmd, c;
     int rp;		/* number of spaces to diddle */
     int	ts, ss;		/* tabs && spaces to insert */
-    register cp;	/* current position */
+    register int cp;	/* current position */
     int i;		/* random index */
     int	endd;		/* last open place */
-    register rsize;	/* size of upper buffer */
+    register int rsize;	/* size of upper buffer */
     int	currDLE = 0;	/* what DLE is now */
     int	len;		/* full insert size */
     bool Dflag;
@@ -48,8 +48,8 @@ bool visual;
 	}
 	if (autoindent)
 	    currDLE = findDLE(lstart, &i, skipws(lstart),0);
-	if (visual)
-#if VT52
+	if (visual) {
+#if TTY_VT52
 	    if (OL) {
 #else
 	    if (OL && (*yp) < LINES-2) {
@@ -62,6 +62,7 @@ bool visual;
 		mvcur(1+(*yp), 0);
 		strput(CE);
 	    }
+	}
 	mvcur(-1, currDLE);
     }
     else {
@@ -114,7 +115,7 @@ bool visual;
 	    strput(CE);				/* clear this line */
 	    println();
 	    if (visual) {
-#if RMX
+#if OS_RMX
 		/* at OL at bottom kludge... */
 		if (OL && (*yp) < LINES-2) {
 #else

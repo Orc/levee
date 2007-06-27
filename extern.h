@@ -1,7 +1,7 @@
 /*
  * LEVEE, or Captain Video;  A vi clone
  *
- * Copyright (c) 1982-1997 David L Parsons
+ * Copyright (c) 1982-2007 David L Parsons
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, without or
@@ -80,18 +80,21 @@ char rcb[], *rcp,		/* last modification command */
 extern
 struct ybuf yank;		/* last deleted/yanked text */
 /* STATIC INITIALIZATIONS: */
+
 /* ttydef stuff */
-#if ST | TERMCAP
+#if OS_ATARI | USE_TERMCAP
 extern int LINES, COLS;
 #endif
-#if TERMCAP
+
+#if USE_TERMCAP
 extern bool CA, canUPSCROLL;
 extern char FkL,
 	    CurRT,
 	    CurLT,
 	    CurDN,
 	    CurUP;
-#endif /*TERMCAP*/
+#endif /*USE_TERMCAP*/
+
 extern char *TERMNAME,
 	    *HO,
 	    *UP,
@@ -176,17 +179,19 @@ cmdtype movemap[];
 #define EXTERN_D
 #define wc(ch)	(scan(65,'=',(ch),wordset)<65)
 
-#if SYS5
+#if HAVE_STRING_H
 #include <string.h>
+#endif
 
+#if HAVE_MEMSET
 #define fillchar(p,l,c)	memset((p),(c),(l))
-#define index(s,c)	strchr((s),(c))
-#else /*!SYS5*/
-#if ST
+#elif HAVE_BLKFILL
 #define fillchar(p,l,c)	blkfill((p),(c),(l))
-#endif /*ST*/
-#endif /*SYS5*/
-		
+#endif
+#if HAVE_STRCHR
+#define index(s,c)	strchr((s),(c))
+#endif
+
 extern findstates PROC findCP();
 extern exec_type PROC editcore();
 
@@ -225,7 +230,7 @@ extern VOID PROC moveright();
 extern VOID PROC fillchar();
 #endif
 
-#if TERMCAP
+#if USE_TERMCAP
 extern void tc_init();
 #endif
 

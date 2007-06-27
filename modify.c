@@ -1,7 +1,7 @@
 /*
  * LEVEE, or Captain Video;  A vi clone
  *
- * Copyright (c) 1982-1997 David L Parsons
+ * Copyright (c) 1982-2007 David L Parsons
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, without or
@@ -30,7 +30,7 @@ doyank(low, high)
 int low, high;
 {
     HANDLE f;
-    register sz;
+    register int sz;
     
     yank.size = high - low;
     moveleft(&core[low], yank.stuff, min(yank.size, SBUFSIZE));
