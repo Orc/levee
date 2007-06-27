@@ -21,6 +21,8 @@
 #include "levee.h"
 #include "extern.h"
 
+#include <stdlib.h>
+
 #if HAVE_SIGNAL_H
 #include <signal.h>
 #endif

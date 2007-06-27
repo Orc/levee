@@ -31,10 +31,11 @@ AC_INIT $TARGET
 
 # validate --size=
 #
-case "${SIZE:-1}" in
-[0-9][0-9]*)	;;
-[0-9][0-9]*[Ll]);;
-*)		AC_ERROR "--size=$SIZE is not a valid number" ;;
+case X"${SIZE}" in
+X[0-9][0-9]*)	 ;;
+X[0-9][0-9]*[Ll]);;
+X)               ;;
+X*)		 AC_FAIL "--size=$SIZE is not a valid number" ;;
 esac
 
 AC_PROG_CC
@@ -90,6 +91,10 @@ else
 
     if AC_LIBRARY tgetent $LIBORDER; then
 	AC_DEFINE USE_TERMCAP	1
+	# our -libtermcap might be (n)curses in disguise.  If so,
+	# it might have a colliding mvcur() that we need to define
+	# ourselves out from.
+	AC_QUIET AC_CHECK_FUNCS mvcur && AC_DEFINE mvcur __mvcur
     else
 	# have to use a local termcap
 	AC_DEFINE TERMCAP_EMULATION	1
