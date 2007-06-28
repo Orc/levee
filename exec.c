@@ -84,7 +84,7 @@ VOID PROC
 version()
 /* version: print which version of levee we are... */
 {
-    errmsg("levee ");prints(ED_NOTICE);printch(ED_REVISION);
+    errmsg("levee (c)");prints(codeversion);
 } /* version */
 
 

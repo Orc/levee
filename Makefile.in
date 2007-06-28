@@ -8,10 +8,14 @@ CFLAGS += -Wall
 
 OBJS = blockio.o display.o editcor.o exec.o find.o \
     unixcall.o globals.o insert.o main.o misc.o \
-    modify.o move.o ucsd.o undo.o wildargs.o
+    modify.o move.o ucsd.o undo.o wildargs.o \
+    version.o
 
 lev: $(OBJS)
 	$(CC) $(CFLAGS) -o lev $(OBJS) @LIBS@
+
+version.o: version.c VERSION
+	$(CC) $(CFLAGS) -c -DVERSION=\"`cat VERSION`\" version.c
 
 clean:
 	rm -f *.o lev

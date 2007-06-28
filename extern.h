@@ -112,8 +112,7 @@ char Erasechar,
      eraseline;
 
 extern
-char ED_NOTICE[],		/* Editor version */
-     ED_REVISION,		/* Small revisions & corrections */
+char codeversion[],		/* Editor version */
      fismod[],			/* File is modified message */
      fisro[];			/* permission denied message */
      

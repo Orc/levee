@@ -173,9 +173,7 @@ char *TERMNAME,		/* will be set in termcap handling */
 char Erasechar = ERASE,			/* our erase character */
      eraseline = 'X'-'@';		/* and line-kill character */
 
-char ED_NOTICE[]  = "(c)3.4",		/* Editor version */
-     ED_REVISION = 'o',			/* Small revisions & corrections */
-     fismod[] = "File is modified",	/* File is modified message */
+char fismod[] = "File is modified",	/* File is modified message */
      fisro[] = "File is readonly";	/* when you can't write the file */
 
 char *excmds[] = {
