@@ -28,13 +28,12 @@ install: install.bin install.man
 install.bin: lev
 	@INSTALL_DIR@ $(PREFIX)$(exedir)
 	@INSTALL_PROGRAM@ lev $(PREFIX)$(exedir)/levee
-	@NOMK@ @LN_S@ -f levee $(PREFIX)$(exedir)/lv
+	@NOMK@@LN_S@ -f levee $(PREFIX)$(exedir)/lv
 
 install.man:
 	@INSTALL_DIR@ $(PREFIX)$(mandir)/man1
 	@INSTALL_DATA@ lv.1 $(PREFIX)$(mandir)/man1/levee.1
-	@NOMK@ @INSTALL_DATA@ lv.1 $(PREFIX)$(mandir)/man1/lv.1
-	@NOMK@ echo ".so man1/levee.1" > $(PREFIX)$(mandir)/man1/lv.1
+	@NOMK@echo ".so man1/levee.1" > $(PREFIX)$(mandir)/man1/lv.1
 
 # Dependencies
 

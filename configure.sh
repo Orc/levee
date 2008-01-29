@@ -5,16 +5,19 @@
 # is a script that's processed with eval, so you need to be very careful to
 # make certain that what you quote is what you want to quote.
 
-ac_help='
+ac_help="
 --use-termcap		Link with termcap instead of curses, if possible
+--partial-install	Don\'t install the lv, lv(1) name links
 --size=NNN		Use a NNN-byte edit buffer
 --dos			compile for ms-dos or microsoft windows
 --tos			compile for the Atari ST
 --rmx			compile for RMX
---flexos		compile for FlexOS'
+--flexos		compile for FlexOS"
 
 LOCAL_AC_OPTIONS='
 case Z$1 in
+Z--partial-install)
+	    missing_lv=1;;
 Z--dos)	    ac_os=DOS;;
 Z--tos)     ac_os=ATARI=1;;
 Z--flexos)  ac_os=FLEXOS=1;;
@@ -56,11 +59,6 @@ elif [ "$OS_FLEXOS" ]; then
 else
     AC_DEFINE	SIZE ${SIZE:-256000}
     AC_DEFINE	OS_UNIX	1
-    if AC_PROG_LN_S; then
-	AC_SUB NOMK ''
-    else
-	AC_SUB NOMK '#'
-    fi
 
     if AC_CHECK_HEADERS string.h; then
 	# Assume a mainly ANSI-compliant world, where the
@@ -103,6 +101,12 @@ else
     fi
 
     AC_CHECK_HEADERS termios.h && AC_CHECK_FUNCS tcgetattr
+fi
+
+if test -z "$missing_lv" && AC_PROG_LN_S; then
+    AC_SUB NOMK ''
+else
+    AC_SUB NOMK '#'
 fi
 
 AC_OUTPUT Makefile
