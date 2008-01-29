@@ -103,10 +103,10 @@ else
     AC_CHECK_HEADERS termios.h && AC_CHECK_FUNCS tcgetattr
 fi
 
-if test -z "$missing_lv" && AC_PROG_LN_S; then
+if AC_PROG_LN_S && test -z "$missing_lv"; then
     AC_SUB NOMK ''
 else
-    AC_SUB NOMK '#'
+    AC_SUB NOMK '@#'
 fi
 
 AC_OUTPUT Makefile
