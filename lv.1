@@ -22,7 +22,7 @@ editing at.  These addresses  are in the same  format as command
 mode addresses,  except that a naked + will put  you at the very
 end of the file.
 .PP
-Levee is copyright (c) 1982-1998 by David L. Parsons. (see
+Levee is copyright (c) 1982-2008 by David L. Parsons. (see
 the notice at the end of this document for distribution terms)
 
 .SH "COMMAND MODE COMMANDS"
@@ -78,8 +78,8 @@ the first line in the range  and print all the lines in that
 range. "1,10" sets the current line to 1,  then prints lines
 1 to 10.
 
-If you specify a non-existent line in a range, the comm-
-and will abort and Levee will tell you "bad address".
+If you specify a non-existent line in a range, the command
+ will abort and Levee will tell you "bad address".
 
 .SS "Command mode commands"
 
@@ -476,8 +476,7 @@ past the end of the file are denoted by ~ lines.
 If list is  set,  tabs  display as ^I, and the end of line
 displays as $.
 
-If a  line is too long for the screen,  it will  just dis-
-appear off the end of the screen.
+If a  line is too long for the screen,  it will  just disappear off the end of the screen.
 
 Levee will handle any screen resolution and any monospaced
 font you hand it ( if you are running in low resolution, Levee
@@ -567,7 +566,7 @@ a yank buffer, where it can be retrieved by the 'p' or 'P' commands.
 
 .TP
 .B (#)d
-Delete an object. Like 'cc', 'dd' effects whole lines.
+Delete an object. Like 'cc', 'dd' affects whole lines.
 
 .TP
 .IB (*) (#)e
@@ -770,6 +769,10 @@ Exactly like :xit.
 .IB (*) (#)$
 Move to end of line. If you give a count, move to the end of the (count-1)
 line down (so 2$ moves you to the end of the next line.).
+
+.TP
+.B (#)!
+Pipe an object through an external program. Like 'cc', '!!' affects whole lines.
 
 .TP
 .IB (*) %

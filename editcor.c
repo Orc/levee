@@ -1,7 +1,7 @@
 /*
  * LEVEE, or Captain Video;  A vi clone
  *
- * Copyright (c) 1982-2007 David L Parsons
+ * Copyright (c) 1982-2008 David L Parsons
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, without or
@@ -172,6 +172,46 @@ bool before;
     return(putback(curr, &newend));
 }
 
+bool PROC
+execute(start, end)
+{
+    int tf;
+    FILE *f;
+    char scratch[20];
+    bool ret = FALSE;
+    int size;
+
+    strcpy(scratch, "/tmp/lv.XXXXXX");
+    
+    clrprompt();
+    printch('!');
+    if ( !getline(instring) )
+	return FALSE;
+
+    if ( (tf = mkstemp(scratch)) < 0 ) {
+	prints("[tempfile error]");
+	return FALSE;
+    }
+
+    strcat(instring, " 2>&1 <");
+    strcat(instring, scratch);
+    
+    if ( (size = write(tf, core+start, end-start)) == (end-start) ) {
+	if ( (f=popen(instring, "r")) ) {
+	    if ( deletion(start, end) && (insertfile(f, 1, start, &size) > 0) )
+		ret = TRUE;
+	    pclose(f);
+	}
+	else
+	    error();
+    }
+	
+    close(tf);
+    unlink(scratch);
+    
+    return ret;
+}
+
 VOID PROC
 gcount()
 {
@@ -253,6 +293,9 @@ cmdtype cmd;
 	newend = curr;
 	disp = curr;
 	switch (cmd) {
+	    case EXEC_C:
+		ok = execute(curr, endp);
+		break;
 	    case DELETE_C:
 		ok = deletion(curr, endp);
 		break;

@@ -209,6 +209,7 @@ extern int PROC insertion(), chop(), fixcore(), lookup(), to_index();
 extern int PROC doaddwork(), addfile(), expandargs(), to_line();
 extern int PROC findfwd(), findback(), getcontext(), getKey();
 extern int PROC cclass();
+extern int PROC insertfile();
 
 extern VOID PROC strput(), numtoa(), clrprompt(), setend(), error();
 extern VOID PROC insert_to_undo(), resetX(), zerostack(), swap();

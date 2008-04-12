@@ -1,7 +1,7 @@
 /*
  * LEVEE, or Captain Video;  A vi clone
  *
- * Copyright (c) 1982-2007 David L Parsons
+ * Copyright (c) 1982-2008 David L Parsons
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, without or
@@ -62,7 +62,7 @@ struct undostack undo;			/* To undo a command */
 
 		/* R A N D O M   S T R I N G S */
 
-char instring[80],	/* Latest input */
+char instring[200],	/* Latest input */
      filenm[80] = "",	/* Filename */
      altnm[80] = "";	/* Alternate filename */
 char gcb[16];		/* Command buffer for mutations of insert */
@@ -321,7 +321,7 @@ cmdtype movemap[256]={
     /*^^*/ BAD_COMMAND,
     /*^_*/ BAD_COMMAND,
     /*  */ GO_RIGHT,
-    /*! */ BAD_COMMAND,
+    /*! */ EXEC_C,
     /*" */ BAD_COMMAND,
     /*# */ BAD_COMMAND,
     /*$ */ TO_EOL,

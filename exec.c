@@ -1,22 +1,3 @@
-/*
- * LEVEE, or Captain Video;  A vi clone
- *
- * Copyright (c) 1982-2007 David L Parsons
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, without or
- * without modification, are permitted provided that the above
- * copyright notice and this paragraph are duplicated in all such
- * forms and that any documentation, advertising materials, and
- * other materials related to such distribution and use acknowledge
- * that the software was developed by David L Parsons (orc@pell.chi.il.us).
- * My name may not be used to endorse or promote products derived
- * from this software without specific prior written permission.
- * THIS SOFTWARE IS PROVIDED AS IS'' AND WITHOUT ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE.
- */
 #include "levee.h"
 #include "extern.h"
 #include <string.h>
@@ -442,37 +423,62 @@ splat:	errmsg("bad substitute");
 } /* cutandpaste */
 
 
+/* quietly read in a file (and mark it in the undo stack)
+ */
+int PROC
+insertfile(FILE *f, int insert, int at, int *fsize)
+{
+    int high,
+	onright,
+	rc=0;
+
+    onright = (bufmax-at);
+    high = SIZE-onright;
+
+    if ( insert && (onright > 0) )
+	 moveright(&core[at], &core[high], onright);
+
+    rc = addfile(f, at, high, fsize);
+
+    if ( (rc == 0) && (*fsize < 0) ) {
+	rc = -1;
+	*fsize=0;
+    }
+    if ( insert ) {
+	if ( *fsize ) 
+	    insert_to_undo(&undo, at, *fsize);
+	modified = YES;
+	if (onright > 0)
+	    moveleft(&core[high], &core[at+(*fsize)], onright);
+    }
+    diddled = YES;
+    return rc;
+} /* insertfile */
+
+
+
 VOID PROC
 inputf(fname, newbuf)
 register char *fname;
 bool newbuf;
 {
-    int onright = 0,	/* text moved right for :read */
-	fsize;		/* bytes read in */
     FILE *f;
-
+    int fsize,		/* bytes read in */
+	rc;
 
     if (newbuf)
 	readonly = NO;
-
+	
     zerostack(&undo);
-    if (newbuf) {
+
+    if ( newbuf ) {
 	modified = NO;
 	low = 0;
-	high = SIZE;
     }
-    else {		/* append stuff to the buffer */
+    else {
 	fixupline(bseekeol(curr));
-	onright = bufmax-low;
-#if OS_DOS
-	high = SIZE;
-	high -= onright;
-#else
-	high = (SIZE-onright);
-#endif
-	if (onright > 0)
-	    moveright(&core[low], &core[high], onright);
     }
+    
     printch('"');
     prints(fname);
     prints("\" ");
@@ -483,29 +489,22 @@ bool newbuf;
 	    newfile = YES;
     }
     else {
-	if (addfile(f, low, high, &fsize))
-	    plural(fsize," byte");
-	else if (fsize < 0) {
+	rc = insertfile(f, !newbuf, low, &fsize);
+	fclose(f);
+
+	if ( rc > 0 )
+	    plural(fsize, " byte");
+	else if ( rc < 0 )
 	    prints("[read error]");
-	    fsize = 0;
-	}
 	else {
 	    prints("[overflow]");
-	    readonly = YES;
+	    readonly=1;
 	}
-	fclose(f);
-	if (newbuf)
-	    newfile = NO;
+	if (newbuf) newfile = NO;
     }
     if (newbuf) {
 	fillchar(contexts, sizeof(contexts), -1);
 	bufmax = fsize;
-    }
-    else {
-	insert_to_undo(&undo, low, fsize);
-	modified = YES;
-	if (onright > 0)
-	    moveleft(&core[high], &core[low+fsize], onright);
     }
     if (*startcmd) {
 	count = 1;
@@ -515,7 +514,6 @@ bool newbuf;
     }
     else
 	curr = low;
-    diddled = YES;
 } /* inputf */
 
 

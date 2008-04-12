@@ -1,7 +1,7 @@
 /*
  * LEVEE, or Captain Video;  A vi clone
  *
- * Copyright (c) 1980-2007 David L Parsons
+ * Copyright (c) 1980-2008 David L Parsons
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, without or
@@ -283,7 +283,8 @@ extern long gemdos();
 #define PARA_FWD	31
 #define PARA_BACK	32
 		/*modifications*/
-#define DELETE_C	40
+#define DELETE_C	39
+#define EXEC_C		40
 #define ADJUST_C	41
 #define CHANGE_C	42
 #define YANK_C		43
