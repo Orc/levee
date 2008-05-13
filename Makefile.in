@@ -4,7 +4,8 @@ exedir=@exedir@
 mandir=@mandir@
 CC=@CC@
 
-CFLAGS += -Wall
+CFLAGS=@CFLAGS@
+LDFLAGS=@LDFLAGS@
 
 OBJS = blockio.o display.o editcor.o exec.o find.o \
     unixcall.o globals.o insert.o main.o misc.o \
@@ -12,7 +13,7 @@ OBJS = blockio.o display.o editcor.o exec.o find.o \
     version.o
 
 lev: $(OBJS)
-	$(CC) $(CFLAGS) -o lev $(OBJS) @LIBS@
+	$(CC) $(LDFLAGS) -o lev $(OBJS) @LIBS@
 
 version.o: version.c VERSION
 	$(CC) $(CFLAGS) -c -DVERSION=\"`cat VERSION`\" version.c

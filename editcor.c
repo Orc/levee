@@ -19,6 +19,7 @@
  */
 #include "levee.h"
 #include "extern.h"
+#include <stdlib.h>
     
 /* do some undoable modification */
 

@@ -466,7 +466,8 @@ EOF
     fi
     echo "checking out the C compiler"
 
-    $AC_CC -o /tmp/ngc$$ /tmp/ngc$$.c
+    $AC_CC -c -o /tmp/ngc$$.o /tmp/ngc$$.c
+    $AC_CC -o /tmp/ngc$$ /tmp/ngc$$.o
     status=$?
 
     TLOGN " ($AC_CC)"
@@ -479,7 +480,7 @@ EOF
 
 	if [ "$CFLAGS" ]; then
 	    test "$CFLAGS" && echo "validating CFLAGS=${CFLAGS}"
-	    if $AC_CC $CFLAGS -o /tmp/ngc$$.o /tmp/ngc$$.c ; then
+	    if $AC_CC $CFLAGS -c -o /tmp/ngc$$.o /tmp/ngc$$.c ; then
 		AC_CFLAGS=${CFLAGS:-"-g"}
 		test "$CFLAGS" && echo "CFLAGS=\"${CFLAGS}\" are okay"
 	    elif [ "$CFLAGS" ]; then
@@ -489,11 +490,11 @@ EOF
 	    AC_CFLAGS=-g
 	fi
 	if [ "$LDFLAGS" ]; then
-	    test "$LDFLAGS" && echo "validating LDFLAGS=${LDFLAGS}"
+	    echo "validating LDFLAGS=${LDFLAGS}"
 	    if $AC_CC $LDFLAGS -o /tmp/ngc$$ /tmp/ngc$$.o; then
-		AC_LDFLAGS=${LDFLAGS:-"-g"}
-		test "$LDFLAGS" && TLOG "LDFLAGS=\"${LDFLAGS}\" are okay"
-	    elif [ "$LDFLAGS" ]; then
+		AC_LDFLAGS="$LDFLAGS"
+		TLOG "LDFLAGS=\"${AC_LDFLAGS}\" are okay"
+	    else
 		TLOG "ignoring bogus LDFLAGS=\"${LDFLAGS}\""
 	    fi
 	else
@@ -963,7 +964,7 @@ AC_OUTPUT () {
 	Q=\'
 	cat - > config.cmd << EOF
 #! /bin/sh
-${CC:+CC=${Q}${CC}${Q}} ${CFLAGS:+CFLAGS=${Q}${CFLAGS}${Q}} $ac_progname $ac_configure_command
+${CC:+CC=${Q}${CC}${Q}}${CFLAGS:+ CFLAGS=${Q}${CFLAGS}${Q}}${LDFLAGS:+ LDFLAGS=${Q}${LDFLAGS}${Q}} $ac_progname $ac_configure_command
 EOF
 	chmod +x config.cmd
 
