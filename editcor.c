@@ -216,11 +216,10 @@ execute(start, end)
 VOID PROC
 gcount()
 {
-    count = 0;
-    while (count>=0 && ch >= '0' && ch <='9') {
+    do {
 	count = (count*10) + (ch-'0');
-	readchar();		/* get a char to replace the one we dumped */
-    }
+	readchar(); /* get a char to replace the one we dumped */
+    } while ( count >= 0 && isdigit(ch) );
 }
 
 VOID PROC
@@ -255,8 +254,9 @@ cmdtype cmd;
 
     if (cmd <= YANK_C) {
 	readchar();
-	if (ch >= '0' && ch <= '9') {
+	if ( isdigit(ch) && ch != '0' ) {
 	    oldc = count;
+	    count = 0;
 	    gcount();				/* get a new count */
 	    if (cmd == ADJUST_C)		/* special for >>,<< wierdness */
 		swap(&count, &oldc);		/* reverse sw & count */
@@ -562,7 +562,9 @@ editcore()
     for (;;) {
 	s_wrapped = 0;
 	ch = readchar();			/* get a char */
-	gcount();			/* ... a possible count */
+	count = 0;
+	if (isdigit(ch) && ch != '0')
+	    gcount();			/* ... a possible count */
 	switch (cmd = movemap[(unsigned int)ch]) {
 	  case FILE_C:
 	    wr_stat();			/* write file stats */

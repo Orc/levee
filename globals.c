@@ -336,7 +336,7 @@ cmdtype movemap[256]={
     /*- */ CR_BACK,
     /*. */ REDO_C,
     /*/ */ PATT_FWD,
-    /*0 */ BAD_COMMAND,
+    /*0 */ TO_COL,
     /*1 */ BAD_COMMAND,
     /*2 */ BAD_COMMAND,
     /*3 */ BAD_COMMAND,
