@@ -393,7 +393,8 @@ int start, endd, *size;
             return (c==ESC) ? ESC : EOL;
 	}
 	else if ((!beautify) || c == TAB || c == ''
-			     || (c >= ' ' && c <= '~')) {
+			     || (c >= ' ' && c <= '~')
+			     || (c & 0x80) ) {
 	    if (ip < endd) {
 		if (c == '')
 		    c = readchar();
