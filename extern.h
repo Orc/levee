@@ -197,7 +197,7 @@ extern exec_type PROC editcore();
 extern char PROC line(), peekc(), readchar();
 extern char PROC *findparse(),*makepat();
 
-extern bool PROC getline();
+extern bool PROC lvgetline();
 extern bool PROC putfile();
 extern bool PROC doyank(), deletion(), putback();
 extern bool PROC pushb(),pushi(),pushmem(),uputcmd(), delete_to_undo();
@@ -207,7 +207,7 @@ extern int PROC min(), max(), fseekeol(), bseekeol(), settop();
 extern int PROC scan(), findDLE(), setY(), skipws(), nextline(), setX();
 extern int PROC insertion(), chop(), fixcore(), lookup(), to_index();
 extern int PROC doaddwork(), addfile(), expandargs(), to_line();
-extern int PROC findfwd(), findback(), getcontext(), getKey();
+extern int PROC findfwd(), findback(), lvgetcontext(), getKey();
 extern int PROC cclass();
 extern int PROC insertfile();
 

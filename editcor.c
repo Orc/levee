@@ -186,7 +186,7 @@ execute(start, end)
     
     clrprompt();
     printch('!');
-    if ( !getline(instring) )
+    if ( !lvgetline(instring) )
 	return FALSE;
 
     if ( (tf = mkstemp(scratch)) < 0 ) {

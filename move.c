@@ -142,7 +142,7 @@ cmdtype cmd;
 
     case TO_MARK:
     case TO_MARK_LINE:
-	*newpos = getcontext((char)tolower(readchar()), cmd==TO_MARK_LINE);
+	*newpos = lvgetcontext((char)tolower(readchar()), cmd==TO_MARK_LINE);
 	break;
 
     case CR_FWD:
@@ -160,7 +160,7 @@ cmdtype cmd;
 	clrprompt();
 	if (cmd == PATT_FWD || cmd == PATT_BACK) {
 	    printch(tsearch = instring[0] = chars[cmd-PATT_FWD]);
-	    if (!getline(&instring[1]))
+	    if (!lvgetline(&instring[1]))
 		return ESCAPED;	/* needs to skip later tests */
 	}
 	else {
