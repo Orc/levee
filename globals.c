@@ -391,7 +391,7 @@ cmdtype movemap[256]={
     /*d */ DELETE_C,
     /*e */ FORWD,
     /*f */ TO_CHAR,
-    /*g */ BAD_COMMAND,
+    /*g */ HARDMACRO,
     /*h */ GO_LEFT,
     /*i */ INSERT_C,
     /*j */ GO_DOWN,
