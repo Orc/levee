@@ -21,7 +21,7 @@
 #include "extern.h"
 
 bool PROC
-getline(str)
+lvgetline(str)
 char *str;
 {
     int len;
@@ -31,7 +31,7 @@ char *str;
     str[len] = 0;
     strput(CE);
     return (flag == EOL);
-} /* getline */
+} /* lvgetline */
 
 
 char PROC

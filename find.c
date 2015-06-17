@@ -424,7 +424,7 @@ int *idx,start;
 	break;
 	case '`':
 	case '\'':
-	    addr = getcontext(*(src+1), (*src == '\''));
+	    addr = lvgetcontext(*(src+1), (*src == '\''));
 	    src += 2;
 	break;
     }
@@ -496,7 +496,7 @@ int origin;
 /* get something from the context table */
 
 int PROC
-getcontext(c,begline)
+lvgetcontext(c,begline)
 char c;
 bool begline;
 {
