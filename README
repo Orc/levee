@@ -1,0 +1,41 @@
+My tiny (~80k on osx/x86_64; smaller on 32 bit machines) & ancient
+(first written (in USCD pascal; I converted it to C sometime in the
+1980s) sometime in 1979) almost-vi-clone.
+
+I think it implements about 95% of visual mode;  I still use it on
+most of my machines and only notice things lacking in exec mode
+(I don't implement :g and :v) and when displaying long lines (standard
+vi wraps, I -- following the lead of the USCD pascal editor -- truncate.)
+
+Over its life it's been built on
+
+* USCD pascal (in Pascal, then in p2; those sources may no longer exist
+  because 8" floppies were expensive and I didn't do version control
+  because they were tiny)
+* TOS on the Atari ST
+* MS-DOS
+* Flexos
+* iRMX
+* OS/2
+* Linux
+* FreeBSD
+* NetBSD
+* Macosx
+
+(note that it's not been built on anything aside from Unix for _many_ years,
+and it would take a fairly heroic effort to build it on any of those other
+systems anymore even though I do have code in `configure.sh` for them.)
+
+The configuration options are
+
+*  --use-termcap; link with termcap instead of curses, if at all possible.
+*  --partial-install; don't install the lv, lv(1) name links.
+*  --size=NNN; use an NNN-byte editor buffer (this is the maximum sized
+   file that can be edited without truncation.
+*  --dos; build for ms-dos
+*  --tos; build for TOS
+*  --rmx; build for iRMX
+*  --flexos; build for flexOS
+*  --prefix; root of where to install things (defaults to /usr/local)
+*  --execdir; where to install binaries ($prefix/bin)
+*  --mandir; where to install the manpages ($prefix/man or $prefix/share/man)
