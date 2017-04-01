@@ -732,9 +732,9 @@ AC_PROG () {
 # AC_PROG_LN_S checks to see if ln exists, and, if so, if ln -s works
 #
 AC_PROG_LN_S () {
-    test "$AC_FIND_PROG" || AC_PROG_FIND
+    test "$PROG_FIND" || AC_PROG_FIND
 
-    test "$AC_FIND_PROG" || return 1
+    test "$PROG_LN_S" && return 0
     
     TLOGN "looking for \"ln -s\""
     DEST=`acLookFor ln`
@@ -742,7 +742,7 @@ AC_PROG_LN_S () {
     if [ "$DEST" ]; then
 	rm -f /tmp/b$$
 	$DEST -s /tmp/a$$ /tmp/b$$
-	if [ "`$AC_FIND_PROG /tmp/b$$ -type l -print`" ]; then
+	if [ "`$PROG_FIND /tmp/b$$ -type l -print`" ]; then
 	    TLOG " ($DEST)"
 	    echo "$DEST exists, and ln -s works"
 	    PROG_LN_S="$DEST -s"
@@ -769,10 +769,10 @@ AC_PROG_LN_S () {
 # variable
 #
 AC_PROG_FIND () {
-    if test -z "$AC_FIND_PROG"; then
+    if test -z "$PROG_FIND"; then
 	MF_PATH_INCLUDE FIND find
 	rc=$?
-	AC_FIND_PROG=$DEST
+	PROG_FIND=$CF_FIND
 	return $rc
     fi
     return 0
