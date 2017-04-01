@@ -29,7 +29,7 @@ bool visual;
     int rp;		/* number of spaces to diddle */
     int	ts, ss;		/* tabs && spaces to insert */
     register int cp;	/* current position */
-    int i;		/* random index */
+    int i = 0;		/* random index */
     int	endd;		/* last open place */
     register int rsize;	/* size of upper buffer */
     int	currDLE = 0;	/* what DLE is now */
