@@ -222,14 +222,14 @@ EOF
 
     LOGN "looking for the $B function"
 
-    if $AC_CC -o ngc$$ ngc$$.c $LIBS; then
+    if $AC_CC $AC_CFLAGS $AC_LDFLAGS -o ngc$$ ngc$$.c $LIBS; then
 	AC_DEFINE `echo ${2:-HAVE_$B} | $AC_UPPERCASE` 1
 	TLOG " (found)"
 	rc=0
     else
 	echo "offending command was:"
 	cat ngc$$.c
-	echo "$AC_CC -o ngc$$ ngc$$.c $LIBS"
+	echo "$AC_CC $AC_CFLAGS $AC_LDFLAGS -o ngc$$ ngc$$.c $LIBS"
 	TLOG " (not found)"
 	rc=1
     fi
@@ -928,7 +928,7 @@ AC_WHATIS() {
 
 	echo "main() { printf(\"${MACRO}=\\\"${__fmt}\\\"\\n\", ${MACRO}); }" )  > _ngc$$.c
 
-    if $AC_CC -o _ngc$$ _ngc$$.c; then
+    if $AC_CC $AC_CFLAGS -o _ngc$$ _ngc$$.c; then
 	./_ngc$$
 	rc=0
     else
@@ -1562,12 +1562,21 @@ acCheckCPP () {
 FOO
 EOF
 
-    if $1 $2 ngc$$.c > ngc$$.o; then
+    good=
+    use_cflags=
+    if $1 $2 $AC_CFLAGS ngc$$.c > ngc$$.o; then
+	good=1
+	use_cflags=1
+    elif $1 $2 ngc$$.c > ngc$$.o; then
+	good=1
+    fi
+
+    if [ "$good" ]; then
 	if grep -v '#define' ngc$$.o | grep -s BAR >/dev/null; then
-	    echo "CPP=[$1], CPPFLAGS=[$2]"
+	    echo "CPP=[$1], CPPFLAGS=[$2${use_cflags:+ $AC_CFLAGS}]"
 	    AC_SUB 'CPP' "$1"
-	    AC_SUB 'CPPFLAGS' "$2"
-	    AC_CPP_FILTER="$1 $2"
+	    AC_SUB 'CPPFLAGS' "$2${use_cflags:+ $AC_CFLAGS}"
+	    AC_CPP_FILTER="$1 $2${use_cflags:+ $AC_CFLAGS}"
 	    rm ngc$$.c ngc$$.o
 	    return 0
 	fi
@@ -1597,8 +1606,8 @@ AC_PROG_CPP () {
     unset fail
     LOGN "Looking for cpp"
     
-    if acCheckCPP $AC_CC -E; then
-	TLOG " (using $AC_CC -E as a cpp pipeline)"
+    if acCheckCPP "$AC_CC" -E; then
+	TLOG " (using \$CC -E as a cpp pipeline)"
 	return 0
     fi
     
