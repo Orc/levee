@@ -410,11 +410,11 @@ EOF
 
 	if [ "$CFLAGS" ]; then
 	    test "$CFLAGS" && echo "validating CFLAGS=${CFLAGS}"
-	    if $AC_CC $CFLAGS -o ngc$$.o ngc$$.c ; then
+	    if $AC_CC $CFLAGS -c -o ngc$$.o ngc$$.c ; then
 		AC_CFLAGS=${CFLAGS:-"-g"}
-		test "$CFLAGS" && echo "CFLAGS=\"${CFLAGS}\" are okay"
+		test "$CFLAGS" && TLOG "CFLAGS=\"${CFLAGS}\" are okay"
 	    elif [ "$CFLAGS" ]; then
-		echo "ignoring bogus CFLAGS=\"${CFLAGS}\""
+		TLOG "ignoring bogus CFLAGS=\"${CFLAGS}\""
 	    fi
 	else
 	    AC_CFLAGS=-g
