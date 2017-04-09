@@ -421,7 +421,7 @@ EOF
 	fi
 	if [ "$LDFLAGS" ]; then
 	    test "$LDFLAGS" && echo "validating LDFLAGS=${LDFLAGS}"
-	    if $AC_CC $LDFLAGS -o ngc$$ ngc$$.o; then
+	    if $AC_CC $CFLAGS $LDFLAGS -o ngc$$ ngc$$.c; then
 		AC_LDFLAGS=${LDFLAGS:-"-g"}
 		test "$LDFLAGS" && TLOG "LDFLAGS=\"${LDFLAGS}\" are okay"
 	    elif [ "$LDFLAGS" ]; then
@@ -540,6 +540,7 @@ AC_INIT () {
     rm -f $$
 
     LOG "Configuring for [$1]"
+    _MK_LIBRARIAN=Y
 
     cat > "$__cwd"/config.h << EOF
 /*
@@ -842,6 +843,7 @@ AC_CHECK_NORETURN() {
 	TLOG "(no)"
 	AC_DEFINE 'NORETURN' ''
     fi
+    rm -f ngc$$.o ngc$$.c
 }
 
 
@@ -1042,25 +1044,28 @@ AC_OUTPUT () {
     
     if test "$__MACOS_DSYM"; then
 	# deal with extra OSX droppings, if they exist
-	AC_SUB 'GENERATED_FILES' "-r *.dSYM $*"
+	AC_SUB 'DISTCLEAN' 'rm -fr'
+	AC_SUB 'GENERATED_FILES' "*.dSYM $*"
     else
+	AC_SUB 'DISTCLEAN' 'rm -f'
 	AC_SUB 'GENERATED_FILES' "$*"
     fi
     
-    AC_SUB 'CC'      "$AC_CC"
-    AC_SUB 'CFLAGS'  "$AC_CFLAGS"
-    AC_SUB 'LDFLAGS' "$AC_LDFLAGS"
-    AC_SUB 'srcdir'  "$AC_SRCDIR"
-    AC_SUB 'prefix'  "$AC_PREFIX"
-    AC_SUB 'exedir'  "$AC_EXECDIR"
-    AC_SUB 'bindir'  "$AC_EXECDIR"
-    AC_SUB 'sbindir' "$AC_SBINDIR"
-    AC_SUB 'libdir'  "$AC_LIBDIR"
-    AC_SUB 'libexec' "$AC_LIBEXEC"
-    AC_SUB 'confdir' "$AC_CONFDIR"
-    AC_SUB 'mandir'  "$AC_MANDIR"
+    AC_SUB 'CC'       "$AC_CC"
+    AC_SUB 'CFLAGS'   "$AC_CFLAGS"
+    AC_SUB 'LDFLAGS'  "$AC_LDFLAGS"
+    AC_SUB 'CPPFLAGS' "$CPPFLAGS"
+    AC_SUB 'srcdir'   "$AC_SRCDIR"
+    AC_SUB 'prefix'   "$AC_PREFIX"
+    AC_SUB 'exedir'   "$AC_EXECDIR"
+    AC_SUB 'bindir'   "$AC_EXECDIR"
+    AC_SUB 'sbindir'  "$AC_SBINDIR"
+    AC_SUB 'libdir'   "$AC_LIBDIR"
+    AC_SUB 'libexec'  "$AC_LIBEXEC"
+    AC_SUB 'confdir'  "$AC_CONFDIR"
+    AC_SUB 'mandir'   "$AC_MANDIR"
 
-    if echo "$__config_files" | grep -v librarian.sh >/dev/null; then
+    if [ "$_MK_LIBRARIAN" ] && echo "$__config_files" | grep -v librarian.sh >/dev/null; then
 	# write a librarian that works with static libraries
 	if AC_PROG_LN_S ; then
 	    __dolink=$PROG_LN_S
@@ -1121,7 +1126,7 @@ EOF
 	Q=\'
 	cat - > config.cmd << EOF
 #! /bin/sh
-${CC:+CC=${Q}${CC}${Q}} ${CFLAGS:+CFLAGS=${Q}${CFLAGS}${Q}} $ac_progname $ac_configure_command
+${CC:+CC=${Q}${CC}${Q}} ${CFLAGS:+CFLAGS=${Q}${CFLAGS}${Q}} ${LDFLAGS:+LDFLAGS=${Q}${LDFLAGS}${Q}} $ac_progname $ac_configure_command
 EOF
 	chmod +x config.cmd
 
@@ -1438,10 +1443,12 @@ AC_CC_SHLIBS () {
     AC_PROG_CC || AC_FAIL "Need a C compiler to build shared libraries"
     AC_PROG_LN_S || AC_FAIL "Need to be able to make symbolic links for shared libraries"
     AC_PROG_INSTALL || AC_FAIL "Need an install program to install shared libraries"
+    
     LOGN "checking whether the C compiler can build shared libraries "
 
     echo "int some_variable = 0;" > ngc$$.c 
 
+    _MK_LIBRARIAN=
     if uname -a | grep Darwin >/dev/null; then
 	# Claims to be macos?
 	if $AC_CC $AC_PICFLAG  -dynamiclib -o ngc$$.so ngc$$.c; then
@@ -1458,6 +1465,7 @@ AC_CC_SHLIBS () {
         LOG "(yes; -shared)"
 	__rc=0
     else
+	_MK_LIBRARIAN=Y
         LOG "(no)"
 	__rc=1
     fi
@@ -1573,9 +1581,8 @@ EOF
 
     if [ "$good" ]; then
 	if grep -v '#define' ngc$$.o | grep -s BAR >/dev/null; then
-	    echo "CPP=[$1], CPPFLAGS=[$2${use_cflags:+ $AC_CFLAGS}]"
+	    echo "CPP=[$1], CPP_PIPE=[$2${use_cflags:+ $AC_CFLAGS}]"
 	    AC_SUB 'CPP' "$1"
-	    AC_SUB 'CPPFLAGS' "$2${use_cflags:+ $AC_CFLAGS}"
 	    AC_CPP_FILTER="$1 $2${use_cflags:+ $AC_CFLAGS}"
 	    rm ngc$$.c ngc$$.o
 	    return 0

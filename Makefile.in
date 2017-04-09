@@ -22,7 +22,7 @@ clean:
 	rm -f *.o lev
 
 distclean spotless: clean
-	rm -f @GENERATED_FILES@ @CONFIGURE_FILES@
+	@DISTCLEAN@ @GENERATED_FILES@ @CONFIGURE_FILES@
 
 install: install.bin install.man
 

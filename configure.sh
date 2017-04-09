@@ -42,6 +42,7 @@ X*)		 AC_FAIL "--size=$SIZE is not a valid number" ;;
 esac
 
 AC_PROG_CC
+unset _MK_LIBRARIAN
 
 if [ "$OS_DOS" ]; then
     AC_DEFINE	SIZE ${SIZE:-32000}
