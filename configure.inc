@@ -139,14 +139,14 @@ AC_CONTINUE () {
 __MAKEDOTO() {
     AC_PROG_CC
 
-    if $AC_CC -c -o ngc$$.o "$@" $AC_LIBS 2>ngc$$.err; then
+    if $AC_CC -c -o ngc$$.o "$@" $LIBS 2>ngc$$.err; then
 	__remove ngc$$.o ngc$$.err
 	TLOG " (found)"
 	return 0
     fi
     __remove ngc$$.o
     TLOG " (not found)"
-    echo "test failed:  command was $AC_CC -c -o ngc$$.o" "$@" $AC_LIBS
+    echo "test failed:  command was $AC_CC -c -o ngc$$.o" "$@" $LIBS
     echo "output:"
     cat ngc$$.err
     __remove ngc$$.err
@@ -599,33 +599,24 @@ EOF
 # usage: AC_LIBRARY function library [alternate ...]
 #
 AC_LIBRARY() {
-    SRC=$1
+    local SRC=$1
     shift
-
-    __acllibs=
-    __aclhdrs=
-
-    for x in "$@"; do
-	case X"$x" in
-	X-l*) __acllibs="$__acllibs $x" ;;
-	*)    __aclhdrs="$__aclhdrs $x" ;;
-	esac
-    done
 
     # first see if the function can be found in any of the
     # current libraries
     LOGN "Looking for the ${SRC} function"
-    if AC_QUIET AC_CHECK_FUNCS $SRC $__aclhdrs; then
+    if AC_QUIET AC_CHECK_FUNCS $SRC; then
+	AC_DEFINE HAVE_LIB`echo $1 | sed -e 's/-l//' | $AC_UPPERCASE`
 	LOG "(found)"
 	return 0
     fi
 
     # then search through the supplied list of libraries
-    __libs="$LIBS"
-    for x in $__acllibs; do
+    local __libs="$LIBS"
+    for x in "$@"; do
 	LIBS="$__libs $x"
-	if AC_QUIET AC_CHECK_FUNCS $SRC $__aclhdrs; then
-	    AC_LIBS="$AC_LIBS $x"
+	if AC_QUIET AC_CHECK_FUNCS $SRC; then
+	    AC_DEFINE HAVE_LIB`echo $1 | sed -e 's/-l//' | $AC_UPPERCASE`
 	    LOG " (in $x)"
 	    return 0
 	fi
@@ -1040,7 +1031,7 @@ EOF
 AC_OUTPUT () {
     
     cd "$__cwd"
-    AC_SUB 'LIBS'    "$AC_LIBS"
+    AC_SUB 'LIBS'    "$LIBS"
     
     if test "$__MACOS_DSYM"; then
 	# deal with extra OSX droppings, if they exist
@@ -1110,8 +1101,8 @@ install)$PROG_INSTALL -m 644 \${LIBRARY}.a \$1
 	;;
 esac
 EOF
+	chmod +x librarian.sh
     fi
-    chmod +x librarian.sh
 
     AC_SUB 'CONFIGURE_FILES' "$__config_files"
 
@@ -1229,13 +1220,13 @@ EOF
 	TLOG " (found)"
     elif $AC_CC -o ngc$$ ngc$$.c -lresolv; then
 	TLOG " (yes, with -lresolv)"
-	AC_LIBS="$AC_LIBS -lresolv"
+	LIBS="$LIBS -lresolv"
     elif $AC_CC -DBIND_8_COMPAT -o ngc$$ ngc$$.c; then
 	TLOG " (yes, with BIND_8_COMPAT)"
 	AC_DEFINE BIND_8_COMPAT 1
     elif $AC_CC -DBIND_8_COMPAT -o ngc$$ ngc$$.c -lresolv; then
 	TLOG " (yes, with BIND_8_COMPAT & -lresolv)"
-	AC_LIBS="$AC_LIBS -lresolv"
+	LIBS="$LIBS -lresolv"
 	AC_DEFINE BIND_8_COMPAT 1
     else
 	TLOG " (not found)"
@@ -1426,7 +1417,7 @@ install)$PROG_INSTALL -c \$FULLNAME "\$1"
 	$PROG_LN_S -f \$FULLNAME \$1/\$LIBNAME.\$MAJOR
 	$PROG_LN_S -f \$FULLNAME \$1/\$LIBNAME
 EOF
-    test "$LDCONFIG" && echo '	'$LDCONFIG '"\$1"' >> librarian.sh
+    test "$LDCONFIG" && echo '	'$LDCONFIG '"$1"' >> librarian.sh
     cat >> librarian.sh << EOF
 	;;
 esac
