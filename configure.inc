@@ -445,6 +445,7 @@ EOF
 	test -d ngc$$.dSYM && __MACOS_DSYM=1
 	
     else
+	__remove ngc$$ ngc$$.c ngc$$.o
 	AC_FAIL " does not compile code properly"
     fi
 
@@ -1143,6 +1144,7 @@ EOF
     else
 	echo 
     fi
+    rm -f config.sed
 }
 
 #
