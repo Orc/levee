@@ -1492,6 +1492,8 @@ AC_CC_SHLIBS () {
 #
 AC_PROG_INSTALL () {
 
+    if [ $PROG_INSTALL ]; then return; fi
+
     DEST=`acLookFor install`
 
     LOGN "looking for install"
@@ -1525,9 +1527,24 @@ AC_PROG_INSTALL () {
 	PROG_INSTALL="$DEST"
     fi
 
+    # see if we can strip binaries
+    echo 'main() { puts("hello, sailor!"); }' > ngc$$.c
+    if $AC_CC -o ngc$$ ngc$$.c; then
+	if $PROG_INSTALL -s -m 444 ngc$$ inst$$; then
+	    _strip="-s"
+	else
+	    unset _strip
+	    LOG "(install -s does not appear to work?)"
+	fi
+	rm -f inst$$
+    fi
+    rm -f ngc$$ ngc$$.c
+
     AC_SUB 'INSTALL' "$PROG_INSTALL"
-    AC_SUB 'INSTALL_PROGRAM' "$PROG_INSTALL -s -m 755"
+    AC_SUB 'INSTALL_PROGRAM' "$PROG_INSTALL $_strip -m 755"
     AC_SUB 'INSTALL_DATA' "$PROG_INSTALL -m 444"
+
+    unset _strip
 
     # finally build a little directory installer
     # if mkdir -p works, use that, otherwise use install -d,
@@ -1568,6 +1585,7 @@ EOD
     fi
     chmod +x "$__cwd"/config.md
 }
+
 
 #
 # acCheckCPP is a local that runs a C preprocessor with a given set of
