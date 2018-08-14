@@ -482,7 +482,7 @@ bool newbuf;
     printch('"');
     prints(fname);
     prints("\" ");
-    if ((f=fopen(fname, "r")) == NULL) {
+    if ((f=expandfopen(fname, "r")) == NULL) {
 	prints("[No such file]");
 	fsize = 0;
 	if (newbuf)
@@ -522,12 +522,21 @@ VOID PROC
 backup(name)
 char *name;
 {
-    char back[80];
+    char *back, *expanded;
 #if !OS_UNIX
     char *p;
 #endif
 
-    strcpy(back, name);
+    expanded = expand(name);
+
+    back = malloc( 5 + (expanded ? strlen(expanded) : strlen(name)) );
+
+    if ( ! back ) {
+	printf("--cannot back up!--");
+	return;
+    }
+
+    strcpy(back, expanded ? expanded : name);
 #if OS_UNIX
     strcat(back, "~");
 #else
@@ -539,7 +548,10 @@ char *name;
 #endif
     
     unlink(back);
-    rename(name, back);
+    rename(expanded ? expanded : name, back);
+    free(back);
+    if ( expanded )
+	free(expanded);
 } /* backup */
 
 
@@ -561,7 +573,7 @@ char *fname;
     whole = (low == 0 && high >= bufmax-1);
     if (whole && autocopy)
 	backup(fname);
-    if ( (f=fopen(fname, "w")) ) {
+    if ( (f=expandfopen(fname, "w")) ) {
 	status = putfile(f, low, high);
 	fclose(f);
 	if (status) {
@@ -808,9 +820,9 @@ exec_type *mode;
 bool *noquit;
 {
     char line[120];
-    FILE *fp, *fopen();
+    FILE *fp;
     
-    if ((fp = fopen(fname,"r")) != NULL) {
+    if ((fp = expandfopen(fname,"r")) != NULL) {
 	indirect = YES;
 	while (fgets(line,120,fp) && indirect) {
 	    strtok(line, "\n");

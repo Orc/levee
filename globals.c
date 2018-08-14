@@ -211,7 +211,12 @@ char *excmds[] = {
 };
 
 char wordset[] = "0123456789$_#ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+#if HARD_EOL
 char spaces[] = { TAB,EOL,' ',0 };
+#else
+char spaces[] = { TAB, '\n', ' ', 0 };
+int EOL = 10;
+#endif
 
 int shiftwidth = 4,
 #if USE_TERMCAP | OS_ATARI

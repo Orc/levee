@@ -45,6 +45,12 @@
 #define PROC		/* for magic function types (MSDOS) */
 #define VOID	void	/* ancient creaking C compilers won't understand void */
 
+
+#include <stdio.h>
+
+extern char *expand(char *f);
+extern FILE *expandfopen(char *f, char *mode);
+
 /*
  * Compilation defines for different systems.
  */
@@ -179,7 +185,11 @@ extern long gemdos();
 #define BUGS	7	/* sometime when you least expect it.. */
 
 #define DW	23	/* Delete Word */
+#if HARD_EOL
 #define EOL	10	/* End Of Line */
+#else
+extern int EOL;
+#endif
 #define DLE	16	/* Space compression lead-in */
 #define ESC	27	/* Escape */
 

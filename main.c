@@ -218,6 +218,14 @@ char **args;
 #endif
 
     ++args, --count;
+    
+#ifndef HARD_EOL
+    if (count > 0 && strcmp(*args, "-p") == 0 ) {
+	++args, --count;
+	EOL = '\r';
+    }
+#endif
+
     if (count > 0 && **args == '+') {
 	char *p = *args;
 	strcpy(startcmd, p[1] ? (1+p) : "$");
