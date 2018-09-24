@@ -678,8 +678,10 @@ doinput(name)
 char *name;
 {
     inputf(name, YES);
-    strcpy(altnm, filenm);
-    strcpy(filenm, name);
+    if ( name != filenm ) {
+	strcpy(altnm, filenm);
+	strcpy(filenm, name);
+    }
 }
 
 
