@@ -10,7 +10,7 @@ LDFLAGS=@LDFLAGS@
 OBJS = blockio.o display.o editcor.o exec.o find.o \
     unixcall.o globals.o insert.o main.o misc.o \
     modify.o move.o ucsd.o undo.o wildargs.o \
-    version.o home.o
+    version.o home.o external.o
 
 lev: $(OBJS)
 	$(CC) $(LDFLAGS) -o lev $(OBJS) @LIBS@
@@ -40,8 +40,9 @@ install.man:
 
 blockio.o    : levee.h extern.h blockio.c config.h
 display.o    : levee.h extern.h termcap.i display.c config.h
-editcor.o    : levee.h extern.h editcor.c config.h
+editcor.o    : levee.h extern.h editcor.c config.h external.h
 exec.o       : levee.h extern.h exec.c config.h
+external.o   : external.c external.h
 find.o       : levee.h extern.h grep.h find.c config.h
 globals.o    : levee.h globals.c config.h
 insert.o     : levee.h extern.h insert.c config.h

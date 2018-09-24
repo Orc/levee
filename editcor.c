@@ -1,7 +1,7 @@
 /*
  * LEVEE, or Captain Video;  A vi clone
  *
- * Copyright (c) 1982-2008 David L Parsons
+ * Copyright (c) 1982-2018 David L Parsons
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, without or
@@ -19,6 +19,7 @@
  */
 #include "levee.h"
 #include "extern.h"
+#include "external.h"
 #include <stdlib.h>
     
 /* do some undoable modification */
@@ -181,6 +182,7 @@ execute(start, end)
     char scratch[20];
     bool ret = FALSE;
     int size;
+    pid_t child;
 
     strcpy(scratch, "/tmp/lv.XXXXXX");
     
@@ -194,14 +196,11 @@ execute(start, end)
 	return FALSE;
     }
 
-    strcat(instring, " 2>&1 <");
-    strcat(instring, scratch);
-    
     if ( (size = write(tf, core+start, end-start)) == (end-start) ) {
-	if ( (f=popen(instring, "r")) ) {
+	if ( (f=cmdopen(instring, scratch, &child)) ) {
 	    if ( deletion(start, end) && (insertfile(f, 1, start, &size) > 0) )
 		ret = TRUE;
-	    pclose(f);
+	    cmdclose(f, child);
 	}
 	else
 	    error();

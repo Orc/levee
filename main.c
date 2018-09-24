@@ -287,7 +287,7 @@ long _STKSIZ = 4096;
 long _BLKSIZ = 4096;
 #endif
 
-void /* should be union { void a; int b; float c; } to annoy the purists */
+int /* should be union { void a; int b; float c; } to annoy the purists */
 main(argc,argv)
 int argc;
 char **argv;
