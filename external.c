@@ -67,13 +67,15 @@ cmdopen(char *cmdline, char *input, pid_t *child)
 }
 
 
-void
+int
 cmdclose(FILE *input, pid_t child)
 {
     int status;
 
     waitpid(child, &status, 0);
     fclose(input);
+
+    return WIFEXITED(status) ? WEXITSTATUS(status) : -1;
 }
 
 
@@ -86,14 +88,17 @@ char **argv;
     pid_t child;
     register int c;
     int count = 0;
+    int status;
 
 
-    if ( (f = cmdopen("wc|sort", "README", &child)) != 0 ) {
+    if ( (f = cmdopen(argc > 1 ? argv[1] : "sort", "README", &child)) != 0 ) {
 	while ( (c=getc(f)) != EOF ) {
 	    count++;
 	    putchar(c);
 	}
-	cmdclose(f,child);
+	status = cmdclose(f,child);
+	if ( status != 0 )
+	    printf("exit status %d -- ", status);
 	printf("read %d character%s\n", count, (count!=1)?"s":"");
     }
 }

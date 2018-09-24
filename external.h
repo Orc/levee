@@ -5,6 +5,6 @@
 #include <sys/wait.h>
 
 extern FILE *cmdopen(char *, char *, pid_t *);
-extern void cmdclose(FILE *, pid_t);
+extern int  cmdclose(FILE *, pid_t);
 
 #endif/*_EXTERNAL_D*/
