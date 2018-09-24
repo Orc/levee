@@ -52,6 +52,7 @@ cmdopen(char *cmdline, char *input, pid_t *child)
 	    exit(1);
 	}
 	dup2(io[1], 1);
+	dup2(1,2);
 	
 	execl("/bin/sh", "sh", "-c", cmdline, 0L);
 	close(io[1]);
