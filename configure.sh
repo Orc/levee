@@ -88,8 +88,9 @@ else
 	LIBORDER="-lcurses -lncurses -ltermcap"
     fi
 
+    AC_CHECK_HEADERS termcap.h || AC_FAIL "levee needs <termcap.h>"
+
     if AC_LIBRARY tgetent $LIBORDER; then
-	AC_CHECK_HEADERS termcap.h || AC_FAIL "levee needs <termcap.h>"
 	AC_DEFINE USE_TERMCAP	1
 	# our -libtermcap might be (n)curses in disguise.  If so,
 	# it might have a colliding mvcur() that we need to define
