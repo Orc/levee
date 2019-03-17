@@ -29,7 +29,7 @@ pushblock(u)
 struct undostack *u;
 {
     if (u->blockp == 0)
-	if ((uwrite = OPEN_NEW(undobuf)) < 0)
+	if ( (uwrite = OPEN_NEW(undobuf)) == NOWAY )
 	    return FALSE;
     if (BUFSZ == WRITE_TEXT(uwrite, u->coreblock, BUFSZ)) {
 	u->blockp++;
@@ -60,7 +60,7 @@ int start,size;
 
     ok = TRUE;
     while (ok && size > 0) {
-	chunk = min(size, AVAIL(PAGESIZE-u->ptr));
+	chunk = Min(size, AVAIL(PAGESIZE-u->ptr));
 	moveleft(&core[start], (char*)&u->coreblock[u->ptr], chunk);
 	size -= chunk;
 	start += chunk;
@@ -170,7 +170,7 @@ int start, size;
     loc = start+size;		/* running backwards */
     ok = TRUE;
     while (ok && size > 0) {
-	chunk = min(size, AVAIL(u->ptr));
+	chunk = Min(size, AVAIL(u->ptr));
 	size -= chunk;
 	loc -= chunk;
 	moveleft((char*)&u->coreblock[u->ptr-INDEX(chunk)], &core[loc], chunk);
@@ -240,9 +240,9 @@ int *topp;
 	closeio = (undo.blockp > 0);
 	if (closeio) {			/* save diskfile */
 	    CLOSE_FILE(uwrite);		/* close current undo file */
-	    rename(undobuf,undotmp);
+	    os_rename(undobuf,undotmp);
 	    uread = OPEN_OLD(undotmp);	/* reopen it for reading */
-	    if (uread < 0)
+	    if ( uread == NOWAY )
 		return -1;
 	}
 	*topp = SIZE+1;
@@ -262,7 +262,7 @@ int *topp;
 	    undo = save_undo;
 	if (closeio) {
 	    CLOSE_FILE(uread);		/* Zap old buffer */
-	    unlink(undotmp);
+	    os_unlink(undotmp);
 	}
 	if (!ok)
 	    error();

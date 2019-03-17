@@ -23,85 +23,6 @@
 
 #include <stdlib.h>
 
-#if HAVE_SIGNAL_H
-#include <signal.h>
-#endif
-
-#if OS_RMX
-    extern alien token rq$get$task$tokens();	/* for unique files */
-#endif
-
-VOID PROC
-stamp(s, template)
-/* make a unique temporary file */
-char *s;
-char *template;
-{
-#if OS_RMX
-    token dummy;
-
-    strcpy(s, ":work:");
-    strcat(s, template);
-    numtoa(&s[strlen(s)], rq$get$task$tokens(0,&dummy));
-#else
-#if OS_DOS || OS_ATARI
-    char *p;
-#endif
-
-#if OS_UNIX
-    strcpy(s, "/tmp/");
-#endif
-
-#if OS_FLEXOS
-    s[0] = 0;
-#endif
-
-#if OS_DOS
-    if (p=getenv("TMP")) {
-	strcpy(s, p);
-	if (s[strlen(s)-1] != '\\')
-	    strcat(s, "\\");
-    }
-    else
-	s[0] = 0;
-#endif
-#if OS_ATARI
-    if (p=getenv("_TMP")) {
-	strcpy(s, p);
-	if (s[strlen(s)-1] != '\\')
-	    strcat(s, "\\");
-    }
-    else
-	s[0] = 0;
-#endif
-    strcat(s, template);
-    numtoa(&s[strlen(s)], getpid());
-#endif
-}
-
-#if OS_RMX|OS_UNIX
-PROC void
-ctrlc()
-/* ctrlc: RMX control-C handler */
-{
-    count = 0;	/* clear count, eh? */
-}
-#endif
-
-#if OS_RMX
-PROC
-settty()
-/* settty: set up the terminal for raw input */
-{
-    unsigned dummy;
-    /* transparent mode? */
-    dq$special(1,&fileno(stdin),&dummy);
-    
-    /* turn off control character assignments */
-    strput("\033]T:C15=0,C18=0,C20=0,C21=0,C23=0\033\\");
-}
-#endif
-
 VOID PROC
 initialize(count, args)
 int count;
@@ -109,61 +30,19 @@ char **args;
 /* initialize: set up everything I can in levee */
 {
     int i;
-#if OS_RMX
     int xmode = E_INIT, xquit;
-#else
-    char *getenv();
-#if OS_ATARI
-    extern int mapslash;
-#endif
-#endif
+    char *p;
 
-#if OS_UNIX
-    signal(SIGINT, ctrlc);
-#else
-    signal(SIGINT, SIG_IGN);
-#endif
-    initcon();
-
-#if OS_RMX
-    exception(0);
-    dq$trap$cc(ctrlc,&i);
-#endif
-
-#if TTY_ZTERM
-    zconfig();
-#endif /*TTY_ZTERM*/
-
-#if OS_ATARI
-    screensz(&LINES, &COLS);
+    dinitialize();
+    dscreensize(&COLS, &LINES);
     dofscroll = LINES/2;
-#endif
 
-#if OS_RMX
-#if USE_TERMCAP
-    {	FILE *tcf;
-	extern char termcap[];
-
-	if (tcf=fopen(":termcap:","rb")) {
-	    fgets(termcap,200,tcf);		/* get a line... */
-	    termcap[strlen(termcap)-1] = 0;	/* erase \n at eof */
-	    fclose(tcf);			/* close the file */
-	}
-    }
-#endif /*USE_TERMCAP*/
-    settty();
-#endif /*OS_RMX*/
-
-#if USE_TERMCAP
-    tc_init();
-#endif
-
-    version(); strput(".  Copyright (c) 1983-2007 by David Parsons");
+    version(); dputs(".  Copyright (c) 1983-2007 by David Parsons");
 
     if (!CA) {
 	lineonly = TRUE;
-        mvcur(0, 0);
-        strput(CE);
+        dgotoxy(0, 0);
+	dclear_to_eol();
 	prints("(line mode)");
     }
     else
@@ -195,31 +74,28 @@ char **args;
 
     fillchar(contexts, sizeof(contexts), -1);
 
-    stamp(undobuf, "$un");
-    stamp(yankbuf, "$ya");
-    stamp(undotmp, "$tm");
+    os_mktemp(undobuf, "$un");
+    os_mktemp(yankbuf, "$ya");
+    os_mktemp(undotmp, "$tm");
     
-    mvcur(LINES-1,0);
-#if OS_ATARI
-    mapslash = getenv("mapslash") != 0L;
-#endif
-#if OS_RMX
-    do_file(":lvrc:", &xmode, &xquit);
-#else /*!OS_RMX	system has a environment.. */
-    {	char *p;
-	extern char *execstr;	/* [exec.c] */
+    dgotoxy(LINES-1,0);
 
-	if ( (p=getenv("LVRC")) ) {
-	    strcpy(instring,p);
-	    execstr = instring;
-	    setcmd();
-	}
+    
+    if ( p = getenv("LVRC") ) {
+	extern char* execstr;
+	
+	strcpy(instring,p);
+	execstr = instring;
+	setcmd();
     }
-#endif
+    else if ( p = dotfile() )
+	do_file(p, &xmode, &xquit);
 
     ++args, --count;
     
-#ifndef HARD_EOL
+#if SOFT_EOL
+    /* USCD pascal-style (and early Macos?) EOL
+     */
     if (count > 0 && strcmp(*args, "-p") == 0 ) {
 	++args, --count;
 	EOL = '\r';
@@ -275,24 +151,20 @@ exec_type emode;
 	if (mode != E_VISUAL && curpos.x > 0)
 	    println();
 	else
-	    mvcur(-1,0);
+	    dgotoxy(-1,0);
     } while (more && noquit);
     if (zotscreen)
 	clrprompt();
     return noquit;
 }
 
-#if OS_ATARI
-long _STKSIZ = 4096;
-long _BLKSIZ = 4096;
-#endif
-
-int /* should be union { void a; int b; float c; } to annoy the purists */
+int
 main(argc,argv)
 int argc;
 char **argv;
 {
     initialize(argc, argv);
+    set_input();
 
     diddled = TRUE;	/* force screen redraw when we enter editcore() */
     if (lineonly)
@@ -302,20 +174,10 @@ char **argv;
 	while (execmode(editcore()))
             /* do nada */;
 
-    unlink(undobuf);
-    unlink(yankbuf);
+    os_unlink(undobuf);
+    os_unlink(yankbuf);
 
-#if TTY_ZTERM
-    zclose();
-#endif
-
-    fixcon();
-
-#if OS_RMX
-    strputs("\033]T:C15=3,C18=13,C20=5,C21=6,C23=4\033\\\n");
-    dq$special(2,&fileno(stdin),&curr);
-#else
-    println();
-#endif
+    reset_input();
+    os_restore();
     exit(0);
 }

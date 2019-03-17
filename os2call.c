@@ -30,26 +30,19 @@
 #define INCL_DOS
 #include <os2.h>
 
-int PROC
-min(a,b)
-int a,b;
-{
-    return (a>b) ? b : a;
-}
-
-int PROC
-max(a,b)
-int a,b;
-{
-    return (a<b) ? b : a;
-}
-
 PROC
-strput(s)
+os_dwrite(s,len)
 char *s;
 {
-    write(1, s, strlen(s));
+    return 0;
 }
+
+
+os_tty_setup()
+{
+    return 1;
+}
+
 
 /* get a key, mapping certain control sequences
  */
@@ -77,7 +70,7 @@ getKey()
 /* don't allow interruptions to happen
  */
 PROC
-nointr()
+set_input()
 {
     signal(SIGINT, SIG_IGN);
 } /* nointr */
@@ -86,7 +79,7 @@ nointr()
 /* have ^C do what it usually does
  */
 PROC
-allowintr()
+reset_input()
 {
     signal(SIGINT, SIG_DFL);
 } /* allowintr */
@@ -99,10 +92,10 @@ char *
 basename(s)
 register char *s;
 {
-    register char *p = s;
+    register char *p;
     
-    for (p = s+strlen(s); p > s; --p)
-	if (p[-1] == '/' || p[-1] == '\\' || p[-1] == ':')
+    for (p = s+strlen(s); --p > s; )
+	if (*p == '/' || *p == '\\' || *p == ':')
 	    return p;
     return s;
 } /* basename */
@@ -169,7 +162,7 @@ struct glob_t *dta;
 	    /* found a file - affix the path leading to it, then return
 	     * a pointer to the (static) buffer holding the path+the name.
 	     */
-	    strlwr(ffb.achName);	/* DOS & OS/2 are case-insensitive */
+	    lowercase(ffb.achName);	/* DOS & OS/2 are case-insensitive */
 
 	    if (dta_bfr) {
 		memcpy(&dta_bfr->wr_date, &ffb.fdateLastWrite, sizeof(short));

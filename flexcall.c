@@ -23,51 +23,89 @@
 #include "levee.h"
 
 #if OS_FLEXOS
+#include <stdio.h>
 #include <flexos.h>
 #include <ctype.h>
 
 static int oldkmode;
 static int oldsmode;
 
-int
-min(a,b)
+
+/* **** FILE I/O ABSTRACTION **** */
+
+FILEDESC
+OPEN_OLD(name)
+char *name;
 {
-    return (a>b) ? b : a;
+    int fd = s_open(name,0x08);
+
+    return ( fd < 0 ) ? NOWAY : (FILEDESC)fd;
+}
+
+FILEDESC
+OPEN_NEW(name)
+char *name
+{
+    int fd = s_create(0,0,name,0,0/*mode*/,0)
+
+    return ( fd < 0 ) ? NOWAY : (FILEDESC)fd;
 }
 
 int
-max(a,b)
+CLOSE_FILE(FILEDESC f)
 {
-    return (a<b) ? b : a;
+    return s_close(0,(FILEDESC)f);	/* Full close on handle */
 }
 
-strput(s)
+long
+SEEK_POSITION(FILEDESC f, long offset, int mode)
+{
+    return  s_seek((mode&03)<<9, (long)f, offset);
+}
+
+int
+READ_TEXT(FILEDESC f, void* buf, int length)
+{
+    return s_read(0x0100,(long)(FILEDESC),p,(long)(length),0L);
+}
+
+int
+WRITE_TEXT(FILEDESC f, void *buf, int length)
+{
+    return s_write(0x0101,(long)(f),buf,(long)(length),0L)
+}
+
+
+int
+os_unlink(char *n)
+{
+    return s_delete(0, n);
+}
+
+
+int
+os_rename(char *a,char *b)
+{
+    return s_rename(0, a, b);
+}
+
+/* **** OS-SPECIFIC DISPLAY I/O **** */
+
+os_dwrite(s, len)
 char *s;
 {
-    s_write(0x01, 1L, s, (long)strlen(s), 0L);
+    s_write(0x01, 1L, s, len, 0L);
+    return 1;
 }
 
-char *
-basename(s)
-char *s;
+
+os_tty_setup()
 {
-    char *strrchr();
-    char *p;
-
-    if ((p=strrchr(s,'/')) || (p=strrchr(s,'\\')) || (p = strrchr(s,':')))
-	return 1+p;
-    return s;
+    return 1;
 }
 
-getKey()
-{
-    char c;
 
-    s_read(0x0101, 0L, &c, 1L, 0L);
-    return c;
-}
-
-initcon()
+set_input()
 {
     CONSOLE tty;
 
@@ -79,7 +117,8 @@ initcon()
     s_set(T_CON, 1L, &tty, SSIZE(tty));
 }
 
-fixcon()
+
+reset_input()
 {
     CONSOLE tty;
 
@@ -89,17 +128,40 @@ fixcon()
     s_set(T_CON, 1L, &tty, SSIZE(tty));
 }
 
-char *
-strdup(s)
-char *s;
-{
-    char *malloc();
-    char *p;
 
-    if (p=malloc(strlen(s)+1))
-	strcpy(p, s);
-    return p;
+os_d_setup()
+{
+    TERMNAME = "Flexos console";
+    HO  = "\033H";
+    UP  = "\033A";
+    CE  = "\033K";
+    CL  = "\033E";
+    OL  = "\033L";
+    BELL= "\007";
+    CM  = "\033Y??";
+    UpS = NULL;		/* Reverse scrolling is painfully slow */
+    CURoff= "\033f";
+    CURon = "\033e";
+
+    CA = 1;
+    canUPSCROLL=0;
+    canOL=1;
+
+    return 1;
 }
+
+
+os_d_restore()
+{
+    return 1;
+}
+
+char *
+dotfile()
+{
+    return ":LVRC:";
+}
+
 
 getpid()
 {
@@ -110,13 +172,29 @@ getpid()
     return myself.ps_pid;
 }
 
-strlwr(s)
+
+getKey()
+{
+    char c;
+
+    s_read(0x0101, 0L, &c, 1L, 0L);
+    return c;
+}
+
+
+char *
+basename(s)
 char *s;
 {
-    while (*s) {
-	if (isupper(*s))
-	    *s += 32;
-	s++;
-    }
+    char *p;
+
+    for ( p=s+strlen(s); p-- > s; ) {
+	if (*p == '/' || *p == '\\' || *p == ':' )
+	    return 1+p;
+
+    return s;
 }
+
+
 #endif
+

@@ -25,26 +25,55 @@
 #if OS_DOS
 #include <glob.h>
 #include <dos.h>
+#include <stdio.h>
+#include <fcntl.h>
 
-int PROC
-min(a,b)
-int a,b;
+
+FILEDESC PROC
+OPEN_OLD(char *name)
 {
-    return (a>b) ? b : a;
+    int fd = open(name, O_RDONLY|O_BINARY);
+
+    return (fd == -1) ? NOWAY : (FILEDESC)fd;
 }
 
-int PROC
-max(a,b)
-int a,b;
+FILEDESC PROC
+OPEN_NEW(char *name)
 {
-    return (a<b) ? b : a;
+    int fd = open(name, O_WRONY|O_CREAT|O_TRUNC|O_BINARY, 0666);
+
+    return (fd == -1) ? NOWAY : (FILEDESC)fd;
 }
 
 PROC
-strput(s)
+CLOSE_FILE(FILEDESC f)
+{
+    return close((int)f);
+}
+
+long PROC
+SEEK_POSITION(FILEDESC f, long offset, int mode)
+{
+    return lseek((int)f, offset, mode);
+}
+
+int PROC
+READ_TEXT(FILEDESC f, void *buf, int size)
+{
+    return read((int)f, buf, size);
+}
+
+int PROC
+WRITE_TEXT(FILEDESC f, void *buf, int size)
+{
+    return write((int)f, buf, size);
+}
+
+PROC
+os_write(s,len)
 char *s;
 {
-    write(1, s, strlen(s));
+    return 0;
 }
 
 /* get a key, mapping certain control sequences
@@ -74,37 +103,42 @@ getKey()
 /* don't allow interruptions to happen
  */
 PROC
-nointr()
+os_tty_setup()
 {
     extern void _cdecl _interrupt _far ignore_ctrlc();
     _dos_setvect(0x23, ignore_ctrlc);
-} /* nointr */
+
+    /* no termcap but assume ansi.sys is loaded, so
+     * we can preinitialize all the cursor movement
+     * values.
+     */
+    TERMNAME = "braindamaged ansi";
+    HO  = "\033[H";
+    UP  = "\033[A";
+    CE  = "\033[K";
+    CL  = "\033[H\033[J";
+    OL  = NULL;
+    UpS = NULL;
+    BELL= "\007";
+    CM  = "\033[%d;%dH";
+
+    CA = TRUE;
+    canUPSCROLL = FALSE;
+    canOL = FALSE;
+    
+    return 1;
+} /* os_tty_setup */
 
 
 /* have ^C do what it usually does
  */
 PROC
-allowintr()
+os_restore()
 {
     extern void _cdecl _interrupt _far intr_on_ctrlc();
     _dos_setvect(0x23, intr_on_ctrlc);
-} /* allowintr */
-
-
-/*
- * basename() returns the filename part of a pathname
- */
-char *
-basename(s)
-register char *s;
-{
-    register char *p = s;
-    
-    for (p = s+strlen(s); p > s; --p)
-	if (p[-1] == '/' || p[-1] == '\\' || p[-1] == ':')
-	    return p;
-    return s;
-} /* basename */
+    return 0;
+} /* os_restore */
 
 
 /*
@@ -163,7 +197,7 @@ struct glob_t *dta;
 	    /* found a file - affix the path leading to it, then return
 	     * a pointer to the (static) buffer holding the path+the name.
 	     */
-	    strlwr(dird.name);		/* DOS & OS/2 are case-insensitive */
+	    lowercase(dird.name);		/* DOS & OS/2 are case-insensitive */
 
 	    if (dta_bfr) {
 		dta_bfr->wr_time = dird.wr_time;
@@ -198,3 +232,22 @@ struct glob_t *dta;
     return (char*)0;
 } /* glob */
 #endif /*OS_DOS*/
+
+
+#if !HAVE_BASENAME
+/*
+ * basename() returns the filename part of a pathname
+ */
+char *
+basename(s)
+register char *s;
+{
+    register char *p = s;
+    
+    for (p = s+strlen(s); p > s; --p)
+	if (p[-1] == '/' || p[-1] == '\\' || p[-1] == ':')
+	    return p;
+    return s;
+} /* basename */
+#endif
+

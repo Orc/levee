@@ -25,31 +25,16 @@
 #if OS_ATARI
 #include <atari\osbind.h>
 
-strput(s)
-register char *s;
-{
-    write(1, s, strlen(s));
-}
-
-
-zwrite(s,len)
+os_dwrite(s,len)
 char *s;
 {
-    write(1, s, len);
+    return 0;
 }
 
 
-min(a,b)
-register int a, b;
+os_tty_setup()
 {
-    return (a<b)?a:b;
-}
-
-
-max(a,b)
-register int a, b;
-{
-    return (a>b)?a:b;
+    return 1;
 }
 
 
@@ -67,4 +52,22 @@ getKey()
 	c = (((unsigned)(key>>16))|0x80) & 0xff;
     return c;
 } /* getKey */
+
+
+/*
+ * basename() returns the filename part of a pathname
+ */
+char *
+basename(s)
+register char *s;
+{
+    register char *p = s;
+    
+    for (p = s+strlen(s); --p > s; )
+	if ( *p == '\\' || *p == ':' )
+	    return p+1;
+    return s;
+} /* basename */
+#endif
+
 #endif /*OS_ATARI*/

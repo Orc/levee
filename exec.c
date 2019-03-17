@@ -2,6 +2,7 @@
 #include "extern.h"
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 VOID PROC undefine();
 VOID PROC fixupline();
@@ -27,8 +28,8 @@ char *string;
 VOID PROC
 clrmsg()
 {
-    mvcur(-1,0);
-    strput(CE);
+    dgotoxy(-1,0);
+    dclear_to_eol();
 } /* clrmsg */
 
 
@@ -36,9 +37,9 @@ VOID PROC
 errmsg(msg)
 char *msg;
 {
-    mvcur(-1,0);
+    dgotoxy(-1,0);
     prints(msg);
-    strput(CE);
+    dclear_to_eol();
 } /* errmsg */
 
 
@@ -74,24 +75,16 @@ args()
 /* args: print the argument list */
 {
     register int i;
-    mvcur(-1,0);
+    dgotoxy(-1,0);
     for (i=0; i < argc; i++) {
 	if (curpos.x+strlen(argv[i]) >= COLS)
 	    exprintln();
 	else if (i > 0)
 	    printch(' ');
 	if (pc == i) {			/* highlight the current filename.. */
-#if OS_ATARI|OS_FLEXOS
-	    strput("\033p");
-#else
-	    printch('[');
-#endif
+	    d_highlight(1);
 	    prints(argv[i]);
-#if OS_ATARI|OS_FLEXOS
-	    strput("\033q");
-#else
-	    printch(']');
-#endif
+	    d_highlight(0);
 	}
 	else
 	    prints(argv[i]);
@@ -171,14 +164,14 @@ setcmd()
 			prints("no ");
 		    prints(vp->v_name);
 		    if (vp->u->strp) {
-			mvcur(-1,10);
+			dwrite("          ", 10-strlen(vp->v_name));
 			prints("= ");
 			prints(vp->u->strp);
 		    }
 		    break;
 		default:
 		    prints(vp->v_name);
-		    mvcur(-1,10);
+		    dwrite("          ", 10-strlen(vp->v_name));
 		    prints("= ");
 		    printi(vp->u->valu);
 		    break;
@@ -197,7 +190,7 @@ int i;
     if (i >= 0) {
 	exprintln();
 	printch(mbuffer[i].token);
-	mvcur(-1,3);
+	dgotoxy(-1,3);
 	if (movemap[(unsigned int)(mbuffer[i].token)] == INSMACRO)
 	    prints("!= ");
 	else
@@ -547,8 +540,8 @@ char *name;
 	strcat(back, ".bkp");
 #endif
     
-    unlink(back);
-    rename(expanded ? expanded : name, back);
+    os_unlink(back);
+    os_rename(expanded ? expanded : name, back);
     free(back);
     if ( expanded )
 	free(expanded);
@@ -584,7 +577,7 @@ char *fname;
 	}
 	else {
 	    prints("[write error]");
-	    unlink(fname);
+	    os_unlink(fname);
 	}
     }
     else
@@ -1091,20 +1084,9 @@ bool *noquit;
 	    zotscreen = YES;
 	    exprintln();
 	    if (*execstr) {
-#if TTY_ZTERM
-		zclose();
-#endif
-#if OS_FLEXOS|OS_UNIX
-		fixcon();
-#else
-		allowintr();
-#endif
+		reset_input();
 		system(execstr);
-#if OS_FLEXOS|OS_UNIX
-		initcon();
-#else
-		nointr();
-#endif
+		set_input();
 	    }
 	    else
 		prints("incomplete shell escape.");

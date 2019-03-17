@@ -69,9 +69,10 @@ extern
 char undobuf[],
      undotmp[],
      yankbuf[];
+
 extern
-int uread,			/* reading from the undo stack */
-    uwrite;			/* writing to the undo stack */
+FILEDESC uread,			/* reading from the undo stack */
+	uwrite;			/* writing to the undo stack */
 			    /* B U F F E R S */
 extern
 char rcb[], *rcp,		/* last modification command */
@@ -81,19 +82,17 @@ extern
 struct ybuf yank;		/* last deleted/yanked text */
 /* STATIC INITIALIZATIONS: */
 
-/* ttydef stuff */
-#if OS_ATARI | USE_TERMCAP
 extern int LINES, COLS;
-#endif
 
-#if USE_TERMCAP
-extern bool CA, canUPSCROLL;
+extern bool CA,			/* cursor addressable? */
+	    canUPSCROLL,	/* can the display upscroll */
+	    canOL;		/* can the display open a line? */
+
 extern char FkL,
 	    CurRT,
 	    CurLT,
 	    CurDN,
 	    CurUP;
-#endif /*USE_TERMCAP*/
 
 extern char *TERMNAME,
 	    *HO,
@@ -203,7 +202,7 @@ extern bool PROC doyank(), deletion(), putback();
 extern bool PROC pushb(),pushi(),pushmem(),uputcmd(), delete_to_undo();
 extern bool PROC ok_to_scroll(), move_to_undo();
 
-extern int PROC min(), max(), fseekeol(), bseekeol(), settop();
+extern int PROC fseekeol(), bseekeol(), settop();
 extern int PROC scan(), findDLE(), setY(), skipws(), nextline(), setX();
 extern int PROC insertion(), chop(), fixcore(), lookup(), to_index();
 extern int PROC doaddwork(), addfile(), expandargs(), to_line();
@@ -230,8 +229,55 @@ extern VOID PROC moveright();
 extern VOID PROC fillchar();
 #endif
 
-#if USE_TERMCAP
-extern void tc_init();
+
+extern VOID PROC dwrite(char *, int);
+extern VOID PROC dputs(char *);
+extern VOID PROC dputc(char);
+extern VOID PROC dgotoxy(int,int);
+extern VOID PROC dclear_to_eol();
+extern VOID PROC dclearscreen();
+extern VOID PROC dnewline();
+extern VOID PROC dopenline();
+extern VOID PROC d_cursor(int);
+extern VOID PROC d_highlight(int);
+extern VOID PROC dinitialize();
+extern VOID PROC dscreensize(int *, int *);
+extern VOID PROC drestore();
+extern VOID PROC Ping();
+
+extern int PROC os_initialize();
+extern int PROC os_restore();
+extern int PROC os_cangotoxy();
+extern int PROC os_clear_to_eol();
+extern int PROC os_clearscreen();
+extern int PROC os_cursor(int);
+extern int PROC os_highlight(int);
+extern int PROC os_dwrite(char *, int);
+extern int PROC os_gotoxy(int,int);
+extern int PROC os_highlight(int);
+extern int PROC os_initialize();
+extern int PROC os_newline();
+extern int PROC os_openline();
+extern int PROC os_screensize(int *, int *);
+extern int PROC os_scrollback();
+extern int PROC os_Ping();
+extern VOID PROC set_input();
+extern VOID PROC reset_input();
+
+extern int PROC os_mktemp(char *, const char *);
+extern int PROC os_unlink(char *);
+extern int PROC os_rename(char *, char *);
+
+extern int PROC Max(int,int);
+extern int PROC Min(int,int);
+extern char *PROC dotfile();
+
+extern FILE* PROC expandfopen(char *file, char *mode);
+
+extern VOID PROC lowercase(char*);
+
+#if !HAVE_STRDUP
+extern char* PROC strdup(char*);
 #endif
 
 #endif /*EXTERN_D*/

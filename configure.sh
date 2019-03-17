@@ -66,9 +66,11 @@ else
 	# existance of string.h implies a memset() and strchr()
 	AC_DEFINE HAVE_MEMSET	1
 	AC_DEFINE HAVE_STRCHR	1
+	AC_DEFINE HAVE_STRDUP	1
     else
 	AC_CHECK_FUNCS memset
 	AC_CHECK_FUNCS strchr
+	AC_CHECK_FUNCS strdup
     fi
 
     # for basename

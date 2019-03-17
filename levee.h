@@ -35,134 +35,60 @@
 
 #include "config.h"
 
+#if LOGGING
+extern void login(char *, ...);
+#else
+#define logit(...)
+#endif
+
 #ifndef TRUE
 #define	TRUE	(1)	/* Nobody defines TRUE & FALSE, so I will do */
 #define	FALSE	(0)	/* it myself */
 #endif
 
-#define	HANDLE	int	/* default file handle type */
+#define unless(x)	if (!(x))
+#define if(x)		if ((x))
 
+#ifndef PROC
 #define PROC		/* for magic function types (MSDOS) */
+#endif
+
+#ifndef VOID
 #define VOID	void	/* ancient creaking C compilers won't understand void */
-
-
-#include <stdio.h>
-
-extern char *expand(char *f);
-extern FILE *expandfopen(char *f, char *mode);
-
-/*
- * Compilation defines for different systems.
- */
-
-#if OS_ATARI
-
-#include <stdio.h>
-
-#define	void	int	/* Alcyon C don't know void */
-
-/* extractions from osbind.h */
-#define OPEN_OLD(n)		gemdos(0x3d,n,/*open mode*/0)
-#define OPEN_NEW(n)		gemdos(0x3c,n,/*permissions*/0)
-#define CLOSE_FILE(f)		gemdos(0x3e,f)
-#define SEEK_POSITION(f,o,m)	gemdos(0x42,(long)(o),f,m)
-#define READ_TEXT(f,b,c)	gemdos(0x3f,f,(long)(c),b)
-#define WRITE_TEXT(f,b,c)	gemdos(0x40,f,(long)(c),b)
-
-extern char *malloc();
-extern long gemdos();
-
-#endif /*OS_ATARI*/
-
-#if OS_RMX
-#include <:inc:stdio.h>
-#include <:inc:udi.h>
-
-#define OPEN_OLD(n)		open(n, /*open mode*/0)
-#define OPEN_NEW(n)		creat(n,/*permissions*/0)
-#define CLOSE_FILE(f)		close(f)
-#define SEEK_POSITION(f,o,m)	lseek((f),(long)(o),(m))
-#define READ_TEXT(f,p,c)	read((f),(p),(unsigned)(c))
-#define WRITE_TEXT(f,p,c)	write((f),(p),(unsigned)(c))
-
-#define zwrite(p,s)	write(1,(p), (unsigned)(s))
-
-#endif /*OS_RMX*/
+#endif
 
 #if OS_DOS
-
-#include <stdio.h>
-#include <fcntl.h>
-
-#define OPEN_OLD(n)		open(n, O_RDONLY|O_BINARY)
-#define OPEN_NEW(n)		open(n, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY, 0666)
-#define CLOSE_FILE(f)		close(f)
-#define SEEK_POSITION(f,o,m)	lseek(f, (long)(o), (m))
-#define READ_TEXT(f,p,c)	read(f, p, (int)(c))
-#define WRITE_TEXT(f,p,c)	write(f, p, (int)(c))
-
-#define zwrite(p,s)	WRITE_TEXT(fileno(stdout), p, s)
-
-#undef PROC
-#define PROC	_fastcall
-
-#include "proto.h"
-
-#endif /*OS_DOS*/
-
-#if OS_UNIX
-
-#include <stdio.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <ctype.h>
-
-#define OPEN_OLD(n)		open(n, O_RDONLY)
-#define OPEN_NEW(n)		open(n, O_WRONLY|O_CREAT|O_TRUNC, 0666)
-#define CLOSE_FILE(f)		close(f)
-#define SEEK_POSITION(f,o,m)	lseek(f, (long)(o), (m))
-#define READ_TEXT(f,p,c)	read(f, p, (int)(c))
-#define WRITE_TEXT(f,p,c)	write(f, p, (int)(c))
-
-#define zwrite(p,s)		fwrite(p, 1, s, stdout)
-
-#endif /*OS_UNIX*/
-
-#if OS_FLEXOS
+#  define PROC _fastcall
+#elif OS_WINDOWS
+#  define PROC _cdecl
+#else
+#  define PROC /**/
+#endif
 
 #include <stdio.h>
 
-#define OPEN_OLD(n)		s_open(m,0x08)		/* note reversed parameters! */
-#define OPEN_NEW(n)		s_create(0,0,n,0,0/*mode*/,0)
-#define CLOSE_FILE(f)		s_close(0,f)		/* Full close on handle */
-#define SEEK_POSITION(f,o,m)	s_seek((m&03)<<9, f, o)
-#define	READ_TEXT(f,p,c)	s_read(0x0100,(long)(f),p,(long)(c),0L)
-#define	WRITE_TEXT(f,p,c)	s_write(0x0101,(long)(f),p,(long)(c),0L)
+extern char *PROC expand(char *f);
 
-#define	zwrite(p,s)		s_write(0x0101, 1L, p, (long)(s),0L)
+#if USING_STDIO
+extern FILE *PROC expandfopen(char *f, char *mode);
+#endif
 
-#define	unlink(n)		s_delete(0, n)
-#define	rename(a,b)		s_rename(0, a, b)
 
-/* OPEN_OLD mode flags */
+/* abstract out file i/o (separately from display i/o, hahaha)
+ */
+typedef void *FILEDESC;
+#define NOWAY ((FILEDESC)-1)
 
-#undef	HANDLE
-#define	HANDLE	long
-
-#endif /*OS_FLEXOS*/
+extern FILEDESC PROC OPEN_OLD(char *);
+extern FILEDESC PROC OPEN_NEW(char *);
+extern int PROC CLOSE_FILE(FILEDESC);
+extern long PROC SEEK_POSITION(FILEDESC, long, int);
+extern int PROC READ_TEXT(FILEDESC, void *, int);
+extern int PROC WRITE_TEXT(FILEDESC, void *, int);
 
 #define bool int
 
-/* ttydef stuff */
-#if !(OS_ATARI | USE_TERMCAP)
-
-#ifndef LINES
-#define LINES	25
-#endif  /*LINES*/
-#define COLS	79
-
-#endif
+extern int LINES, COLS;
 
 #define	YES	1
 #define	NO	0
@@ -172,24 +98,19 @@ extern long gemdos();
 #define LTARROW	erase
 #define RTARROW	12
 
-#if !USE_TERMCAP
-#define CA	TRUE
-#if !(OS_DOS||OS_FLEXOS)
-#define canUPSCROLL 1
-#endif
-#endif
-
 /* nospecific stuff */
 #define MAGICNUMBER  42
 #define hell_freezes_over  FALSE
 #define BUGS	7	/* sometime when you least expect it.. */
 
-#define DW	23	/* Delete Word */
 #if HARD_EOL
 #define EOL	10	/* End Of Line */
 #else
 extern int EOL;
 #endif
+
+#define DW	23	/* Delete Word */
+
 #define DLE	16	/* Space compression lead-in */
 #define ESC	27	/* Escape */
 

@@ -20,6 +20,8 @@
 /* global declarations */
 
 #include "levee.h"
+#include "extern.h"
+
 #define GLOBALS
 
 char lastchar,		/* Last character read via peekc */
@@ -71,8 +73,8 @@ char undobuf[40];
 char undotmp[40];
 char yankbuf[40];
 
-HANDLE uread,		/* reading from the undo stack */
-       uwrite;		/* writing to the undo stack */
+FILEDESC uread,		/* reading from the undo stack */
+	 uwrite;	/* writing to the undo stack */
 
 			    /* B U F F E R S */
 char rcb[256];		/* last modification command */
@@ -86,75 +88,12 @@ struct ybuf yank;	/* last deleted/yanked text */
 
 /* ttydef stuff */
 
-#if OS_ATARI | USE_TERMCAP
 int LINES, COLS;
-#endif
 
-#if TTY_ZTERM
-char *TERMNAME = "zterm",
-     *HO  = "\001",	/* goto top of screen */
-     *UP  = "\002",	/* move up 1 line? */
-     *CE  = "\003",	/* clear to end of line */
-     *CL  = "\004",	/* clearscreen */
-     *OL  = "\005",	/* open current line down */
-     *UpS = "\006",	/* scroll up 1 line */
-     *BELL= "\007",	/* ring the bell */
-     *CM  = "yes",	/* cursor movement exists */
-     *CURoff,
-     *CURon;
-#endif /*ZTERM*/
+bool CA = 0,
+     canUPSCROLL = 0,
+     canOL = 0;
 
-#if TTY_ANSI
-#if OS_DOS
-char *TERMNAME = "braindamaged ansi",
-#else
-char *TERMNAME = "hardwired ansi",
-#endif
-     *HO  = "\033[H",
-     *UP  = "\033[A",
-     *CE  = "\033[K",
-     *CL  = "\033[H\033[J",
-#if OS_DOS
-     *OL  = NULL,
-     *UpS = NULL,
-#else
-     *OL  = "\033[L",
-     *UpS = "\033[L",
-#endif
-     *BELL= "\007",
-     *CM  = "\033[%d;%dH",
-     *CURoff,
-     *CURon;
-#endif /*TTY_ANSI*/
-
-#if TTY_VT52
-#if OS_ATARI
-char *TERMNAME = "Atari ST",
-#else
-#if OS_FLEXOS
-char *TERMNAME = "Flexos console",
-#else
-char *TERMNAME = "hardwired vt52",
-#endif /*OS_FLEXOS*/
-#endif /*OS_ATARI*/
-     *HO  = "\033H",
-     *UP  = "\033A",
-     *CE  = "\033K",
-     *CL  = "\033E",
-     *OL  = "\033L",
-     *BELL= "\007",
-     *CM  = "\033Y??",
-#if OS_FLEXOS
-     *UpS = NULL,	/* Reverse scrolling is painfully slow */
-#else
-     *UpS = "\033I",
-#endif
-     *CURoff= "\033f",
-     *CURon = "\033e";
-#endif /*TTY_VT52*/
-
-#if USE_TERMCAP
-bool CA, canUPSCROLL;
 char FkL, CurRT, CurLT, CurUP, CurDN;
 
 char *TERMNAME,		/* will be set in termcap handling */
@@ -168,7 +107,6 @@ char *TERMNAME,		/* will be set in termcap handling */
      *UpS,
      *CURoff,
      *CURon;
-#endif /*USE_TERMCAP*/
 
 char Erasechar = ERASE,			/* our erase character */
      eraseline = 'X'-'@';		/* and line-kill character */
@@ -219,13 +157,9 @@ int EOL = 10;
 #endif
 
 int shiftwidth = 4,
-#if USE_TERMCAP | OS_ATARI
     dofscroll,
-#else
-    dofscroll  = LINES/2,
-#endif
-    tabsize    = 8;
-int autoindent = YES,
+    tabsize    = 8,
+    autoindent = YES,
     autocopy   = NO,
     autowrite  = YES,
     wrapscan   = YES,
@@ -234,9 +168,6 @@ int autoindent = YES,
     list       = NO,
     magic      = YES,
     bell       = YES,
-#if OS_ATARI
-    mapslash,
-#endif
     ignorecase = NO;
 
 struct variable vars[]={
@@ -549,4 +480,4 @@ cmdtype movemap[256]={
     /*xx*/ BAD_COMMAND,
     /*xx*/ BAD_COMMAND,
     /*xx*/ BAD_COMMAND
-    };
+};

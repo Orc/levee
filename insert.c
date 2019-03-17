@@ -40,7 +40,7 @@ bool visual;
 	if (openflag<0 && bufmax>0 && curr<bufmax) {
 	    curr = 1+lend;
 	    if (visual)
-		zwrite("\n", 1);
+		dnewline();
 	}
 	else {			/* open above current line */
 	    (*yp)--;
@@ -50,20 +50,20 @@ bool visual;
 	    currDLE = findDLE(lstart, &i, skipws(lstart),0);
 	if (visual) {
 #if TTY_VT52
-	    if (OL) {
+	    if (canOL) {
 #else
-	    if (OL && (*yp) < LINES-2) {
+	    if (canOL && (*yp) < LINES-2) {
 #endif
-		strput(OL);
+		dopenline();
 		(*yp)++;
 		curpos.y = *yp;
 	    }
 	    else {
-		mvcur(1+(*yp), 0);
-		strput(CE);
+		dgotoxy(1+(*yp), 0);
+		dclear_to_eol();
 	    }
 	}
-	mvcur(-1, currDLE);
+	dgotoxy(-1, currDLE);
     }
     else {
 	if (autoindent)
@@ -87,10 +87,10 @@ bool visual;
 	    if (Dflag)
 		while ((cmd=peekc()) == '' || cmd == '') {
 		    if (readchar() == '')
-			currDLE = min(COLS,currDLE+shiftwidth);
+			currDLE = Min(COLS,currDLE+shiftwidth);
 		    else
-			currDLE = max(0,currDLE-shiftwidth);
-		    mvcur(-1, currDLE);
+			currDLE = Max(0,currDLE-shiftwidth);
+		    dgotoxy(-1, currDLE);
 		}
 	} while (!(c = line(core, cp, endd-1, &len)));
 	if (Dflag && (len > 0 || c == ESC)) {
@@ -112,24 +112,24 @@ bool visual;
 	cp += len;
 	if (c == EOL) {		/* Diddle-Diddle */
 	    core[cp++] = EOL;		/* add in a \n */
-	    strput(CE);				/* clear this line */
+	    dclear_to_eol();			/* clear this line */
 	    println();
 	    if (visual) {
 #if OS_RMX
 		/* at OL at bottom kludge... */
-		if (OL && (*yp) < LINES-2) {
+		if (canOL && (*yp) < LINES-2) {
 #else
-		if (OL) {
+		if (canOL) {
 #endif
-		    strput(OL);
+		    dopenline();
 		    (*yp)++;
 		}
 		else
-		    strput(CE);
+		    dclear_to_eol();
 	    }
 	    if (!autoindent)		/* reset currDLE? */
 		currDLE = 0;
-	    mvcur(-1, currDLE);
+	    dgotoxy(-1, currDLE);
 	}
     } while (c != ESC && cp <= endd-INSSIZE);
     *dp = cp;					/* start display here */

@@ -27,14 +27,19 @@ extern char FkL, CurRT, CurLT, CurUP, CurDN;
 
 extern alien rq$s$write$move();
 
-strput(s)
-/* strput: write a string to stdout */
+os_dwrite(s,len)
 char *s;
 {
     int dummy;
 
-    if (s)
-	rq$s$write$move(fileno(stdout), s, strlen(s), &dummy);
+    rq$s$write$move(fileno(stdout), s, len, &dummy);
+    return 1;
+}
+
+
+os_tty_setup()
+{
+    return 1;
 }
 
 char
@@ -68,23 +73,12 @@ getKey()
     return c;
 }
 
-int max(a,b)
-int a,b;
-{
-    return (a>b)?a:b;
-}
-
-int min(a,b)
-int a,b;
-{
-    return (a>b)?b:a;
-}
-
 extern alien token rq$c$create$command$connection(),
 		   rq$c$delete$command$connection(),
 		   rq$c$send$command();
 
-int system(s)
+int
+subshell(s)
 /* system: do a shell escape */
 char *s;
 {

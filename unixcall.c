@@ -25,57 +25,168 @@
 #ifdef OS_UNIX
 
 #include "extern.h"
+#include <stdio.h>
+#include <fcntl.h>
 #include <termios.h>
 #include <string.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <ctype.h>
 #include <sys/ioctl.h>
 
-#if USE_TERMCAP
-#include <termcap.h>
-#endif
 
-int
-min(a,b)
-int a, b;
+/* **** FILE IO ABSTRACTIONS **** */
+FILEDESC
+OPEN_OLD(char *name)
 {
-    return (a>b) ? b : a;
+    int fd = open(name, O_RDONLY);
+
+    return (fd == -1) ? NOWAY : (FILEDESC)fd;
 }
 
-int
-max(a,b)
-int a, b;
+FILEDESC
+OPEN_NEW(char *name)
 {
-    return (a<b) ? b : a;
+    int fd = open(name, O_WRONLY|O_CREAT|O_TRUNC, 0666);
+
+    return (fd == -1) ? NOWAY : (FILEDESC)fd;
 }
 
-void strput(s)
+int PROC
+CLOSE_FILE(FILEDESC f)
+{
+    return close( (int)f );
+}
+
+long PROC
+SEEK_POSITION(FILEDESC f, long offset, int mode)
+{
+    return lseek((int)f, offset, mode);
+}
+
+int PROC
+READ_TEXT(FILEDESC f, void *buf, int size)
+{
+    return read((int)f, buf, size);
+}
+
+int PROC
+WRITE_TEXT(FILEDESC f, void *buf, int size)
+{
+    return write((int)f, buf, size);
+}
+
+
+/* *** UNIX-SPECIFIC CONSOLE I/O *** */
+int PROC
+os_write(s,len)
 char *s;
 {
-#if USE_TERMCAP
-    if (s)
-	tputs(s, 1, putchar);
-#else
-    if (s)
-	write(1, s, strlen(s));
-#endif
+    return 0;
 }
 
-#if !HAVE_BASENAME
-char *
-basename(s)
+
+int PROC
+os_gotoxy(y,x)
+{
+    return 0;
+}
+
+
+int PROC
+os_dwrite(s,len)
 char *s;
 {
-    char *rindex();
-    char *p;
-
-    if (p=strrchr(s,'/'))
-	return 1+p;
-    return s;
+    return 0;
 }
-#endif
 
+
+int PROC
+os_newline()
+{
+    return 0;
+}
+
+
+int PROC
+os_clearscreen()
+{
+    return 0;
+}
+
+
+int PROC
+os_clear_to_eol()
+{
+    return 0;
+}
+
+
+int PROC
+os_cursor(int visible)
+{
+    return 0;
+}
+
+int
+os_scrollback()
+{
+    return 0;
+}
+
+int
+os_scrolldown()
+{
+    return 0;
+}
+
+int
+os_openline()
+{
+    return 0;
+}
+
+int
+os_highlight(int yes_or_no)
+{
+    return 0;
+}
+
+int
+os_Ping()
+{
+    return 0;
+}
+
+/* get the screensize, if we can
+ */
+int
+os_screensize(x,y)
+int *x;
+int *y;
+{
+#if defined(TIOCGSIZE)
+	struct ttysize tty;
+	if (ioctl(0, TIOCGSIZE, &tty) == 0) {
+	    if (tty.ts_lines) (*y)=tty.ts_lines;
+	    if (tty.ts_cols)  (*x)=tty.ts_cols;
+
+	    logit("os_screensize: col=%d,row=%d", tty.ts_cols, tty.ts_lines);
+	    return 1;
+	}
+#elif defined(TIOCGWINSZ)
+	struct winsize tty;
+	if (ioctl(0, TIOCGWINSZ, &tty) == 0) {
+	    if (tty.ws_row) (*y)=tty.ws_row;
+	    if (tty.ws_col) (*x)=tty.ws_col;
+
+	    logit("os_screensize: col=%d,row=%d", tty.ws_col, tty.ws_row);
+	    return 1;
+	}
+#endif
+    return 0;
+}
 
 #if !HAVE_TCGETATTR
 #define tcgetattr(fd,t)	ioctl(fd, TCGETS, t)
@@ -84,47 +195,101 @@ char *s;
 #endif
 
 
-static int ioset = 0;
 static struct termios old;
 
-void
-initcon()
+
+int
+os_initialize()
 {
-    struct termios new;
+    tcgetattr(0, &old);	/* get editing keys */
 
-    if (!ioset) {
-	tcgetattr(0, &old);	/* get editing keys */
+    Erasechar = old.c_cc[VERASE];
+    eraseline = old.c_cc[VKILL];
 
-        Erasechar = old.c_cc[VERASE];
-        eraseline = old.c_cc[VKILL];
-
-        new = old;
-
-	new.c_iflag &= ~(IXON|IXOFF|IXANY|ICRNL|INLCR);
-	new.c_lflag &= ~(ICANON|ISIG|ECHO);
-	new.c_oflag = 0;
-
-	tcsetattr(0, TCSANOW, &new);
-        ioset=1;
-    }
+    return 0;
 }
 
-void
-fixcon()
+
+int
+os_restore()
 {
-    if (ioset) {
-	 tcsetattr(0, TCSANOW, &old);
-         ioset = 0;
-    }
+    return 1;
 }
 
+
+int
+os_rename(char *from, char *to)
+{
+    return rename(from, to);
+}
+
+
+int
+os_unlink(char *file)
+{
+    return unlink(file);
+}
+
+
+int
+os_mktemp(char *dest, const char *template)
+{
+    /* assert sizeof (dest) > sizeof (template)+sizeof("XXXXXX") */
+    sprintf(dest, "%sXXXXXX", template);
+    strcpy(dest, template);
+
+    return mktemp(dest) != 0;
+}
+
+
+/* put the terminal into raw mode
+ */
+void
+set_input()
+{
+    struct termios new = old;
+
+    new.c_iflag &= ~(IXON|IXOFF|IXANY|ICRNL|INLCR);
+    new.c_lflag &= ~(ICANON|ISIG|ECHO);
+    new.c_oflag = 0;
+
+    tcsetattr(0, TCSANOW, &new);
+}
+
+
+/* reset the terminal to what is was before
+ */
+void
+reset_input()
+{
+     tcsetattr(0, TCSANOW, &old);
+}
+
+
+/* what does our dotfile look like
+ */
+char *
+dotfile()
+{
+    /* should expand username */
+
+    return "~/.lvrc";
+}
+
+
+/* get a single keypress from the console
+ */
 int
 getKey()
 {
     unsigned char c[1];
     fd_set input;
 
+
+#if USING_STDIO
+    logit("getKey: flush stdout");
     fflush(stdout);
+#endif
     /* we're using Unix select() to wait for input, so lets hope that
      * all the Unices out there support select().  If your Unix doesn't,
      * you can make this work by replacing this select loop with:
@@ -140,8 +305,27 @@ getKey()
 	FD_SET(0, &input);
 
 	select(1, &input, 0, 0, 0);
-	if( read(0,c,1) == 1)
+	if( read(0,c,1) == 1) {
+#if 0
+	    if (c[0] >= ' ' && c[0] < 127 )
+		fprintf(stderr, "getKey -> %c\n", c[0]);
+	    else
+		fprintf(stderr, "getKey -> %02x\n", (unsigned char)c[0]);
+#endif
 	    return c[0];
-    };
+	}
+    }
 }
+
+#if !HAVE_BASENAME
+char *
+basename(s)
+char *s;
+{
+    char *p = strrchr(s, '/');
+
+    return p ? 1+p : s;
+}
+#endif
+
 #endif

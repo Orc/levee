@@ -20,6 +20,8 @@
 #include "levee.h"
 #include "extern.h"
 
+#include <ctype.h>
+
 int PROC findcol();
 int PROC moveword();
 int PROC sentence();
@@ -40,11 +42,11 @@ cmdtype cmd;
     switch (cmd) {			/* move around */
     
     case GO_LEFT:
-	*newpos = max(lstart, curp-max(count,1));
+	*newpos = Max(lstart, curp-Max(count,1));
 	break;
 
     case GO_RIGHT:
-	*newpos = min(lend, curp+max(count,1));
+	*newpos = Min(lend, curp+Max(count,1));
 	break;
 
     case GO_UP:
@@ -108,12 +110,12 @@ cmdtype cmd;
 	if (cmd<=UPTO_CHAR) {
 	    *newpos = fchar(curp,*newpos);
 	    if (cmd==UPTO_CHAR && *newpos>=0)
-		*newpos = max(curp, *newpos-1);
+		*newpos = Max(curp, *newpos-1);
 	}
 	else {
 	    *newpos = bchar(curp,*newpos);
 	    if (cmd==BACKTO_CHAR && *newpos>=0)
-		*newpos = min(curp, *newpos+1);
+		*newpos = Min(curp, *newpos+1);
 	}
 	break;
 
@@ -237,7 +239,7 @@ cmdtype cmd;
 	    error();
 	break;
     }
-    mvcur(yp, xp);
+    dgotoxy(yp, xp);
 }
     
 int PROC
@@ -339,7 +341,7 @@ bool forwd, toword;
     step = setstep[forwd];	/* set direction to move.. */
     if (!toword)
 	cp += step;		/* advance one character */
-    count = max(1,count);
+    count = Max(1,count);
     ccl = class(core[cp]);
     if (toword && ccl == spaces) {	/* skip to start of word */
 	count--;

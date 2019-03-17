@@ -83,7 +83,7 @@ char ***argvp;
     }
     if ( (ap[ac] = strdup(token)) ) {
 #if OS_ATARI|OS_RMX|OS_FLEXOS
-	strlwr(ap[ac]);		/* monocase filesystem */
+	lowercase(ap[ac]);		/* monocase filesystem */
 #endif
 	*argvp = ap;
 	return (*argcp)++;

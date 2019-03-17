@@ -21,6 +21,8 @@
 #include "extern.h"
 #include "grep.h"
 
+#include <ctype.h>
+
 /* modification commands that can be accessed by either editcore || execmode */
 
 /* put stuff into the yank buffer */
@@ -29,13 +31,13 @@ bool PROC
 doyank(low, high)
 int low, high;
 {
-    HANDLE f;
+    FILEDESC f;
     register int sz;
     
     yank.size = high - low;
-    moveleft(&core[low], yank.stuff, min(yank.size, SBUFSIZE));
+    moveleft(&core[low], yank.stuff, Min(yank.size, SBUFSIZE));
     if (yank.size > SBUFSIZE) {
-	if ((f=OPEN_NEW(yankbuf)) >= 0) {
+	if ((f=OPEN_NEW(yankbuf)) != NOWAY ) {
 	    low += SBUFSIZE;
 	    sz = WRITE_TEXT(f, core+low, high-low);
 	    CLOSE_FILE(f);
@@ -64,16 +66,16 @@ putback(start, newend)
 int start, *newend;
 {
     int siz, st;
-    HANDLE f;
+    FILEDESC f;
     
     if (yank.size+bufmax < SIZE && yank.size > 0) {
 	*newend = start + yank.size;
 	if (start < bufmax)
 	    moveright(&core[start], &core[start+yank.size], bufmax-start);
-	moveleft(yank.stuff, &core[start], min(SBUFSIZE, yank.size));
+	moveleft(yank.stuff, &core[start], Min(SBUFSIZE, yank.size));
 	if (yank.size > SBUFSIZE) {
 	    siz = yank.size - SBUFSIZE;
-	    if ((f=OPEN_OLD(yankbuf)) >= 0) {
+	    if ( (f=OPEN_OLD(yankbuf)) != NOWAY ) {
 		st = READ_TEXT(f, &core[start+SBUFSIZE], siz);
 		CLOSE_FILE(f);
 		if (st == siz)
@@ -155,14 +157,14 @@ restart:
 	if (*query) {
 	    /*>>>> don't delete -- keep for future use
 	    if (visual) {
-		mvcur(yp,setX(i));puts("?");
+		dgotoxy(yp,setX(i));puts("?");
 	    }
 	    else {
 	    <<<<*/
 		println();
 		writeline(-1,-1,bseekeol(i));
 		println();
-		mvcur(-1,setX(i));
+		dgotoxy(-1,setX(i));
 		prints("^?");
 	    /*>>>>
 	    }

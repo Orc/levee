@@ -21,6 +21,8 @@
 #include "extern.h"
 #include "external.h"
 #include <stdlib.h>
+#include <unistd.h>
+#include <ctype.h>
     
 /* do some undoable modification */
 
@@ -81,7 +83,7 @@ int endd, sw;
     newc = skipws(curr);
     disp = curr;
     newend = endd;
-    endY = setY(min(newend, pend));
+    endY = setY(Min(newend, pend));
 }
 
 /* join <count> lines together */
@@ -137,7 +139,7 @@ bool dorepl;
 		else
 		    core[i] = c;
 	    }
-	    newend = min(endp+1,lend);
+	    newend = Min(endp+1,lend);
 	}
     }
 }
@@ -165,9 +167,9 @@ bool before;
     endY = setY(curr);
     if (!before)
 	if (yank.lines)
-	    curr = min(lend+1,bufmax);
+	    curr = Min(lend+1,bufmax);
 	else
-	    curr = min(curr+1, lend);
+	    curr = Min(curr+1, lend);
     else if (yank.lines)
 	curr = lstart;
     newc = disp = curr;
@@ -207,7 +209,7 @@ execute(start, end)
     }
 	
     close(tf);
-    unlink(scratch);
+    os_unlink(scratch);
     
     return ret;
 }
@@ -260,7 +262,7 @@ cmdtype cmd;
 	    if (cmd == ADJUST_C)		/* special for >>,<< wierdness */
 		swap(&count, &oldc);		/* reverse sw & count */
 	    else
-		count = count*max(oldc,1);	/* combine them */
+		count = count*Max(oldc,1);	/* combine them */
 	}
 	if (ch == cmdch) {		/* diddle lines */
 	    yank.lines = TRUE;
@@ -304,9 +306,9 @@ cmdtype cmd;
 		break;
 	    case CHANGE_C:
 		if (endp <= pend+1) {
-		    mvcur(setY(endp-1), setX(endp-1));
+		    dgotoxy(setY(endp-1), setX(endp-1));
 		    printch('$');
-		    mvcur(yp, xp);
+		    dgotoxy(yp, xp);
 		}
 		if (deletion(curr, endp))
 		    ok = ((newend = insertion(1, 0, &disp, &endY, TRUE)) >= 0);
@@ -331,13 +333,13 @@ cmdtype cmd;
 	    case INSERT_C:		/* variations on insert */
 		if (cmd != INSERT_C) {
 		    if (cmd == APPEND_C)
-			curr = min(curr+1, lend);
+			curr = Min(curr+1, lend);
 		    else if (cmd == A_AT_END)
 			curr = lend;
 		    else /* if (cmd == I_AT_NONWHITE) */
 			curr = skipws(lstart);
 		    xp = setX(curr);
-		    mvcur(yp,xp);
+		    dgotoxy(yp,xp);
 		}
 		newend = insertion(count, 0, &disp, &endY, TRUE);
 		ok = (newend >= 0);
@@ -416,7 +418,7 @@ cmdtype cmd;
 killredo:
 	rcb[0] = 0;
     }
-    mvcur(yp, xp);
+    dgotoxy(yp, xp);
     if (xerox)
 	*rcp = 0;	/* terminate the redo */
     redoing = FALSE;
@@ -460,7 +462,7 @@ unsigned char code;
 	curr = np;
 	yp = settop(nl);
 	redisplay(TRUE);
-	mvcur(yp,xp);
+	dgotoxy(yp,xp);
     }
     else
 	error();
@@ -518,16 +520,18 @@ bool down;
 
     if (count <= 0)
 	count = dofscroll;
-    strput(CURoff);
+
+    d_cursor(0);
+    
     if (down) {
-	curr = min(bufmax-1, nextline(TRUE, curr, count));
-	i = min(bufmax-1, nextline(TRUE, pend, count));
+	curr = Min(bufmax-1, nextline(TRUE, curr, count));
+	i = Min(bufmax-1, nextline(TRUE, pend, count));
 	if (i > pend)
 	    scrollforward(i);
     }
     else {
-	curr = bseekeol(max(0,nextline(FALSE, curr, count)));
-	i = bseekeol(max(0,nextline(FALSE, ptop, count)));
+	curr = bseekeol(Max(0,nextline(FALSE, curr, count)));
+	i = bseekeol(Max(0,nextline(FALSE, ptop, count)));
 	if (i < ptop) {
 	    if (canUPSCROLL)
 		scrollback(i);
@@ -538,10 +542,12 @@ bool down;
 	    }
 	}
     }
-    strput(CURon);
+    
+    d_cursor(1);
+    
     setpos(skipws(curr));	/* initialize new position - first nonwhite */
     yp = setY(curr);
-    mvcur(yp, xp);		/* go there */
+    dgotoxy(yp, xp);		/* go there */
 }
 
 exec_type PROC
@@ -558,7 +564,7 @@ editcore()
     }
     if (diddled || zotscreen)		/* redisplay? */
 	redisplay(FALSE);
-    mvcur(yp, xp);			/* and move the cursor */
+    dgotoxy(yp, xp);			/* and move the cursor */
 
     for (;;) {
 	s_wrapped = 0;
@@ -569,7 +575,7 @@ editcore()
 	switch (cmd = movemap[(unsigned int)ch]) {
 	  case FILE_C:
 	    wr_stat();			/* write file stats */
-	    mvcur(yp, xp);
+	    dgotoxy(yp, xp);
 	    break;
 
 	  case WINDOW_UP:
@@ -579,7 +585,7 @@ editcore()
 
 	  case REDRAW_C:			/* redraw the window */
 	    redisplay(TRUE);
-	    mvcur(yp, xp);
+	    dgotoxy(yp, xp);
 	    break;
 
 	  case MARKER_C:			/* set a marker */

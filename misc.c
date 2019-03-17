@@ -19,6 +19,8 @@
  */
 #include "levee.h"
 #include "extern.h"
+#include <stdlib.h>
+#include <ctype.h>
 
 bool PROC
 lvgetline(str)
@@ -29,7 +31,7 @@ char *str;
     
     flag = line(str, 0, COLS-curpos.x, &len);
     str[len] = 0;
-    strput(CE);
+    dclear_to_eol();
     return (flag == EOL);
 } /* lvgetline */
 
@@ -130,7 +132,7 @@ int cp;
     
     ix = ptop;
     yp = -1;
-    cp = min(cp,bufmax-1);
+    cp = Min(cp,bufmax-1);
     do {
 	yp++;
 	ix = 1+fseekeol(ix);
@@ -244,12 +246,9 @@ error()
     if (xerox)
 	rcb[0] = 0;
     xerox = FALSE;
-#if OS_ATARI
-    Supexec(beeper);
-#else
+
     if (bell)
-	strput(BELL);
-#endif /*OS_ATARI*/
+	Ping();
 } /* error */
 
 
@@ -342,7 +341,7 @@ char c;
 	case 2: ixp = tabstack[--tabptr]; break;
 	case 3: ixp -= 3; break;
     }
-    mvcur(-1,ixp);
+    dgotoxy(-1,ixp);
 } /* back_up */
 
 
@@ -378,7 +377,7 @@ int start, endd, *size;
 	else if (c == eraseline) {
 	    ip = start;
 	    tabptr = 0;
-	    mvcur(-1,ixp=col0);
+	    dgotoxy(-1,ixp=col0);
 	}
 	else if (c==Erasechar) {
 	    if (ip>start)
@@ -436,7 +435,7 @@ resetX()
 {
     if (deranged) {
 	xp = setX(curr);
-	mvcur(-1, xp);
+	dgotoxy(-1, xp);
 	deranged = FALSE;
     }
 } /* resetX */
@@ -478,3 +477,43 @@ int lines;
     setend();
     return(yp);
 } /* settop */
+
+
+PROC
+Max(a,b)
+{
+    return (a>b) ? a : b;
+}
+
+
+PROC
+Min(a,b)
+{
+    return (a<b) ? a : b;
+}
+
+
+void
+lowercase(s)
+char *s;
+{
+    while (*s) {
+	if (isupper(*s))
+	    *s += 32;
+	s++;
+    }
+}
+
+
+#if !HAVE_STRDUP
+char *
+strdup(s)
+char *s;
+{
+    char *p;
+
+    if (p=malloc(strlen(s)+1))
+	strcpy(p, s);
+    return p;
+}
+#endif

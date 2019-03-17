@@ -20,30 +20,23 @@
 #include "levee.h"
 #include "extern.h"
 
-/* do a gotoXY -- allowing -1 for same row/column */
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
 
-#if USE_TERMCAP | OS_ATARI
-
-#define MAXCOLS 160
-
-#if USE_TERMCAP
-#include "termcap.i"
+#if HAVE_TERMCAP_H
+#include <termcap.h>
 #endif
 
-#else /*!(USE_TERMCAP | OS_ATARI)*/
 
-#define MAXCOLS COLS
+#define MAXCOLS 320
 
-#endif
-
+/* do a gotoXY -- allowing -1 for same row/column
+ */
 VOID PROC
-mvcur(y,x)
-int y,x;
+dgotoxy(y,x)
 {
-#if TERMCAP_EMULATION || TTY_ANSI
-    static char gt[30];
-#endif
-   
     if (y == -1)
 	y = curpos.y;
     else
@@ -56,31 +49,249 @@ int y,x;
 	curpos.x = x;
     if (x >= COLS)
 	x = COLS-1;
+    
+    unless ( os_gotoxy(y,x) )
+	dputs(tgoto(CM,x,y));
+}
 
-#if TERMCAP_EMULATION
-    tgoto(gt,y,x);
-    strput(gt);
-#elif USE_TERMCAP
-    strput( tgoto(CM, x, y) );
-#elif TTY_ZTERM
-    zgoto(x,y);
-#elif TTY_ANSI
-    {	register char *p = gt;		/* make a ansi gotoXY string */
-	*p++ = 033;
-	*p++ = '[';
-	numtoa(p,1+y); p += strlen(p);
-	*p++ = ';';
-	numtoa(p,1+x); p += strlen(p);
-	*p++ = 'H';
-	WRITE_TEXT(1, gt, (p-gt));
+
+#if USE_TERMCAP
+#  if USING_STDIO
+
+#define tputs_putc	putchar
+
+#  else
+
+/* write a single character to output w/o the assistance
+ * of stdio.
+ */
+static int
+tputs_putc(c)
+char c;
+{
+    char s[1];
+    s[0] = c;
+    return write(1, s, 1) == 1 ? c : EOF;
+}
+
+#  endif
+#endif
+
+
+VOID PROC
+dwrite(s,len)
+char *s;
+{
+    if ( len == 0 )
+	return;
+
+    unless ( os_dwrite(s, len) ) {
+	logit("dwrite <%.*s>(%d)", len, s, len);
+#if 0 /*USING_TERMCAP*/
+	tputs(s, len, tputs_putc);
+#elif USING_STDIO
+	fwrite(s, len, 1, stdout);
+#else
+	write(1, s, len);
+#endif
     }
-#elif TTY_VT52
-    CM[2] = y+32;
-    CM[3] = x+32;
-    strput(CM);
+}
+
+
+/* write a string to our display
+ */
+VOID PROC
+dputs(s)
+char *s;
+{
+    if ( s )
+	dwrite(s, strlen(s));
+}
+
+
+/* write a character to our display
+ */
+VOID PROC
+dputc(c)
+char c;
+{
+    char s[1];
+    s[0] = c;
+    dwrite(s, 1);
+}
+
+
+/* add a blank line to the screen at our current row
+ */
+VOID PROC
+dopenline()
+{
+    unless ( os_openline() )
+	dputs(OL);
+}
+
+
+/* spit out a newline
+ */
+VOID PROC
+dnewline()
+{
+    unless ( os_newline() )
+	dputs("\r\n");
+}
+
+
+/* clear the screen
+ */
+VOID PROC
+dclearscreen()
+{
+    unless ( os_clearscreen() )
+	dputs(CL);
+}
+
+
+/* clear to end of line
+ */
+VOID PROC
+dclear_to_eol()
+{
+    unless ( os_clear_to_eol() )
+	dputs(CE);
+}
+
+
+/* turn the cursor off or on
+ */
+VOID PROC
+d_cursor(visible)
+{
+    unless ( os_cursor(visible) )
+	dputs(visible ? CURon : CURoff);
+}
+
+
+/* highlight text
+ */
+VOID PROC
+d_highlight(yes_or_no)
+{
+    unless ( os_highlight(yes_or_no) )
+	dputc( yes_or_no ? '[' : ']' );
+}
+
+
+/* get the screensize
+ */
+VOID PROC
+dscreensize(x,y)
+int *x;
+int *y;
+{
+    int li, co;
+    
+    unless ( os_screensize(x,y) ) {
+	li = tgetnum("li");
+	co = tgetnum("co");
+
+	if ( (li > 0) && (co > 0) ) {
+	    (*x) = co;
+	    (*y) = li;
+	}
+	else {
+	    (*x) = 0;
+	    (*y) = 0;
+	}
+    }
+}
+
+
+/* initialize everything
+ */
+void
+dinitialize()
+{
+    static char tcbuf[4096];
+#if USING_STDIO
+    static char iob[4096];
+#endif
+    char *term, *bufp;
+    register st;
+    
+    if (os_initialize())
+	return;
+
+    /* default initialize assumes termcap, so
+     * read in the termcap entry for this terminal.
+     */
+    
+    unless ( term=getenv("TERM") )
+	term = "dumb";
+    
+    st = tgetent(tcbuf, term);
+
+    TERMNAME = term;
+    bufp = tcbuf+2048;
+    CM = tgetstr("cm", &bufp);
+    UP = tgetstr("up", &bufp);
+    unless ( HO = tgetstr("ho", &bufp) ) {
+	char *goto0 = tgoto(CM, 0, 0);
+
+	if (goto0)
+	    HO = strdup(goto0);
+    }
+
+    CL = tgetstr("cl", &bufp);
+    CE = tgetstr("ce", &bufp);
+    unless ( BELL = tgetstr("vb", &bufp) )
+	BELL = "\007";
+    OL = tgetstr("al", &bufp);
+    UpS = tgetstr("sr", &bufp);
+	
+    CURon = tgetstr("ve", &bufp);
+    CURoff = tgetstr("vi", &bufp);
+
+    dofscroll = LINES/2;
+
+    /* set cursor movement keys to zero for now */
+    FkL = CurRT = CurLT = CurUP = CurDN = EOF;
+
+    canUPSCROLL = (UpS != NULL);
+    CA = (CM != NULL);
+    canOL = (OL != NULL);
+
+    logit("canUPSCROLL = %d", canUPSCROLL);
+    logit("CA = %d", CA);
+    logit("canOL = %d", canOL);
+
+#if USING_STDIO
+    fflush(stdout);
+    setvbuf(stdout, iob, _IOFBF, sizeof iob);
 #endif
 }
 
+
+/* restore everything back to normal
+ */
+void
+drestore()
+{
+    os_restore();
+}
+
+
+/* ring the bell
+ */
+void
+Ping()
+{
+    unless ( os_Ping() )
+	dputs(BELL);
+}
+
+
+/* convert a number to a string, w/o using sprintf
+ */
 VOID PROC
 numtoa(str,num)
 char *str;
@@ -102,6 +313,9 @@ int num;
     moveleft(&str[i], str, 10-i);
 }
 
+
+/* print out a number, w/o using printf
+ */
 VOID PROC
 printi(num)
 int num;
@@ -110,36 +324,38 @@ int num;
     register int size;
     
     numtoa(nb,num);
-    size = min(strlen(nb),COLS-curpos.x);
+    size = Min(strlen(nb),COLS-curpos.x);
     if (size > 0) {
 	nb[size] = 0;
-	zwrite(nb, size);
+	dwrite(nb, size);
 	curpos.x += size;
     }
 }
 
+
+/* do a newline, updating x & y
+ */
 VOID PROC
 println()
 {
-    zwrite("\r\n", 2);
+    dnewline();
     curpos.x = 0;
-    curpos.y = min(curpos.y+1, LINES-1);
+    curpos.y = Min(curpos.y+1, LINES-1);
 }
 
-/* print a character out in a readable form --
+
+/* format: put a displayable version of c into out
  *    ^<x> for control-<x>
  *    spaces for <tab>
  *    normal for everything else
  */
-
-static char hexdig[] = "0123456789ABCDEF";
-
 int PROC
 format(out,c)
-/* format: put a displayable version of c into out */
 register char *out;
 register unsigned c;
 {
+    static char hexdig[] = "0123456789ABCDEF";
+
     if (c >= ' ' && c < '') {
     	out[0] = c;
     	return 1;
@@ -170,6 +386,9 @@ register unsigned c;
     }
 }
 
+
+/* print a formatted character
+ */
 VOID PROC
 printch(c)
 char c;
@@ -177,14 +396,16 @@ char c;
     register int size;
     char buf[MAXCOLS];
 
-    size = min(format(buf,c),COLS-curpos.x);
+    size = Min(format(buf,c),COLS-curpos.x);
     if (size > 0) {
-	buf[size] = 0;
-	zwrite(buf, size);
+	dwrite(buf, size);
 	curpos.x += size;
     }
 }
 
+
+/* print a formatted string
+ */
 VOID PROC
 prints(s)
 char *s;
@@ -198,13 +419,15 @@ char *s;
     	bi += size;
     	curpos.x += size;
     }
-    size = min(bi,COLS-oxp);
+    size = Min(bi,COLS-oxp);
     if (size > 0) {
-	buf[size] = 0;
-	zwrite(buf, size);
+	dwrite(buf, size);
     }
 }
 
+
+/* print a line of editor content
+ */
 VOID PROC
 writeline(y,x,start)
 int y,x,start;
@@ -216,9 +439,9 @@ int y,x,start;
     
     endd = fseekeol(start);
     if (start==0 || core[start-1] == EOL)
-	mvcur(y, 0);
+	dgotoxy(y, 0);
     else
-	mvcur(y, x);
+	dgotoxy(y, x);
     oxp = curpos.x;
 
     while (start < endd && curpos.x < COLS) {
@@ -230,17 +453,15 @@ int y,x,start;
     	buf[bi++] = '$';
     	curpos.x++;
     }
-    size = min(bi,COLS-oxp);
-    if (size > 0) {
-	buf[size] = 0;
-	zwrite(buf, size);
-    }
+    size = Min(bi,COLS-oxp);
+    dwrite(buf, size);
     if (curpos.x < COLS)
-	strput(CE);
+	dclear_to_eol();
 }
 
-/* redraw && refresh the screen */
 
+/* redraw && refresh the screen
+ */
 VOID PROC
 refresh(y,x,start,endd,rest)
 int y,x,start,endd;
@@ -248,13 +469,9 @@ bool rest;
 {
     int sp;
     
-#if OS_ATARI
-    /* turn the cursor off */
-    asm(" clr.l  -(sp)     ");
-    asm(" move.w #21,-(sp) ");
-    asm(" trap   #14       ");
-    asm(" addq.l #6,sp     ");
-#endif
+
+    d_cursor(0);
+	
     sp = start;
     while (sp <= endd) {
 	writeline(y, x, sp);
@@ -264,19 +481,14 @@ bool rest;
     }
     if (rest && sp >= bufmax)
 	while (y<LINES-1) { /* fill screen with ~ */
-	    mvcur(y, 0);
-	    printch('~'); strput(CE);
+	    dgotoxy(y, 0);
+	    printch('~'); dclear_to_eol();
 	    y++;
 	}
-#if OS_ATARI
-    /* turn the cursor back on */
-    asm(" clr.w  -(sp)     ");
-    asm(" move.w #1,-(sp)  ");
-    asm(" move.w #21,-(sp) ");
-    asm(" trap   #14       ");
-    asm(" addq.l #6,sp     ");
-#endif
+    
+    d_cursor(1);
 }
+
 
 /* redraw everything */
 
@@ -293,10 +505,11 @@ VOID PROC
 scrollback(curr)
 int curr;
 {
-    mvcur(0,0);		/* move to the top line */
+    dgotoxy(0,0);		/* move to the top line */
     do {
 	ptop = bseekeol(ptop-1);
-	strput(UpS);
+	unless ( os_scrollback() )
+	    dputs(UpS);
 	writeline(0, 0, ptop);
     } while (ptop > curr);
     setend();
@@ -308,7 +521,7 @@ int curr;
 {
     do {
 	writeline(LINES-1, 0, pend+1);
-	zwrite("\n", 1);
+	dnewline();
 	pend = fseekeol(pend+1);
 	ptop = fseekeol(ptop)+1;
     } while (pend < curr);
@@ -333,8 +546,8 @@ int top,bottom;
 VOID PROC
 clrprompt()
 {
-    mvcur(LINES-1,0);
-    strput(CE);
+    dgotoxy(LINES-1,0);
+    dclear_to_eol();
 }
 
 VOID PROC
