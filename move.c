@@ -22,15 +22,15 @@
 
 #include <ctype.h>
 
-int PROC findcol();
-int PROC moveword();
-int PROC sentence();
-int PROC match();
-int PROC fchar(), bchar();
+int findcol();
+int moveword();
+int sentence();
+int match();
+int fchar(), bchar();
 
 /* driver for movement commands */
 
-findstates PROC
+findstates
 findCP(curp,newpos,cmd)
 int curp, *newpos;
 cmdtype cmd;
@@ -189,7 +189,7 @@ cmdtype cmd;
 
 /* this procedure handles all movement in visual mode */
 
-VOID PROC
+void
 movearound(cmd)
 cmdtype cmd;
 {
@@ -242,7 +242,7 @@ cmdtype cmd;
     dgotoxy(yp, xp);
 }
     
-int PROC
+int
 findcol(ip, col)
 int ip, col;
 {
@@ -266,7 +266,7 @@ char dstpatt[]="[](){}", srcpatt[]="][)(}{";
 
 /* find matching [], (), {} */
 
-int PROC
+int
 match(p)
 int p;
 {
@@ -292,7 +292,7 @@ int p;
     return (-1);
 }
 
-char * PROC
+char *
 class(c)
 /* find the character class of a char -- for word movement */
 char c;
@@ -305,7 +305,7 @@ char c;
 	return (char*)NULL;
 }
 
-int PROC
+int
 skip(chars,cp,step)
 /* skip past characters in a character class */
 char *chars;
@@ -317,7 +317,7 @@ int step;
     return cp;
 }
 
-int PROC
+int
 tow(cp,step)
 /* skip to the start of the next word */
 register int cp;
@@ -329,7 +329,7 @@ register int step;
     return cp;
 }
 
-int PROC
+int
 moveword(cp,forwd,toword)
 /* word movement */
 int cp;
@@ -367,7 +367,7 @@ bool forwd, toword;
 
 /* find a character forward on current line */
 
-int PROC
+int
 fchar(pos,npos)
 int pos,npos;
 {
@@ -381,7 +381,7 @@ int pos,npos;
 
 /* find a character backward on the current line */
 
-int PROC
+int
 bchar(pos,npos)
 int pos,npos;
 {
@@ -395,7 +395,7 @@ int pos,npos;
 
 /* look for the end of a sentence forward */
 
-int PROC
+int
 ahead(i)
 int i;
 {
@@ -412,7 +412,7 @@ int i;
 
 /* look for the end of a sentence backwards. */
 
-int PROC
+int
 back(i)
 int i;
 {
@@ -431,7 +431,7 @@ int i;
     Sentences are delimited by ., !, or ? followed by a space.
 */
 
-int PROC
+int
 sentence(start,forwd)
 int start;
 bool forwd;

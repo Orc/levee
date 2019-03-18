@@ -26,11 +26,11 @@
 static void
 copyright()
 {
-     dputs(".  Copyright (c) 1983-2019 by David Parsons");
+     dputs("  Copyright (c) 1983-2019 by David Parsons");
 }
 
 
-VOID PROC
+void
 initialize(count, args)
 int count;
 char **args;
@@ -45,19 +45,15 @@ char **args;
     dscreensize(&COLS, &LINES);
     dofscroll = LINES/2;
 
-    if (CA) {
-	lineonly = FALSE;
-#if 0
-	dgotoxy(LINES-1, 0);
-	version(); copyright();
-#endif
-    }
-    else {
-	lineonly = TRUE;
+    if ( lineonly = !CA ) {
         dgotoxy(0, 0);
 	dclear_to_eol();
 	version(); copyright();
 	prints("(line mode)");
+    }
+    else if ( count <= 1 ) {
+	dgotoxy(LINES-1, 0);
+	version(); copyright();
     }
 
 
@@ -133,7 +129,7 @@ char **args;
 	filenm[0] = 0;
 }
 
-bool PROC
+bool
 execmode(emode)
 exec_type emode;
 {

@@ -24,7 +24,7 @@
 #define AVAIL(x)	((x)<<1)
 #define INDEX(x)	((1+x)>>1)
 
-bool PROC
+bool
 pushblock(u)
 struct undostack *u;
 {
@@ -39,7 +39,7 @@ struct undostack *u;
     return FALSE;
 }
 
-bool PROC
+bool
 pushw(u, i)
 struct undostack *u;
 int i;
@@ -50,7 +50,7 @@ int i;
     return TRUE;
 }
 
-bool PROC
+bool
 pushmem(u, start, size)
 struct undostack *u;
 int start,size;
@@ -72,7 +72,7 @@ int start,size;
     return ok;
 }
 
-VOID PROC
+void
 zerostack(u)
 struct undostack *u;
 {
@@ -82,7 +82,7 @@ struct undostack *u;
     u->ptr = 0;
 }
 
-bool PROC
+bool
 uputcmd(u, size, start, cmd)
 struct undostack *u;
 int size,start;
@@ -91,7 +91,7 @@ char cmd;
     return(pushw(u, size) && pushw(u, start) && pushw(u, cmd));
 }
 
-VOID PROC
+void
 insert_to_undo(u, start, size)
 struct undostack *u;
 int start,size;
@@ -106,7 +106,7 @@ int start,size;
 
 /* delete stuff from the buffer && put it into the undo stack */
 
-bool PROC
+bool
 delete_to_undo(u, start, lump)
 struct undostack *u;
 int start, lump;
@@ -125,7 +125,7 @@ int start, lump;
 
 /* copy stuff into the undo buffer */
 
-bool PROC
+bool
 move_to_undo(u, start, lump)
 struct undostack *u;
 int start,lump;
@@ -133,7 +133,7 @@ int start,lump;
     return pushmem(u, start, lump) && uputcmd(u,lump,start,U_MOVEC);
 }
 
-bool PROC
+bool
 popblock(u)
 struct undostack *u;
 {
@@ -148,7 +148,7 @@ struct undostack *u;
     return FALSE;
 }
 
-bool PROC
+bool
 popw(u, i)
 struct undostack *u;
 int *i;
@@ -159,7 +159,7 @@ int *i;
     return TRUE;
 }
 
-bool PROC
+bool
 popmem(u, start, size)
 struct undostack *u;
 int start, size;
@@ -184,7 +184,7 @@ int start, size;
 	
 /* delete (I)nserted text */
 
-bool PROC
+bool
 takeout(save_undo,curp)
 struct undostack *save_undo;
 int *curp;
@@ -195,7 +195,7 @@ int *curp;
 			    && delete_to_undo(save_undo,*curp,lump);
 }
 
-bool PROC
+bool
 copyover(save_undo,curp)
 struct undostack *save_undo;
 int *curp;
@@ -207,7 +207,7 @@ int *curp;
 			     && popmem(&undo, *curp, lump);
 }
 
-bool PROC
+bool
 putin(save_undo,curp)
 struct undostack *save_undo;
 int *curp;
@@ -227,7 +227,7 @@ int *curp;
 
 /* driver for undo -- returns last address modified || -1 if error */
 
-int PROC
+int
 fixcore(topp)
 int *topp;
 {

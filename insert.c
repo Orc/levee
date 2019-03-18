@@ -20,7 +20,7 @@
 #include "levee.h"
 #include "extern.h"
 
-int PROC
+int
 insertion(count, openflag, dp, yp, visual)
 int count, openflag, *dp, *yp;
 bool visual;

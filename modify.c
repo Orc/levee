@@ -27,7 +27,7 @@
 
 /* put stuff into the yank buffer */
 
-bool PROC
+bool
 doyank(low, high)
 int low, high;
 {
@@ -50,7 +50,7 @@ int low, high;
     return TRUE;
 }
 
-bool PROC
+bool
 deletion(low, high)
 int low,high;
 {
@@ -61,7 +61,7 @@ int low,high;
 
 /* move stuff from the yank buffer into core */
 
-bool PROC
+bool
 putback(start, newend)
 int start, *newend;
 {
@@ -94,7 +94,7 @@ int start, *newend;
 
 #define DSIZE 1024
 
-int PROC
+int
 makedest(str,start,ssize,size)
 /* makedest: make the replacement string for an regular expression */
 char *str;
@@ -135,7 +135,7 @@ int start, ssize, size;
     return to-str;
 }
 
-int PROC
+int
 chop(start,endd,visual,query)
 int start,*endd;
 bool visual, *query;

@@ -53,25 +53,25 @@ OPEN_NEW(char *name)
     return (fd == -1) ? NOWAY : (FILEDESC)fd;
 }
 
-int PROC
+int
 CLOSE_FILE(FILEDESC f)
 {
     return close( (int)f );
 }
 
-long PROC
+long
 SEEK_POSITION(FILEDESC f, long offset, int mode)
 {
     return lseek((int)f, offset, mode);
 }
 
-int PROC
+int
 READ_TEXT(FILEDESC f, void *buf, int size)
 {
     return read((int)f, buf, size);
 }
 
-int PROC
+int
 WRITE_TEXT(FILEDESC f, void *buf, int size)
 {
     return write((int)f, buf, size);
@@ -79,7 +79,7 @@ WRITE_TEXT(FILEDESC f, void *buf, int size)
 
 
 /* *** UNIX-SPECIFIC CONSOLE I/O *** */
-int PROC
+int
 os_write(s,len)
 char *s;
 {
@@ -87,14 +87,14 @@ char *s;
 }
 
 
-int PROC
+int
 os_gotoxy(y,x)
 {
     return 0;
 }
 
 
-int PROC
+int
 os_dwrite(s,len)
 char *s;
 {
@@ -102,28 +102,28 @@ char *s;
 }
 
 
-int PROC
+int
 os_newline()
 {
     return 0;
 }
 
 
-int PROC
+int
 os_clearscreen()
 {
     return 0;
 }
 
 
-int PROC
+int
 os_clear_to_eol()
 {
     return 0;
 }
 
 
-int PROC
+int
 os_cursor(int visible)
 {
     return 0;

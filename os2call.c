@@ -30,7 +30,7 @@
 #define INCL_DOS
 #include <os2.h>
 
-PROC
+
 os_dwrite(s,len)
 char *s;
 {
@@ -49,7 +49,7 @@ os_initialize()
 
 /* get a key, mapping certain control sequences
  */
-PROC
+
 getKey()
 {
     register c;
@@ -72,7 +72,7 @@ getKey()
 
 /* don't allow interruptions to happen
  */
-PROC
+
 set_input()
 {
     signal(SIGINT, SIG_IGN);
@@ -81,7 +81,7 @@ set_input()
 
 /* have ^C do what it usually does
  */
-PROC
+
 reset_input()
 {
     signal(SIGINT, SIG_DFL);

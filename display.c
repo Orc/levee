@@ -34,7 +34,7 @@
 
 /* do a gotoXY -- allowing -1 for same row/column
  */
-VOID PROC
+void 
 dgotoxy(y,x)
 {
     if (y == -1)
@@ -78,7 +78,7 @@ char c;
 #endif
 
 
-VOID PROC
+void 
 dwrite(s,len)
 char *s;
 {
@@ -100,7 +100,7 @@ char *s;
 
 /* write a string to our display
  */
-VOID PROC
+void 
 dputs(s)
 char *s;
 {
@@ -111,7 +111,7 @@ char *s;
 
 /* write a character to our display
  */
-VOID PROC
+void 
 dputc(c)
 char c;
 {
@@ -123,7 +123,7 @@ char c;
 
 /* add a blank line to the screen at our current row
  */
-VOID PROC
+void 
 dopenline()
 {
     unless ( os_openline() )
@@ -133,7 +133,7 @@ dopenline()
 
 /* spit out a newline
  */
-VOID PROC
+void 
 dnewline()
 {
     unless ( os_newline() )
@@ -143,7 +143,7 @@ dnewline()
 
 /* clear the screen
  */
-VOID PROC
+void 
 dclearscreen()
 {
     unless ( os_clearscreen() )
@@ -153,7 +153,7 @@ dclearscreen()
 
 /* clear to end of line
  */
-VOID PROC
+void 
 dclear_to_eol()
 {
     unless ( os_clear_to_eol() )
@@ -163,7 +163,7 @@ dclear_to_eol()
 
 /* turn the cursor off or on
  */
-VOID PROC
+void 
 d_cursor(visible)
 {
     unless ( os_cursor(visible) )
@@ -173,7 +173,7 @@ d_cursor(visible)
 
 /* highlight text
  */
-VOID PROC
+void 
 d_highlight(yes_or_no)
 {
     unless ( os_highlight(yes_or_no) )
@@ -183,7 +183,7 @@ d_highlight(yes_or_no)
 
 /* get the screensize
  */
-VOID PROC
+void 
 dscreensize(x,y)
 int *x;
 int *y;
@@ -292,7 +292,7 @@ Ping()
 
 /* convert a number to a string, w/o using sprintf
  */
-VOID PROC
+void 
 numtoa(str,num)
 char *str;
 int num;
@@ -316,7 +316,7 @@ int num;
 
 /* print out a number, w/o using printf
  */
-VOID PROC
+void 
 printi(num)
 int num;
 {
@@ -335,7 +335,7 @@ int num;
 
 /* do a newline, updating x & y
  */
-VOID PROC
+void 
 println()
 {
     dnewline();
@@ -349,7 +349,7 @@ println()
  *    spaces for <tab>
  *    normal for everything else
  */
-int PROC
+int 
 format(out,c)
 register char *out;
 register unsigned c;
@@ -389,7 +389,7 @@ register unsigned c;
 
 /* print a formatted character
  */
-VOID PROC
+void 
 printch(c)
 char c;
 {
@@ -406,7 +406,7 @@ char c;
 
 /* print a formatted string
  */
-VOID PROC
+void 
 prints(s)
 char *s;
 {
@@ -428,7 +428,7 @@ char *s;
 
 /* print a line of editor content
  */
-VOID PROC
+void 
 writeline(y,x,start)
 int y,x,start;
 {
@@ -462,7 +462,7 @@ int y,x,start;
 
 /* redraw && refresh the screen
  */
-VOID PROC
+void 
 refresh(y,x,start,endd,rest)
 int y,x,start,endd;
 bool rest;
@@ -492,7 +492,7 @@ bool rest;
 
 /* redraw everything */
 
-VOID PROC
+void 
 redisplay(flag)
 bool flag;
 {
@@ -501,7 +501,7 @@ bool flag;
     refresh(0, 0, ptop, pend, TRUE);
 }
     
-VOID PROC
+void 
 scrollback(curr)
 int curr;
 {
@@ -515,7 +515,7 @@ int curr;
     setend();
 }
 
-VOID PROC
+void 
 scrollforward(curr)
 int curr;
 {
@@ -529,7 +529,7 @@ int curr;
 
 /* find if the number of lines between top && bottom is less than dofscroll */
 
-bool PROC
+bool 
 ok_to_scroll(top,bottom)
 int top,bottom;
 {
@@ -543,14 +543,14 @@ int top,bottom;
     return(nl>0);
 }
 
-VOID PROC
+void 
 clrprompt()
 {
     dgotoxy(LINES-1,0);
     dclear_to_eol();
 }
 
-VOID PROC
+void 
 prompt(toot,s)
 bool toot;
 char *s;

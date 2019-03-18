@@ -36,7 +36,7 @@ int	newend,		/* end position after change */
 
 /* move a line of text right || left */
 
-VOID PROC
+void
 adjuster(sleft, endd, sw)
 bool sleft;
 int endd, sw;
@@ -88,7 +88,7 @@ int endd, sw;
 
 /* join <count> lines together */
 
-VOID PROC
+void
 join(count)
 int count;
 {
@@ -118,7 +118,7 @@ int count;
 	error();
 }
 
-VOID PROC
+void
 squiggle(endp, c, dorepl)
 int endp;
 char c;
@@ -144,7 +144,7 @@ bool dorepl;
     }
 }
 
-VOID PROC
+void
 bigreplace()
 {
     int len, tsiz;
@@ -160,7 +160,7 @@ bigreplace()
 	}
 }
 
-bool PROC
+bool
 put(before)
 bool before;
 {
@@ -176,7 +176,7 @@ bool before;
     return(putback(curr, &newend));
 }
 
-bool PROC
+bool
 execute(start, end)
 {
     int tf;
@@ -214,7 +214,7 @@ execute(start, end)
     return ret;
 }
 
-VOID PROC
+void
 gcount()
 {
     do {
@@ -223,7 +223,7 @@ gcount()
     } while ( count >= 0 && isdigit(ch) );
 }
 
-VOID PROC
+void
 docommand(cmd)
 cmdtype cmd;
 {
@@ -428,7 +428,7 @@ killredo:
 
 /* Initialize && execute a macro */
 
-VOID PROC
+void
 exmacro()
 {
     int mp;
@@ -445,7 +445,7 @@ exmacro()
 
 /* redraw the screen w.r.t. the cursor */
 
-VOID PROC
+void
 zdraw(code)
 unsigned char code;
 {
@@ -470,7 +470,7 @@ unsigned char code;
 
 /* start up a built-in macro */
 
-VOID PROC
+void
 macrocommand()
 {
     if (count > 1)
@@ -512,7 +512,7 @@ macrocommand()
 
 /* scroll the window up || down */
 
-VOID PROC
+void
 scroll(down)
 bool down;
 {
@@ -550,7 +550,7 @@ bool down;
     dgotoxy(yp, xp);		/* go there */
 }
 
-exec_type PROC
+exec_type
 editcore()
 {
     cmdtype cmd;

@@ -34,6 +34,8 @@
 #define LEVEE_D
 
 #include "config.h"
+#include <stdio.h>
+
 
 #if LOGGING
 extern void login(char *, ...);
@@ -49,29 +51,9 @@ extern void login(char *, ...);
 #define unless(x)	if (!(x))
 #define if(x)		if ((x))
 
-#ifndef PROC
-#define PROC		/* for magic function types (MSDOS) */
-#endif
+extern char *expand(char *f);
 
-#ifndef VOID
-#define VOID	void	/* ancient creaking C compilers won't understand void */
-#endif
-
-#if OS_DOS
-#  define PROC _fastcall
-#elif OS_WINDOWS
-#  define PROC _cdecl
-#else
-#  define PROC /**/
-#endif
-
-#include <stdio.h>
-
-extern char *PROC expand(char *f);
-
-#if USING_STDIO
-extern FILE *PROC expandfopen(char *f, char *mode);
-#endif
+extern FILE *expandfopen(char *f, char *mode);
 
 
 /* abstract out file i/o (separately from display i/o, hahaha)
@@ -79,12 +61,12 @@ extern FILE *PROC expandfopen(char *f, char *mode);
 typedef void *FILEDESC;
 #define NOWAY ((FILEDESC)-1)
 
-extern FILEDESC PROC OPEN_OLD(char *);
-extern FILEDESC PROC OPEN_NEW(char *);
-extern int PROC CLOSE_FILE(FILEDESC);
-extern long PROC SEEK_POSITION(FILEDESC, long, int);
-extern int PROC READ_TEXT(FILEDESC, void *, int);
-extern int PROC WRITE_TEXT(FILEDESC, void *, int);
+extern FILEDESC OPEN_OLD(char *);
+extern FILEDESC OPEN_NEW(char *);
+extern int CLOSE_FILE(FILEDESC);
+extern long SEEK_POSITION(FILEDESC, long, int);
+extern int READ_TEXT(FILEDESC, void *, int);
+extern int WRITE_TEXT(FILEDESC, void *, int);
 
 #define bool int
 

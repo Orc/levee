@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-bool PROC
+bool
 lvgetline(str)
 char *str;
 {
@@ -36,7 +36,7 @@ char *str;
 } /* lvgetline */
 
 
-char PROC
+char
 readchar()
 {
     ch = peekc();		/* get the peeked character */
@@ -52,7 +52,7 @@ readchar()
 
 
 /* look at next input character without actually using it */
-char PROC
+char
 peekc()
 {
     if (needchar) {				/* if buffer is empty, */
@@ -77,7 +77,7 @@ peekc()
 /* find the amount of leading whitespace between start && limit.
    endd is the last bit of whitespace found.
 */
-int PROC
+int
 findDLE(start, endd, limit, dle)
 int start, *endd, limit, dle;
 {
@@ -93,7 +93,7 @@ int start, *endd, limit, dle;
 } /* findDLE */
 
 
-int PROC
+int
 skipws(loc)
 int loc;
 {
@@ -103,7 +103,7 @@ int loc;
 } /* skipws */
 
 
-int PROC
+int
 setX(cp)
 int cp;
 {
@@ -124,7 +124,7 @@ int cp;
 } /* setX */
 
 
-int PROC
+int
 setY(cp)
 int cp;
 {
@@ -141,7 +141,7 @@ int cp;
 } /* setY */
 
 
-int PROC
+int
 to_line(cp)
 int cp;
 {
@@ -156,7 +156,7 @@ int cp;
 } /* to_line */
 
 
-int PROC
+int
 to_index(line)
 int line;
 {
@@ -168,7 +168,8 @@ int line;
     return(cp);
 } /* to_index */
     
-VOID PROC
+
+void
 swap(a,b)
 int *a,*b;
 {
@@ -180,7 +181,7 @@ int *a,*b;
 } /* swap */
 
 
-int PROC
+int
 #if OS_ATARI
 cclass(c)
 register int c;
@@ -210,7 +211,7 @@ register unsigned char c;
 #endif
 
 
-VOID PROC
+void
 error()
 {
     indirect = FALSE;
@@ -225,7 +226,7 @@ error()
 
 
 /* the dirty work to start up a macro */
-VOID PROC
+void
 insertmacro(cmdstr, count)
 char *cmdstr;
 int count;
@@ -241,7 +242,7 @@ int count;
 } /* insertmacro */
 
 
-int PROC
+int
 lookup(c)
 char c;
 {
@@ -253,7 +254,7 @@ char c;
 } /* lookup */
 
 
-VOID PROC
+void
 fixmarkers(base,offset)
 int base,offset;
 {
@@ -269,7 +270,7 @@ int base,offset;
 } /* fixmarkers */
 
 
-VOID PROC
+void
 wr_stat()
 {
     clrprompt();
@@ -303,7 +304,7 @@ static int  tabptr,
 	    tabstack[20],
 	    ixp;
 	
-VOID PROC
+void
 back_up(c)
 char c;
 {
@@ -324,7 +325,7 @@ char c;
  *    ESC : ended with an ESC
  *    EOL : ended with an '\r'
  */
-char PROC
+char
 line(s, start, endd, size)
 char *s;
 int start, endd, *size;
@@ -391,7 +392,7 @@ int start, endd, *size;
 
 
 /* move to core[loc] */
-VOID PROC
+void
 setpos(loc)
 int loc;
 {
@@ -402,7 +403,7 @@ int loc;
 } /* setpos */
 
 
-VOID PROC
+void
 resetX()
 {
     if (deranged) {
@@ -414,7 +415,7 @@ resetX()
 
 
 /* set end of window */
-VOID PROC
+void
 setend()
 {
     int bottom, count;
@@ -432,7 +433,7 @@ setend()
 /*  set top of window
  *  return the number of lines actually between curr && ptop.
  */
-int PROC
+int
 settop(lines)
 int lines;
 {
@@ -451,14 +452,14 @@ int lines;
 } /* settop */
 
 
-PROC
+
 Max(a,b)
 {
     return (a>b) ? a : b;
 }
 
 
-PROC
+
 Min(a,b)
 {
     return (a<b) ? a : b;

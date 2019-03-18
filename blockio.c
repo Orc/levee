@@ -26,7 +26,7 @@
 			    FALSE-- file too big
 */
 
-int PROC
+int 
 addfile(f, start, endd, size)
 FILE *f;
 int start;
@@ -43,7 +43,7 @@ int endd, *size;
 
 /* write out a file -- return TRUE if ok. */
 
-bool PROC
+bool 
 putfile(f, start, endd)
 register FILE *f;
 register int start, endd;

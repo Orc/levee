@@ -4,16 +4,16 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-VOID PROC undefine();
-VOID PROC fixupline();
-VOID PROC doinput();
+void undefine();
+void fixupline();
+void doinput();
 
 /*
  * do a newline and set flags.
  */
 #define exprintln()	(zotscreen=YES),println()
 
-VOID PROC
+void
 plural(num,string)
 int num;
 char *string;
@@ -25,7 +25,7 @@ char *string;
 } /* plural */
 
 
-VOID PROC
+void
 clrmsg()
 {
     dgotoxy(-1,0);
@@ -33,7 +33,7 @@ clrmsg()
 } /* clrmsg */
 
 
-VOID PROC
+void
 errmsg(msg)
 char *msg;
 {
@@ -46,7 +46,7 @@ char *msg;
 /* get a space-delimited token */
 char *execstr;			/* if someone calls getarg in the	*/
 				/* wrong place, death will come...	*/
-char *PROC
+char *
 getarg()
 {
     char *rv;
@@ -62,7 +62,7 @@ getarg()
 } /* getarg */
 
 
-VOID PROC
+void
 version()
 /* version: print which version of levee we are... */
 {
@@ -70,7 +70,7 @@ version()
 } /* version */
 
 
-VOID PROC
+void
 args()
 /* args: print the argument list */
 {
@@ -91,7 +91,7 @@ args()
     }
 } /* args */
     
-VOID PROC
+void
 setcmd()
 {
     bool no = NO,b;
@@ -183,7 +183,7 @@ setcmd()
 
 
 /* print a macro */
-VOID PROC
+void
 printone(i)
 int i;
 {
@@ -201,7 +201,7 @@ int i;
 
 
 /* print all the macros */
-VOID PROC
+void
 printall()
 {
     int i;
@@ -212,7 +212,7 @@ printall()
 
 
 /* :map ch text */
-VOID PROC
+void
 map(insert)
 bool insert;
 {
@@ -251,7 +251,7 @@ bool insert;
 } /* map */
 
 
-VOID PROC
+void
 undefine(i)
 int i;
 {
@@ -266,7 +266,7 @@ int i;
 } /* undefine */
 
 
-int PROC
+int
 unmap()
 {
     int i;
@@ -289,7 +289,7 @@ unmap()
 
 
 /* return argument # of a filename */
-int PROC
+int
 findarg(name)
 register char *name;
 {
@@ -302,7 +302,7 @@ register char *name;
 
 
 /* add a filename to the arglist */
-int PROC
+int
 addarg(name)
 register char *name;
 {
@@ -314,7 +314,7 @@ register char *name;
 
 
 /* get a file name argument (substitute alt file for #) */
-char * PROC
+char *
 getname()
 {
     extern int wilderr;
@@ -350,7 +350,7 @@ int  high,low;		/* low && high end of command range */
 bool affirm;		/* cmd! */
 /* s/[src]/dst[/options] */
 /* s& */
-VOID PROC
+void
 cutandpaste()
 {
     bool askme  = NO,
@@ -418,7 +418,7 @@ splat:	errmsg("bad substitute");
 
 /* quietly read in a file (and mark it in the undo stack)
  */
-int PROC
+int
 insertfile(FILE *f, int insert, int at, int *fsize)
 {
     int high,
@@ -450,7 +450,7 @@ insertfile(FILE *f, int insert, int at, int *fsize)
 
 
 
-VOID PROC
+void
 inputf(fname, newbuf)
 register char *fname;
 bool newbuf;
@@ -511,7 +511,7 @@ bool newbuf;
 
 
 /* Change a file's name (for autocopy). */
-VOID PROC
+void
 backup(name)
 char *name;
 {
@@ -548,7 +548,7 @@ char *name;
 } /* backup */
 
 
-bool PROC
+bool
 outputf(fname)
 char *fname;
 {
@@ -586,7 +586,7 @@ char *fname;
 } /* outputf */
 
 
-int PROC
+int
 oktoedit(writeold)
 /* check and see if it is ok to edit a new file */
 int writeold;	/* automatically write out changes? */
@@ -611,7 +611,7 @@ int writeold;	/* automatically write out changes? */
 
 
 /* write out all || part of a file */
-bool PROC
+bool
 writefile()
 {
     char *name;
@@ -632,7 +632,7 @@ writefile()
 }
 
 
-VOID PROC
+void
 editfile()
 {
     char *name = NULL;	/* file to edit */
@@ -666,7 +666,7 @@ editfile()
 }
 
 
-VOID PROC
+void
 doinput(name)
 char *name;
 {
@@ -678,7 +678,7 @@ char *name;
 }
 
 
-VOID PROC
+void
 toedit(count)
 int count;
 {
@@ -689,7 +689,7 @@ int count;
 }
 
 
-VOID PROC
+void
 readfile()
 {
     char *name;
@@ -701,7 +701,7 @@ readfile()
 }
 
 
-VOID PROC
+void
 nextfile(prev)
 bool prev;
 {
@@ -757,7 +757,7 @@ bool prev;
 /*
  * set up low, high; set dot to low
  */
-VOID PROC
+void
 fixupline(dft)
 int dft;
 {
@@ -782,7 +782,7 @@ int dft;
 }
 
 
-VOID PROC
+void
 whatline()
 {
     printi(to_line((low < 0) ? (bufmax-1) : low));
@@ -793,7 +793,7 @@ whatline()
 }
 
 
-VOID PROC
+void
 print()
 {
     do {
@@ -808,7 +808,7 @@ print()
 /* execute lines from a :sourced || .lvrc file */
 
 
-bool PROC
+bool
 do_file(fname,mode,noquit)
 char *fname;
 exec_type *mode;
@@ -832,7 +832,7 @@ bool *noquit;
 }
 
 
-VOID PROC
+void
 doins(flag)
 bool flag;
 {
@@ -847,7 +847,7 @@ bool flag;
 
 
 /* figure out a address range for a command */
-char * PROC
+char *
 findbounds(ip)
 char *ip;
 {
@@ -871,7 +871,7 @@ char *ip;
 
 
 /* parse the command line for lineranges && a command */
-int PROC
+int
 parse(inp)
 char *inp;
 {
@@ -919,7 +919,7 @@ char *inp;
 
 
 /* inner loop of execmode */
-VOID PROC
+void
 exec(cmd, mode, noquit)
 char *cmd;
 exec_type *mode;

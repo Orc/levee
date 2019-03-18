@@ -190,94 +190,94 @@ cmdtype movemap[];
 #define index(s,c)	strchr((s),(c))
 #endif
 
-extern findstates PROC findCP();
-extern exec_type PROC editcore();
+extern findstates findCP();
+extern exec_type editcore();
 
-extern char PROC line(), peekc(), readchar();
-extern char PROC *findparse(),*makepat();
+extern char line(), peekc(), readchar();
+extern char *findparse(),*makepat();
 
-extern bool PROC lvgetline();
-extern bool PROC putfile();
-extern bool PROC doyank(), deletion(), putback();
-extern bool PROC pushb(),pushi(),pushmem(),uputcmd(), delete_to_undo();
-extern bool PROC ok_to_scroll(), move_to_undo();
+extern bool lvgetline();
+extern bool putfile();
+extern bool doyank(), deletion(), putback();
+extern bool pushb(),pushi(),pushmem(),uputcmd(), delete_to_undo();
+extern bool ok_to_scroll(), move_to_undo();
 
-extern int PROC fseekeol(), bseekeol(), settop();
-extern int PROC scan(), findDLE(), setY(), skipws(), nextline(), setX();
-extern int PROC insertion(), chop(), fixcore(), lookup(), to_index();
-extern int PROC doaddwork(), addfile(), expandargs(), to_line();
-extern int PROC findfwd(), findback(), lvgetcontext(), getKey();
-extern int PROC cclass();
-extern int PROC insertfile();
+extern int fseekeol(), bseekeol(), settop();
+extern int scan(), findDLE(), setY(), skipws(), nextline(), setX();
+extern int insertion(), chop(), fixcore(), lookup(), to_index();
+extern int doaddwork(), addfile(), expandargs(), to_line();
+extern int findfwd(), findback(), lvgetcontext(), getKey();
+extern int cclass();
+extern int insertfile();
 
-extern VOID PROC strput(), numtoa(), clrprompt(), setend(), error();
-extern VOID PROC insert_to_undo(), resetX(), zerostack(), swap();
-extern VOID PROC mvcur(), printch(), prints(), writeline(), refresh();
-extern VOID PROC redisplay(), scrollback(), scrollforward(), prompt();
-extern VOID PROC setpos(), resetX(), insertmacro(), wr_stat();
-extern VOID PROC movearound(), printi(), println(), killargs();
-extern VOID PROC exec(), initcon(), fixcon(), version(), setcmd();
-extern VOID PROC toedit(), inputf(), fixmarkers(), errmsg();
+extern void strput(), numtoa(), clrprompt(), setend(), error();
+extern void insert_to_undo(), resetX(), zerostack(), swap();
+extern void mvcur(), printch(), prints(), writeline(), refresh();
+extern void redisplay(), scrollback(), scrollforward(), prompt();
+extern void setpos(), resetX(), insertmacro(), wr_stat();
+extern void movearound(), printi(), println(), killargs();
+extern void exec(), initcon(), fixcon(), version(), setcmd();
+extern void toedit(), inputf(), fixmarkers(), errmsg();
 
 #ifndef moveleft
-extern VOID PROC moveleft();
+extern void moveleft();
 #endif
 #ifndef moveright
-extern VOID PROC moveright();
+extern void moveright();
 #endif
 #ifndef fillchar
-extern VOID PROC fillchar();
+extern void fillchar();
 #endif
 
 
-extern VOID PROC dwrite(char *, int);
-extern VOID PROC dputs(char *);
-extern VOID PROC dputc(char);
-extern VOID PROC dgotoxy(int,int);
-extern VOID PROC dclear_to_eol();
-extern VOID PROC dclearscreen();
-extern VOID PROC dnewline();
-extern VOID PROC dopenline();
-extern VOID PROC d_cursor(int);
-extern VOID PROC d_highlight(int);
-extern VOID PROC dinitialize();
-extern VOID PROC dscreensize(int *, int *);
-extern VOID PROC drestore();
-extern VOID PROC Ping();
+extern void dwrite(char *, int);
+extern void dputs(char *);
+extern void dputc(char);
+extern void dgotoxy(int,int);
+extern void dclear_to_eol();
+extern void dclearscreen();
+extern void dnewline();
+extern void dopenline();
+extern void d_cursor(int);
+extern void d_highlight(int);
+extern void dinitialize();
+extern void dscreensize(int *, int *);
+extern void drestore();
+extern void Ping();
 
-extern int PROC os_initialize();
-extern int PROC os_restore();
-extern int PROC os_cangotoxy();
-extern int PROC os_clear_to_eol();
-extern int PROC os_clearscreen();
-extern int PROC os_cursor(int);
-extern int PROC os_highlight(int);
-extern int PROC os_dwrite(char *, int);
-extern int PROC os_gotoxy(int,int);
-extern int PROC os_highlight(int);
-extern int PROC os_initialize();
-extern int PROC os_newline();
-extern int PROC os_openline();
-extern int PROC os_screensize(int *, int *);
-extern int PROC os_scrollback();
-extern int PROC os_Ping();
-extern VOID PROC set_input();
-extern VOID PROC reset_input();
+extern int os_initialize();
+extern int os_restore();
+extern int os_cangotoxy();
+extern int os_clear_to_eol();
+extern int os_clearscreen();
+extern int os_cursor(int);
+extern int os_highlight(int);
+extern int os_dwrite(char *, int);
+extern int os_gotoxy(int,int);
+extern int os_highlight(int);
+extern int os_initialize();
+extern int os_newline();
+extern int os_openline();
+extern int os_screensize(int *, int *);
+extern int os_scrollback();
+extern int os_Ping();
+extern void set_input();
+extern void reset_input();
 
-extern int PROC os_mktemp(char *, const char *);
-extern int PROC os_unlink(char *);
-extern int PROC os_rename(char *, char *);
+extern int os_mktemp(char *, const char *);
+extern int os_unlink(char *);
+extern int os_rename(char *, char *);
 
-extern int PROC Max(int,int);
-extern int PROC Min(int,int);
-extern char *PROC dotfile();
+extern int Max(int,int);
+extern int Min(int,int);
+extern char * dotfile();
 
-extern FILE* PROC expandfopen(char *file, char *mode);
+extern FILE* expandfopen(char *file, char *mode);
 
-extern VOID PROC lowercase(char*);
+extern void lowercase(char*);
 
 #if !HAVE_STRDUP
-extern char* PROC strdup(char*);
+extern char* strdup(char*);
 #endif
 
 #endif /*EXTERN_D*/

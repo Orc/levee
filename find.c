@@ -22,13 +22,13 @@
 #include "grep.h"
 #include <ctype.h>
 
-int PROC amatch();
-int PROC locate();
-VOID PROC patsize();
+int amatch();
+int locate();
+void patsize();
 
 static int arg;		/* arguments inside of a RE */
 
-int PROC
+int
 REmatch(pattern, start, end)
 char *pattern;
 int start,end;
@@ -43,7 +43,7 @@ int start,end;
     return start;
 }
 
-int PROC
+int
 omatch(pattern, cp, endp)
 char *pattern, **cp, *endp;
 {
@@ -92,7 +92,7 @@ char *pattern, **cp, *endp;
     return FALSE;
 }
 	
-int PROC
+int
 amatch(pattern,start,endp)
 char *pattern, *endp, *start;
 {
@@ -133,7 +133,7 @@ char *pattern, *endp, *start;
 
 /*  increment pattern by the size of the token being scanned
  */
-VOID PROC
+void
 patsize(pattern)
 register char **pattern;
 {
@@ -154,7 +154,7 @@ register char **pattern;
     }
 }
 
-int PROC
+int
 locate(pattern,linep)
 /* locate: find a character in a closure */
 char *pattern;
@@ -172,7 +172,7 @@ register char *linep;
 }
 char *p;
 
-VOID PROC
+void
 concatch(c)
 /* add a character to the pattern */
 char c;
@@ -181,7 +181,7 @@ char c;
 	*p++ = c;
 }
 
-char PROC
+char
 esc(s)
 char **s;
 {
@@ -195,7 +195,7 @@ char **s;
     return **s;
 }
 
-char * PROC
+char *
 dodash(src)
 /* parse the innards of a [] */
 char *src;
@@ -221,7 +221,7 @@ char *src;
     return src;
 }
 
-char * PROC
+char *
 badccl(src)
 /* a [] was encountered. is it a CCL (match one of the included
  *  characters); or is it a NCCL (match all but the included characters)?
@@ -246,7 +246,7 @@ char *src;
 	/* patterns that cannot be closed */
 char badclose[] = { LSTART, LEND, CLOSURE, 0 };
 
-char * PROC
+char *
 makepat(string,delim)
 char *string, delim;
 /* make up the pattern string for find	-- ripped from 'Software Tools' */
@@ -319,7 +319,7 @@ char *string, delim;
     return (*string == delim)?(string+1):(string);
 }
 
-int PROC
+int
 findfwd(pattern,start,endp)
 /* look for a regular expression forward */
 char *pattern;
@@ -335,7 +335,7 @@ int start, endp;
      return ERR;
  }
 
-int PROC
+int
 findback(pattern,start,endp)
 /* look for a regular expression backwards */
 char *pattern;
@@ -354,7 +354,7 @@ int start, endp;
 
 bool s_wrapped = 0;
 
-char * PROC
+char *
 search(pat, start)
 /* get a token for find & find it in the buffer
  */
@@ -390,7 +390,7 @@ int *start;
     return p;
 }
 
-char * PROC
+char *
 findparse(src,idx,start) /* driver for ?, /, && : lineranges */
 char *src;
 int *idx,start;
@@ -461,7 +461,7 @@ int *idx,start;
     return(src);
 }
 
-int PROC
+int
 nextline(advance,dest,count)
 bool advance;
 int dest,count;
@@ -479,14 +479,14 @@ int dest,count;
     return(dest);
 }
 
-int PROC
+int
 fseekeol(origin)
 int origin;
 {
     return(origin + scan(bufmax-origin-1,'=',EOL,&core[origin]));
 }
 
-int PROC
+int
 bseekeol(origin)
 int origin;
 {
@@ -495,7 +495,7 @@ int origin;
 
 /* get something from the context table */
 
-int PROC
+int
 lvgetcontext(c,begline)
 char c;
 bool begline;

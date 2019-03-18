@@ -22,7 +22,7 @@
 
 #ifndef moveleft
 
-VOID PROC
+void
 moveleft(src,dest,length)
 register char *src,*dest;
 register int length;
@@ -35,7 +35,7 @@ register int length;
 
 #ifndef moveright
 
-VOID PROC
+void
 moveright(src,dest,length)
 register char *src,*dest;
 register int length;
@@ -50,7 +50,7 @@ register int length;
 
 #ifndef fillchar
 
-VOID PROC
+void
 fillchar(src,length,ch)
 register char *src,ch;
 register int length;
@@ -61,7 +61,7 @@ register int length;
 
 #endif
 
-int PROC
+int
 scan(length,tst,ch,src)
 int length;
 register char tst,ch,*src;

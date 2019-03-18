@@ -32,7 +32,7 @@
 
 int wilderr, wildcard;
 
-int PROC
+int
 expandargs(name, argcp, argvp)
 char *name;
 int *argcp;
@@ -63,7 +63,7 @@ char ***argvp;
 
 #define QUANTUM	10
 
-int PROC
+int
 doaddwork(token,argcp,argvp)
 char *token;
 int *argcp;
@@ -93,7 +93,7 @@ memfail:
     return -1;
 }
 
-VOID PROC
+void
 killargs(argcp, argvp)
 int *argcp;
 char ***argvp;

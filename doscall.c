@@ -29,7 +29,7 @@
 #include <fcntl.h>
 
 
-FILEDESC PROC
+FILEDESC
 OPEN_OLD(char *name)
 {
     int fd = open(name, O_RDONLY|O_BINARY);
@@ -37,7 +37,7 @@ OPEN_OLD(char *name)
     return (fd == -1) ? NOWAY : (FILEDESC)fd;
 }
 
-FILEDESC PROC
+FILEDESC
 OPEN_NEW(char *name)
 {
     int fd = open(name, O_WRONY|O_CREAT|O_TRUNC|O_BINARY, 0666);
@@ -45,25 +45,25 @@ OPEN_NEW(char *name)
     return (fd == -1) ? NOWAY : (FILEDESC)fd;
 }
 
-PROC
+
 CLOSE_FILE(FILEDESC f)
 {
     return close((int)f);
 }
 
-long PROC
+long
 SEEK_POSITION(FILEDESC f, long offset, int mode)
 {
     return lseek((int)f, offset, mode);
 }
 
-int PROC
+int
 READ_TEXT(FILEDESC f, void *buf, int size)
 {
     return read((int)f, buf, size);
 }
 
-int PROC
+int
 WRITE_TEXT(FILEDESC f, void *buf, int size)
 {
     return write((int)f, buf, size);
@@ -97,7 +97,7 @@ os_mktemp(char *dest, char *template)
 #endif
 }
 
-PROC
+
 os_write(s,len)
 char *s;
 {
@@ -106,7 +106,7 @@ char *s;
 
 /* get a key, mapping certain control sequences
  */
-PROC
+
 getKey()
 {
     register c;
@@ -135,7 +135,7 @@ void _cdecl _interrupt _far ignore_ctrlc()
 
 /* don't allow interruptions to happen
  */
-PROC
+
 os_initialize()
 {
     _dos_setvect(0x23, ignore_ctrlc);
@@ -167,7 +167,7 @@ os_initialize()
 
 /* have ^C do what it usually does
  */
-PROC
+
 os_restore()
 {
     extern void _cdecl _interrupt _far intr_on_ctrlc();
