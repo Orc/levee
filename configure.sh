@@ -101,7 +101,6 @@ else
 	AC_CHECK_FUNCS strdup
     fi
 
-    # for basename
     if AC_CHECK_HEADERS signal.h; then
 	# Assume a mainly sane world where the existance
 	# of signal.h means that signal() exists
@@ -128,7 +127,6 @@ else
 fi
 
 AC_CHECK_FUNCS basename && AC_CHECK_HEADERS libgen.h
-
 AC_CHECK_FUNCS glob && AC_CHECK_HEADERS glob.h
 
 if AC_PROG_LN_S && test -z "$missing_lv"; then

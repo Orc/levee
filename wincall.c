@@ -16,15 +16,57 @@
 #include <io.h>
 #include <fcntl.h>
 
+/* **** FILE IO ABSTRACTIONS **** */
+FILEDESC
+OPEN_OLD(char *name)
+{
+    int fd = open(name, O_RDONLY);
+
+    if ( fd == -1 )
+	return NOWAY;
+
+    _setmode(fd, _O_BINARY);
+    return (FILEDESC)fd;
+}
+
+FILEDESC
+OPEN_NEW(char *name)
+{
+    int fd = open(name, O_WRONLY|O_CREAT|O_TRUNC, 0666);
+
+    if ( fd == -1 )
+	return NOWAY;
+
+    _setmode(fd, _O_BINARY);
+    return (FILEDESC)fd;
+}
+
+int
+CLOSE_FILE(FILEDESC f)
+{
+    return close( (int)f );
+}
+
+long
+SEEK_POSITION(FILEDESC f, long offset, int mode)
+{
+    return lseek((int)f, offset, mode);
+}
+
+int
+READ_TEXT(FILEDESC f, void *buf, int size)
+{
+    return read((int)f, buf, size);
+}
+
+int
+WRITE_TEXT(FILEDESC f, void *buf, int size)
+{
+    return write((int)f, buf, size);
+}
 
 /* i/o handling mess
  */
-
-static struct _obuf {
-    char *buf;
-    int size;
-    int next;
-} obuf;
 
 static struct _input_fd {
     HANDLE fd;			/* Windows file descriptor */
@@ -42,47 +84,16 @@ static struct _window_fd {
     int set;
 } window = { .set=0 };
 
-static FILE *log = 0;
 
-void
-logit(char *fmt, ...)
+os_openline()
 {
-    int i;
-    char buffer[800];
-    
-    va_list args;
-
-    va_start(args, fmt);
-    vsnprintf(buffer, 800, fmt, args);
-    va_end(args);
-
-    for ( i=0; (i < 800) && buffer[i]; i++ ) {
-	if ( buffer[i] >= ' ' && buffer[i] < 127 )
-	    fputc(buffer[i], log);
-	else
-	    fprintf(log, "<%02x>", buffer[i]);
-    }
-    if ( i == 800 )
-	fprintf(log, "...");
-    fputc('\n', log);
-}
-
-
-static int
-os_flush()
-{
-    if ( obuf.next ) {
-	logit("os_flush %d byte%s", obuf.next, (obuf.next==1)?"":"s");
-	write(fileno(stdout), obuf.buf, obuf.next);
-	obuf.next = 0;
-	return 1;
-    }
     return 0;
 }
 
-static int
+
 os_clearscreen()
 {
+#if 0
     COORD coordScreen = { 0, 0 };    /* here's where we'll home the
 					cursor */ 
     BOOL bSuccess;
@@ -114,6 +125,8 @@ os_clearscreen()
 
     bSuccess = SetConsoleCursorPosition( window.fd, coordScreen );
 
+#endif
+    os_dwrite("\f",1);
     return 0;
 }
 
@@ -122,18 +135,8 @@ os_dwrite(s, len)
 char *s;
 {
     logit("os_dwrite(\"%s\",%d)", s, len);
-#if 1
-    if ( obuf.next + len > obuf.size ) {
-	if ( obuf.next )
-	    zflush();
-	if ( len > obuf.size ) {
-	    logit("toolarge write");
-	    write(fileno(stdout), s, len);
-	    return 1;
-	}
-    }
-    memcpy(obuf.buf + obuf.next, s, len);
-    obuf.next += len;
+#if USING_STDIO
+    fwrite(s,len,1,stdout);
 #else
     register rc;
     DWORD written;
@@ -148,16 +151,88 @@ char *s;
 
 
 int
+os_highlight(int visible)
+{
+    return 0;
+}
+
+int
+os_Ping()
+{
+    return 0;
+}
+
 os_newline()
 {
-    os_write("\r\n", 2);
+    return 0;
+}
+
+int
+os_scrollback()
+{
+    return 0;
+}
+
+int
+os_rename(char *old, char *new)
+{
+    return rename(old, new);
+}
+
+int
+os_unlink(char *file)
+{
+    return unlink(file);
+}
+
+char *
+dotfile()
+{
+    static char *dotname = 0;
+    char *disk, *path;
+
+    unless ( dotname ) {
+	disk = getenv("HOMEDRIVE");
+	path = getenv("HOMEPATH");
+
+	if ( disk && path ) {
+	    dotname = malloc(1+strlen(disk)+strlen(path)+1+strlen("lv,rc"));
+
+	    if ( dotname ) {
+		strcpy(dotname, disk);
+		strcat(dotname, path);
+		strcat(dotname, "\\lv.rc");
+
+		return dotname;
+	    }
+	}
+    }
+    return "lv.rc";
+}
+
+int
+os_mktemp(char *dest, const char *template)
+{
+    char *tmpdir = getenv("TEMP");
+
+#if USING_STDIO
+    if ( tmpdir )
+	sprintf(dest, "%s\\%s.%d", tmpdir, template, getpid());
+    else
+	sprintf(dest, "%s.%d", template, getpid());
+#else
+    dest[0] = 0;
+
+    if ( tmpdir ) {
+	strcat(dest, tmpdir);
+	strcat(dest, "\\");
+    }
+    strcat(dest, template);
+    numtoa(&dest[strlen(dest)], getpid());
+#endif
     return 1;
 }
 
-
-extern int LINES, COLS;
-
-/*static char spaces[1024];*/
 
 int
 os_cursor(visible)
@@ -227,7 +302,7 @@ int *y;
 
 
 int
-os_windowsize(x,y)
+os_screensize(x,y)
 int *x;
 int *y;
 {
@@ -271,28 +346,29 @@ os_gotoxy(y, x)
 
 /* set up the stdin descriptor for initcon()/fixcon()
  */
-static int
+int
 os_initialize()
 {
-    char *bigbuf = malloc(20480);
-
 #define NOPE INVALID_HANDLE_VALUE
 
-    obuf.buf = bigbuf;
-    obuf.size = 20480;
-    obuf.next = 0;
-    
-    if ( log == 0 ) {
-	log = fopen("wincall.log", "w+");
-	setvbuf(log, (char *)NULL, _IOLBF, 0);
-    }
-    
+#if USING_STDIO
+    static char iobuf[4096];
+#endif
+
     Erasechar = '\b';	/* ^H */
     Eraseline = 21;	/* ^U */
 
+#if USING_STDIO
     fflush(stdin); _setmode(fileno(stdin), _O_BINARY);
     fflush(stdout); _setmode(fileno(stdout), _O_BINARY);
     fflush(stderr); _setmode(fileno(stderr), _O_BINARY);
+
+    setvbuf(stdout, iobuf, _IOFBF, sizeof iobuf);
+#else
+    _setmode(0, _O_BINARY);
+    _setmode(1, _O_BINARY);
+    _setmode(2, _O_BINARY);
+#endif
     
     if ( !tty_stdin.set ) {
 
@@ -320,10 +396,14 @@ os_initialize()
 	logit("output mode=%016x", window.mode);
 	
 	window.set = 1;
-	/*memset(spaces, ' ', sizeof spaces);*/
     }
 
     return 0;
+}
+
+os_restore()
+{
+    return 1;
 }
 
 
@@ -353,7 +433,9 @@ reset_input()
 int
 getKey()
 {
-    zflush();
+#if USING_STDIO
+    fflush(stdout);
+#endif
     while ( 1 ) {
 	if ( tty_stdin.cur_ev >= tty_stdin.nr_ev ) {
 	    int rc = ReadConsoleInput(tty_stdin.fd, tty_stdin.events,
@@ -382,6 +464,7 @@ getKey()
     return EOF;
 }
 
+#if !HAVE_BASENAME
 /*
  * basename() returns the filename part of a pathname
  */
@@ -396,5 +479,6 @@ register char *s;
 	    return p+1;
     return s;
 } /* basename */
+#endif
 
 #endif

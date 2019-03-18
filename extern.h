@@ -281,4 +281,8 @@ extern void lowercase(char*);
 extern char* strdup(char*);
 #endif
 
+#if !HAVE_BASENAME
+extern char* basename(char*);
+#endif
+
 #endif /*EXTERN_D*/

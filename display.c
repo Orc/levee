@@ -22,7 +22,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <sys/ioctl.h>
 #include <unistd.h>
 
 #if HAVE_TERMCAP_H
@@ -106,8 +105,7 @@ char *s;
 /* write a character to our display
  */
 void 
-dputc(c)
-char c;
+dputc(char c)
 {
     char s[1];
     s[0] = c;

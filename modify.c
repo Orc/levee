@@ -68,7 +68,7 @@ int start, *newend;
     int siz, st;
     FILEDESC f;
     
-    if (yank.size+bufmax < SIZE && yank.size > 0) {
+    if (yank.size+bufmax < EDITSIZE && yank.size > 0) {
 	*newend = start + yank.size;
 	if (start < bufmax)
 	    moveright(&core[start], &core[start+yank.size], bufmax-start);
@@ -183,7 +183,7 @@ restart:
 	}
 	len = lastp-i;
 	dlen = makedest(dest, i, len, DSIZE);
-	if (dlen >= 0 && bufmax-(int)(len+dlen) < SIZE
+	if (dlen >= 0 && bufmax-(int)(len+dlen) < EDITSIZE
 		      && delete_to_undo(&undo, i, len)) {
 	    modified = TRUE;
 	    if (dlen > 0) {

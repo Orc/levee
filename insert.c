@@ -76,7 +76,7 @@ bool visual;
     }
 
     rsize = (bufmax-curr);		/* amount of stuff above curr */
-    endd = SIZE - rsize;		/* split the buffer */
+    endd = EDITSIZE - rsize;		/* split the buffer */
     if (rsize > 0)
 	moveright(&core[curr], &core[endd], rsize);
 

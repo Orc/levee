@@ -426,7 +426,7 @@ insertfile(FILE *f, int insert, int at, int *fsize)
 	rc=0;
 
     onright = (bufmax-at);
-    high = SIZE-onright;
+    high = EDITSIZE-onright;
 
     if ( insert && (onright > 0) )
 	 moveright(&core[at], &core[high], onright);

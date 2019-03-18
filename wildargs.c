@@ -23,11 +23,10 @@
 #include "levee.h"
 #include "extern.h"
 
-#if OS_UNIX
-# include <stdlib.h>
-#elif !OS_RMX
-# include <glob.h>
-#endif
+#if HAVE_GLOB_H
+
+#include <stdlib.h>
+#include <glob.h>
 
 
 int wilderr, wildcard;
@@ -107,3 +106,6 @@ char ***argvp;
     *argcp = 0;
     *argvp = 0L;
 }
+
+
+#endif

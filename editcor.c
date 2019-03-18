@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <fcntl.h>
     
 /* do some undoable modification */
 
@@ -151,7 +152,7 @@ bigreplace()
     
     tsiz = lend-curr;
     if (move_to_undo(&undo, curr, tsiz))
-	if (SIZE - bufmax > tsiz) {	/* enough room for temp copy? */
+	if (EDITSIZE - bufmax > tsiz) {	/* enough room for temp copy? */
 	    moveleft(&core[curr], &core[bufmax],lend-curr);
 	    if (line(core, curr, lend, &len) != ESC)
 		error();
@@ -179,26 +180,27 @@ bool before;
 bool
 execute(start, end)
 {
-    int tf;
+    FILEDESC tf;
     FILE *f;
-    char scratch[20];
+    char scratch[200];
     bool ret = FALSE;
     int size;
     pid_t child;
 
-    strcpy(scratch, "/tmp/lv.XXXXXX");
     
     clrprompt();
-    printch('!');
-    if ( !lvgetline(instring) )
-	return FALSE;
 
-    if ( (tf = mkstemp(scratch)) < 0 ) {
+    os_mktemp(scratch, "lv");
+    if ( (tf = OPEN_NEW(scratch)) == NOWAY ) {
 	prints("[tempfile error]");
 	return FALSE;
     }
+    
+    printch('!');
+    unless ( lvgetline(instring) )
+	return FALSE;
 
-    if ( (size = write(tf, core+start, end-start)) == (end-start) ) {
+    if ( (size = WRITE_TEXT(tf, core+start, end-start)) == (end-start) ) {
 	if ( (f=cmdopen(instring, scratch, &child)) ) {
 	    if ( deletion(start, end) && (insertfile(f, 1, start, &size) > 0) )
 		ret = TRUE;
@@ -207,8 +209,10 @@ execute(start, end)
 	else
 	    error();
     }
+    else
+	prints("[tempfile error]");
 	
-    close(tf);
+    CLOSE_FILE(tf);
     os_unlink(scratch);
     
     return ret;

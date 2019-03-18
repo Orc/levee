@@ -214,7 +214,7 @@ int *curp;
 {
     int lump;
     
-    if (popw(&undo,curp) && popw(&undo,&lump) && (bufmax+lump < SIZE)) {
+    if (popw(&undo,curp) && popw(&undo,&lump) && (bufmax+lump < EDITSIZE)) {
 	insert_to_undo(save_undo, *curp, lump);
 	moveright(&core[*curp], &core[*curp+lump], bufmax-*curp);
 	if (popmem(&undo, *curp, lump))
@@ -245,7 +245,7 @@ int *topp;
 	    if ( uread == NOWAY )
 		return -1;
 	}
-	*topp = SIZE+1;
+	*topp = EDITSIZE+1;
 	curp = -MAGICNUMBER;
 	save_undo.blockp = save_undo.ptr = 0;
 	ok = TRUE;

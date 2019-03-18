@@ -234,8 +234,8 @@ extern int EOL;
 		/* various sizes */
 #define INSSIZE	 ((int)80)		/* Insert string size */
 #define FSIZE	 ((int)39)		/* File string size */
-#ifndef SIZE
-# define SIZE	 ((int)32760)		/* Edit buffer size */
+#ifndef EDITSIZE
+# define EDITSIZE ((int)32760)		/* Edit buffer size */
 #endif
 
 #define SBUFSIZE  ((int)4096)		/* Incore yank buffer size */

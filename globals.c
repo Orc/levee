@@ -79,7 +79,7 @@ FILEDESC uread,		/* reading from the undo stack */
 			    /* B U F F E R S */
 char rcb[256];		/* last modification command */
 char *rcp;		/* this points at the end of the redo */
-char core[SIZE+1];	/* data space */
+char core[EDITSIZE+1];	/* data space */
 
 struct ybuf yank;	/* last deleted/yanked text */
 
