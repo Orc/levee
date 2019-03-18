@@ -55,12 +55,7 @@ dgotoxy(y,x)
 }
 
 
-#if USE_TERMCAP
-#  if USING_STDIO
-
-#define tputs_putc	putchar
-
-#  else
+#if USE_TPUTS && !USING_STDIO
 
 /* write a single character to output w/o the assistance
  * of stdio.
@@ -74,7 +69,6 @@ char c;
     return write(1, s, 1) == 1 ? c : EOF;
 }
 
-#  endif
 #endif
 
 
@@ -87,10 +81,10 @@ char *s;
 
     unless ( os_dwrite(s, len) ) {
 	logit("dwrite <%.*s>(%d)", len, s, len);
-#if 0 /*USING_TERMCAP*/
-	tputs(s, len, tputs_putc);
-#elif USING_STDIO
+#if USING_STDIO
 	fwrite(s, len, 1, stdout);
+#elif USING_TPUTS
+	tputs(s, len, tputs_putc);
 #else
 	write(1, s, len);
 #endif
