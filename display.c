@@ -176,8 +176,12 @@ d_cursor(visible)
 void 
 d_highlight(yes_or_no)
 {
-    unless ( os_highlight(yes_or_no) )
-	dputc( yes_or_no ? '[' : ']' );
+    unless ( os_highlight(yes_or_no) ) {
+	if ( SO && SE )
+	    dputs( yes_or_no ? SO : SE );
+	else
+	    dputc( yes_or_no ? '[' : ']' );
+    }
 }
 
 
@@ -250,6 +254,9 @@ dinitialize()
 	
     CURon = tgetstr("ve", &bufp);
     CURoff = tgetstr("vi", &bufp);
+
+    SO = tgetstr("so", &bufp);
+    SE = tgetstr("se", &bufp);
 
     dofscroll = LINES/2;
 

@@ -104,7 +104,9 @@ extern char *TERMNAME,
 	    *CM,
 	    *UpS,
 	    *CURoff,
-	    *CURon;
+	    *CURon,
+	    *SO,
+	    *SE;
 
 extern
 char Erasechar,
@@ -254,7 +256,6 @@ extern int os_cursor(int);
 extern int os_highlight(int);
 extern int os_dwrite(char *, int);
 extern int os_gotoxy(int,int);
-extern int os_highlight(int);
 extern int os_initialize();
 extern int os_newline();
 extern int os_openline();

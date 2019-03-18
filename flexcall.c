@@ -142,16 +142,18 @@ reset_input()
 os_initialize()
 {
     TERMNAME = "Flexos console";
-    HO  = "\033H";
-    UP  = "\033A";
-    CE  = "\033K";
-    CL  = "\033E";
-    OL  = "\033L";
-    BELL= "\007";
-    CM  = "\033Y??";
-    UpS = NULL;		/* Reverse scrolling is painfully slow */
+    HO    = "\033H";
+    UP    = "\033A";
+    CE    = "\033K";
+    CL    = "\033E";
+    OL    = "\033L";
+    BELL  = "\007";
+    CM    = "\033Y??";
     CURoff= "\033f";
     CURon = "\033e";
+    SO    = "\033p";
+    SE    = "\033q";
+    
 
     CA = 1;
     canUPSCROLL=0;

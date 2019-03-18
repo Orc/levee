@@ -88,16 +88,18 @@ char *s;
 os_initialize()
 {
     TERMNAME = "Atari ST";
-    HO  = "\033H",
-    UP  = "\033A",
-    CE  = "\033K",
-    CL  = "\033E",
-    OL  = "\033L",
-    BELL= "\007",
-    CM  = "\033Y??",
-    UpS = "\033I",
+    HO    = "\033H",
+    UP    = "\033A",
+    CE    = "\033K",
+    CL    = "\033E",
+    OL    = "\033L",
+    BELL  = "\007",
+    CM    = "\033Y??",
+    UpS   = "\033I",
     CURoff= "\033f",
     CURon = "\033e";
+    SO    = "\033p";
+    SE    = "\033q";
 
     canUPSCROLL = TRUE;
     canOL = TRUE;

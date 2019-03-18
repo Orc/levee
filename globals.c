@@ -106,7 +106,9 @@ char *TERMNAME,		/* will be set in termcap handling */
      *CM,
      *UpS,
      *CURoff,
-     *CURon;
+     *CURon,
+     *SO,
+     *SE;
 
 char Erasechar,				/* our erase character */
      Eraseline;				/* and line-kill character */
