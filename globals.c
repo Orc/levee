@@ -108,8 +108,8 @@ char *TERMNAME,		/* will be set in termcap handling */
      *CURoff,
      *CURon;
 
-char Erasechar = ERASE,			/* our erase character */
-     eraseline = 'X'-'@';		/* and line-kill character */
+char Erasechar,				/* our erase character */
+     Eraseline;				/* and line-kill character */
 
 char fismod[] = "File is modified",	/* File is modified message */
      fisro[] = "File is readonly";	/* when you can't write the file */

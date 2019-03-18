@@ -17,15 +17,68 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR
  * PURPOSE.
  */
+
 /*
  * iRMX interface for levee (Intel C)
  */
-#include "levee.h"
+
+#include "config.h"
+
 #if OS_RMX
 
-extern char FkL, CurRT, CurLT, CurUP, CurDN;
+#include <:inc:stdio.h>
+#include <:inc:udi.h>
 
+#include "levee.h"
+#include "extern.h"
+
+extern alien token rq$c$create$command$connection(),
+		   rq$c$delete$command$connection(),
+		   rq$c$send$command(),
+		   rq$get$task$tokens();	/* for unique files */
 extern alien rq$s$write$move();
+
+
+FILESPEC
+OPEN_OLD(char *file)
+{
+    int fd = open(file, /*open mode*/0);
+
+    return (fd == -1) ? NOWAY : (FILESPEC)fd;
+}
+
+FILESPEC
+OPEN_NEW(char *file)
+{
+    int fd = creat(file,/*permissions*/0);
+
+    return (fd == -1) ? NOWAY : (FILESPEC)fd;
+}
+
+int
+CLOSE_FILE(FILESPEC f)
+{
+    return close((int)f);
+}
+
+long
+SEEK_POSITION(FILESPEC f, long offset, int size)
+{
+    return lseek((int)f, offset, mode);
+}
+
+int
+READ_TEXT(FILESPEC f, char *buffer, int size)
+{
+    return read((int)f,buffer, size);
+}
+    
+int
+WRITE_TEXT(FILESPEC f, char *buffer, int size)
+{
+    return write((int)f,buffer,size);
+}
+
 
 os_dwrite(s,len)
 char *s;
@@ -37,8 +90,53 @@ char *s;
 }
 
 
-os_tty_setup()
+os_mktemp(file,template)
+char *file;
+char *template;
 {
+    token dummy;
+
+    strcpy(s, ":WORK:");
+    strcat(s, template);
+    numtoa(&s[strlen(s)], rq$get$task$tokens(0,&dummy));
+
+    return 1;
+}
+
+
+os_initialize()
+{
+    Erasechar = 127;	/* ^? */
+    Eraseline = 21;	/* ^U */
+    
+    return 1;
+}
+
+
+os_restore()
+{
+    return 1;
+}
+
+
+os_set_input()
+{
+    unsigned dummy;
+	    
+    dq$special(1,&fileno(stdin),&dummy);
+		
+    /* turn off control character assignments */
+    strput("\033]T:C15=0,C18=0,C20=0,C21=0,C23=0\033\\");
+			
+    return 1;
+}
+
+
+os_reset_input()
+{
+    strputs("\033]T:C15=3,C18=13,C20=5,C21=6,C23=4\033\\\n");
+    dq$special(2,&fileno(stdin),&curr);
+
     return 1;
 }
 
@@ -73,23 +171,23 @@ getKey()
     return c;
 }
 
-extern alien token rq$c$create$command$connection(),
-		   rq$c$delete$command$connection(),
-		   rq$c$send$command();
-
 int
-subshell(s)
+os_subshell(s)
 /* system: do a shell escape */
 char *s;
 {
     char *string();
     unsigned cp, error, status, dummy;
 
+    os_reset_input();
+    
     cp = rq$c$create$command$connection(fileno(stdin),fileno(stdout),0,&error);
     if (!error) {
 	rq$c$send$command(cp,string(s),&status,&error);
 	rq$c$delete$command$connection(cp,&dummy);
     }
+    
+    os_set_input();
     return error?(error|0x8000):(status&0x7fff);
 }
 #endif

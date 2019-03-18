@@ -114,14 +114,6 @@ extern int EOL;
 #define DLE	16	/* Space compression lead-in */
 #define ESC	27	/* Escape */
 
-/* hardwired line kill and erase character for non-unix machines */
-#define DEL	21	/* ^U */
-#if RMX
-#define ERASE	127
-#else
-#define ERASE	8	/* ^H */
-#endif
-
 #define TAB	9
     
 	/* variable types */

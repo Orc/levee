@@ -108,7 +108,7 @@ extern char *TERMNAME,
 
 extern
 char Erasechar,
-     eraseline;
+     Eraseline;
 
 extern
 char codeversion[],		/* Editor version */

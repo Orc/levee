@@ -38,8 +38,11 @@ char *s;
 }
 
 
-os_tty_setup()
+os_initialize()
 {
+    Erasechar = '\b';	/* ^H */
+    Eraseline = 21;	/* ^U */
+    
     return 1;
 }
 
@@ -85,6 +88,7 @@ reset_input()
 } /* allowintr */
 
 
+#if !HAVE_BASENAME
 /*
  * basename() returns the filename part of a pathname
  */
@@ -100,13 +104,14 @@ register char *s;
     return s;
 } /* basename */
 
+#endif
 
 /*
  * glob() expands a wildcard, via calls to DosFindFirst/Next()
  * and pathname retention.
  */
 char *
-glob(path, dta)
+os_glob(path, dta)
 char *path;
 struct glob_t *dta;
 {

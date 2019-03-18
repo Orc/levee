@@ -209,34 +209,6 @@ register unsigned char c;
 } /* cclass */
 #endif
 
-#if OS_ATARI
-/*
- * wildly machine-dependent code to make a beep
- */
-#include <atari\osbind.h>
-
-static char sound[] = {
-	0xA8,0x01,0xA9,0x01,0xAA,0x01,0x00,
-	0xF8,0x10,0x10,0x10,0x00,0x20,0x03
-};
-
-#define SADDR	0xFF8800L
-
-typedef char srdef[4];
-
-static srdef *SOUND = (srdef *)SADDR;
-
-static
-beeper()
-{
-    register i;
-    for (i=0; i<sizeof(sound); i++) {
-	(*SOUND)[0] = i;
-	(*SOUND)[2] = sound[i];
-    }
-} /* beeper */
-#endif /*OS_ATARI*/
-
 
 VOID PROC
 error()
@@ -374,12 +346,12 @@ int start, endd, *size;
 	    while (wc(s[ip-1]) && ip > start)
 		back_up(s[--ip]);
 	}
-	else if (c == eraseline) {
+	else if (c == Eraseline) {
 	    ip = start;
 	    tabptr = 0;
 	    dgotoxy(-1,ixp=col0);
 	}
-	else if (c==Erasechar) {
+	else if (c == Erasechar) {
 	    if (ip>start)
 		back_up(s[--ip]);
 	    else {

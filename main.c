@@ -23,6 +23,13 @@
 
 #include <stdlib.h>
 
+static void
+copyright()
+{
+     dputs(".  Copyright (c) 1983-2019 by David Parsons");
+}
+
+
 VOID PROC
 initialize(count, args)
 int count;
@@ -34,19 +41,25 @@ char **args;
     char *p;
 
     dinitialize();
+    set_input();
     dscreensize(&COLS, &LINES);
     dofscroll = LINES/2;
 
-    version(); dputs(".  Copyright (c) 1983-2007 by David Parsons");
-
-    if (!CA) {
+    if (CA) {
+	lineonly = FALSE;
+#if 0
+	dgotoxy(LINES-1, 0);
+	version(); copyright();
+#endif
+    }
+    else {
 	lineonly = TRUE;
         dgotoxy(0, 0);
 	dclear_to_eol();
+	version(); copyright();
 	prints("(line mode)");
     }
-    else
-	lineonly = FALSE;
+
 
     /* initialize macro table */
     for (i = 0;i < MAXMACROS;i++)
@@ -164,7 +177,6 @@ int argc;
 char **argv;
 {
     initialize(argc, argv);
-    set_input();
 
     diddled = TRUE;	/* force screen redraw when we enter editcore() */
     if (lineonly)

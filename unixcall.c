@@ -204,7 +204,7 @@ os_initialize()
     tcgetattr(0, &old);	/* get editing keys */
 
     Erasechar = old.c_cc[VERASE];
-    eraseline = old.c_cc[VKILL];
+    Eraseline = old.c_cc[VKILL];
 
     return 0;
 }
@@ -234,11 +234,19 @@ os_unlink(char *file)
 int
 os_mktemp(char *dest, const char *template)
 {
-    /* assert sizeof (dest) > sizeof (template)+sizeof("XXXXXX") */
-    sprintf(dest, "%sXXXXXX", template);
+    /* assert |dest| > |/tmp/|+|template|+|XXXXXX| */
+#if USING_STDIO
+    sprintf(dest, "/tmp/%sXXXXXX", template);
     strcpy(dest, template);
 
     return mktemp(dest) != 0;
+#else
+    strcpy(dest, "/tmp");
+    strcat(dest, template);
+    numtoa(&dest[strlen(dest)], getpid());
+    
+    return 1;
+#endif
 }
 
 

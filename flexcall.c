@@ -89,18 +89,28 @@ os_rename(char *a,char *b)
     return s_rename(0, a, b);
 }
 
+
+int
+os_mktemp(char *dest, char *template)
+{
+#if USING_STDIO
+    sprintf(dest, "%s.XXXXXX", template);
+
+    return mktemp(dest) != 0;
+#else
+    strcpy(dest, template);
+    numtoa(&dest[strlen(dest)], getpid());
+
+    return 1;
+#endif
+}
+
 /* **** OS-SPECIFIC DISPLAY I/O **** */
 
 os_dwrite(s, len)
 char *s;
 {
     s_write(0x01, 1L, s, len, 0L);
-    return 1;
-}
-
-
-os_tty_setup()
-{
     return 1;
 }
 
@@ -129,7 +139,7 @@ reset_input()
 }
 
 
-os_d_setup()
+os_initialize()
 {
     TERMNAME = "Flexos console";
     HO  = "\033H";
@@ -146,6 +156,9 @@ os_d_setup()
     CA = 1;
     canUPSCROLL=0;
     canOL=1;
+
+    Erasechar = '\b';	/* ^H */
+    Eraseline = 21;	/* ^U */
 
     return 1;
 }
@@ -182,6 +195,7 @@ getKey()
 }
 
 
+#if !HAVE_BASENAME
 char *
 basename(s)
 char *s;
@@ -194,7 +208,7 @@ char *s;
 
     return s;
 }
-
+#endif
 
 #endif
 

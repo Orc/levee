@@ -69,6 +69,34 @@ WRITE_TEXT(FILEDESC f, void *buf, int size)
     return write((int)f, buf, size);
 }
 
+
+os_mktemp(char *dest, char *template)
+{
+    char *p;
+    char lastchar;
+    
+    if (p=getenv("TMP")) {
+	strcpy(dest, p);
+
+	lastchar = dest[strlen(dest)-1];
+
+	if ( lastchar != '/' && lastchar != '\\' && lastchar != ':' )
+	    strcat(dest, "/");
+    }
+    else
+	s[0] = 0;
+#if USING_STDIO
+    sprintf(dest+strlen(dest), "%s.XXXXXX", template);
+
+    return mktemp(dest) != 0;
+#else
+    strcat(s, template);
+    numtoa(dest+strlen(dest), getpid());
+
+    return 0;
+#endif
+}
+
 PROC
 os_write(s,len)
 char *s;
@@ -100,12 +128,16 @@ getKey()
 }
 
 
+void _cdecl _interrupt _far ignore_ctrlc()
+{
+    count=0;
+}
+
 /* don't allow interruptions to happen
  */
 PROC
-os_tty_setup()
+os_initialize()
 {
-    extern void _cdecl _interrupt _far ignore_ctrlc();
     _dos_setvect(0x23, ignore_ctrlc);
 
     /* no termcap but assume ansi.sys is loaded, so
@@ -125,9 +157,12 @@ os_tty_setup()
     CA = TRUE;
     canUPSCROLL = FALSE;
     canOL = FALSE;
+
+    Erasechar = '\b';	/* ^H */
+    Eraseline = 21;	/* ^U */
     
     return 1;
-} /* os_tty_setup */
+} /* os_initialize */
 
 
 /* have ^C do what it usually does
@@ -146,7 +181,7 @@ os_restore()
  * and pathname retention.
  */
 char *
-glob(path, dta)
+os_glob(path, dta)
 char *path;
 struct glob_t *dta;
 {
@@ -231,7 +266,6 @@ struct glob_t *dta;
     }
     return (char*)0;
 } /* glob */
-#endif /*OS_DOS*/
 
 
 #if !HAVE_BASENAME
@@ -251,3 +285,4 @@ register char *s;
 } /* basename */
 #endif
 
+#endif /*OS_DOS*/
