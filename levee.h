@@ -288,4 +288,33 @@ struct variable {	/* Settable Variable Record */
     int v_flags;		/* special attributes... */
     union optionrec *u;		/* pointer to it */
 };
+
+
+/* data structures for wildcard matching
+ */
+#if HAVE_GLOB_H
+#include <glob.h>
+#else
+
+typedef struct _glob_t {
+    size_t gl_pathc;
+    int gl_matchc;
+    size_t gl_offset;
+    int gl_flags;
+    char **gl_pathv;
+} glob_t;
+
+/* glob_t flags, from the manpage for libc glob()
+ */
+#define GLOB_APPEND	0x01	/* add to the existing pile of files */
+#define GLOB_DOOFFS	0x02	/* put gl_offset empty slots in gl_pathv */
+#define GLOB_ERR	0x04	/* stop when an error happens */
+#define GLOB_MARK	0x08	/* add a trailing / to matched filenames */
+#define GLOB_NOCHECK	0x10	/* treat unmatched patterns as filenames */
+#define GLOB_NOESCAPE	0x20	/* don't allow wildcard escapes */
+#define GLOB_NOSORT	0x40	/* don't sort the matched file list */
+#define GLOB_TILDE	0x80	/* expand ~user & ~ */
+
+#endif
+
 #endif /*LEVEE_D*/

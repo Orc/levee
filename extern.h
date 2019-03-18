@@ -285,4 +285,7 @@ extern char* strdup(char*);
 extern char* basename(char*);
 #endif
 
+extern int os_glob(const char *, int, int(*) (const char *, int), glob_t *);
+extern void os_globfree(glob_t *);
+
 #endif /*EXTERN_D*/
