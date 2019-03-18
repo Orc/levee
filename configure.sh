@@ -9,9 +9,14 @@ ac_help="
 --use-termcap		Link with termcap instead of curses, if possible
 --partial-install	Don\'t install the lv, lv(1) name links
 --size=NNN		Use a NNN-byte edit buffer
---dos			compile for ms-dos or microsoft windows
+--stdio			Prefer stdio for i/o
+--tputs			Use tputs() to slow down tty output (not with --stdio)
+--logging		Log tty output to levee.log
+--windows		compile for windows 8+
+--dos			compile for ms-dos or old versions of microsoft windows
 --tos			compile for the Atari ST
 --rmx			compile for RMX
+--os2			compiler for OS/2
 --flexos		compile for FlexOS"
 
 LOCAL_AC_OPTIONS='
@@ -22,7 +27,11 @@ Z--dos)	    ac_os=DOS;;
 Z--tos)     ac_os=ATARI=1;;
 Z--flexos)  ac_os=FLEXOS=1;;
 Z--rmx)	    ac_os=RMX;;
+Z--win10)   ac_os=WINDOWS;;
 Z--size=*)  SIZE=$(echo Z$1 | sed -e 's/^Z--size=//') ;;
+Z--stdio)   USING_STDIO=1;;
+Z--tputs)   USING_TPUTS=1;;
+Z--logging) USING_LOGGING=1;;
 *)          ac_error=1;;
 esac;shift'
 
@@ -37,29 +46,48 @@ AC_INIT $TARGET
 case X"${SIZE}" in
 X[0-9][0-9]*)	 ;;
 X[0-9][0-9]*[Ll]);;
-X)               ;;
+X)		 ;;
 X*)		 AC_FAIL "--size=$SIZE is not a valid number" ;;
 esac
 
 AC_PROG_CC
 unset _MK_LIBRARIAN
 
+if [ -n "$USING_LOGGING" ]; then
+    AC_SUB LOGGER	logit.o
+    AC_DEFINE LOGGING	1
+else
+    AC_SUB LOGGER	''
+fi
+
+test -n "$USING_STDIO" && AC_DEFINE USING_STDIO 1
+test -n "$USING_TPUTS" && AC_DEFINE USING_TPUTS 1
+
 if [ "$OS_DOS" ]; then
     AC_DEFINE	SIZE ${SIZE:-32000}
-    AC_DEFINE	PROC	_fastcall
-    AC_DEFINE	TTY_ANSI	1
-    AC_CHECK_FUNCS	basename
+    AC_DEFINE	OS_DOS	1
+    AC_SUB	MACHDEP	dos
+elif [ "$OS_OS2" ]; then
+    AC_DEFINE	SIZE ${SIZE:-32000}
+    AC_DEFINE	OS_OS2 1
+    AC_SUB	MACHDEP os2
 elif [ "$OS_ATARI" ]; then
     AC_DEFINE	SIZE ${SIZE:-32000}
-    AC_DEFINE	TTY_VT52	1
+    AC_DEFINE	OS_ATARI	1
+    AC_SUB	MACHDEP	gem
     AC_DEFINE	HAVE_BLKFILL	1
-    AC_CHECK_FUNCS	basename
 elif [ "$OS_FLEXOS" ]; then
     AC_DEFINE	SIZE ${SIZE:-256000}
-    AC_CHECK_FUNCS	basename
+    AC_DEFINE	OS_FLEXOS	1
+    AC_SUB	MACHDEP	flex
+elif [ "$OS_WINDOWS" ]; then
+    AC_DEFINE   SIZE ${SIZE:-256000}
+    AC_DEFINE	OS_WINDOWS	1
+    AC_SUB	MACHDEP	win
 else
     AC_DEFINE	SIZE ${SIZE:-256000}
     AC_DEFINE	OS_UNIX	1
+    AC_SUB	MACHDEP	unix
 
     if AC_CHECK_HEADERS string.h; then
 	# Assume a mainly ANSI-compliant world, where the
@@ -74,10 +102,6 @@ else
     fi
 
     # for basename
-    if AC_CHECK_FUNCS basename; then
-	AC_CHECK_HEADERS libgen.h
-    fi
-
     if AC_CHECK_HEADERS signal.h; then
 	# Assume a mainly sane world where the existance
 	# of signal.h means that signal() exists
@@ -94,10 +118,6 @@ else
 
     if AC_LIBRARY tgetent $LIBORDER; then
 	AC_DEFINE USE_TERMCAP	1
-	# our -libtermcap might be (n)curses in disguise.  If so,
-	# it might have a colliding mvcur() that we need to define
-	# ourselves out from.
-	AC_QUIET AC_CHECK_FUNCS mvcur && AC_DEFINE mvcur __mvcur
     else
 	# have to use a local termcap
 	AC_DEFINE TERMCAP_EMULATION	1
@@ -106,6 +126,10 @@ else
 
     AC_CHECK_HEADERS termios.h && AC_CHECK_FUNCS tcgetattr
 fi
+
+AC_CHECK_FUNCS basename && AC_CHECK_HEADERS libgen.h
+
+AC_CHECK_FUNCS glob && AC_CHECK_HEADERS glob.h
 
 if AC_PROG_LN_S && test -z "$missing_lv"; then
     AC_SUB NOMK ''

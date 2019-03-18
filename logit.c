@@ -26,5 +26,4 @@ logit(char *fmt, ...)
 	fputc('\n', logfile);
 	free(line);
     }
-    return 0;
 }
