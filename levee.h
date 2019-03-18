@@ -38,7 +38,7 @@
 
 
 #if LOGGING
-extern void login(char *, ...);
+extern void logit(char *, ...);
 #else
 #define logit(...)
 #endif
