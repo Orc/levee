@@ -21,6 +21,7 @@
  * Gemdos (Atari ST) bindings for levee (Alcyon/Sozobon C)
  */
 #include "levee.h"
+#include "externs.h"
 
 #if OS_ATARI
 #include <stdio.h>

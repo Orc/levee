@@ -21,6 +21,7 @@
  * dos interface for levee (Microsoft C)
  */
 #include "levee.h"
+#include "externs.h"
 
 #if OS_DOS
 #include <glob.h>

@@ -21,6 +21,7 @@
  * flexos interface for levee (Metaware C)
  */
 #include "levee.h"
+#include "externs.h"
 
 #if OS_FLEXOS
 #include <stdio.h>

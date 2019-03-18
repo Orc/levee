@@ -21,10 +21,10 @@
  * Unix interface for levee
  */
 #include "levee.h"
+#include "extern.h"
 
 #ifdef OS_UNIX
 
-#include "extern.h"
 #include <stdio.h>
 #include <fcntl.h>
 #include <termios.h>

@@ -22,15 +22,13 @@
  * iRMX interface for levee (Intel C)
  */
 
-#include "config.h"
+#include "levee.h"
+#include "extern.h"
 
 #if OS_RMX
 
 #include <:inc:stdio.h>
 #include <:inc:udi.h>
-
-#include "levee.h"
-#include "extern.h"
 
 extern alien token rq$c$create$command$connection(),
 		   rq$c$delete$command$connection(),
