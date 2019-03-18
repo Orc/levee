@@ -19,7 +19,7 @@ version.c: mkversion VERSION
 	./mkversion
 
 clean:
-	rm -f *.o lev
+	rm -f *.o lev mkversion version.c
 
 distclean spotless: clean
 	@DISTCLEAN@ @GENERATED_FILES@ @CONFIGURE_FILES@

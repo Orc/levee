@@ -17,12 +17,16 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR
  * PURPOSE.
  */
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <fcntl.h>
+#if HAVE_PATHS_H
 #include <paths.h>
+#endif
 
 FILE *
 cmdopen(char *cmdline, char *input, pid_t *child)
