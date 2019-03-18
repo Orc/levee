@@ -42,9 +42,6 @@ char startcmd[80] = "";	/* initial command after read */
 char **argv;		/* Arguments */
 int  argc=0,		/* # arguments */
      pc=0;		/* Index into arguments */
-#if 0
-struct stat thisfile;	/* status on current file, for writeout... */
-#endif
 
 		/* M A C R O   S T U F F */
 struct macrecord mbuffer[MAXMACROS];
