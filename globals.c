@@ -186,9 +186,6 @@ struct variable vars[]={
     {"magic",	  "",	VBOOL,	0,		(void*)&magic      },
     {"ignorecase","ic",	VBOOL,	0,		(void*)&ignorecase },
     {"bell",      "",	VBOOL,	0,		(void*)&bell       },
-#if OS_ATARI
-    {"mapslash",  "ms", VBOOL,	0,		(void*)&mapslash   },
-#endif
     {NULL}
 };
 
