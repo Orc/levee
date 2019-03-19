@@ -88,15 +88,25 @@ char *s;
 }
 
 
-os_mktemp(file,template)
+os_mktemp(file,size,template)
 char *file;
 char *template;
 {
     token dummy;
+    static char Xes[] = ":WORK:";
 
-    strcpy(s, ":WORK:");
+    unless (size > sizeof(Xes) + strlen(template) + 20) {
+	errno = E2BIG;
+	return 0;
+    }
+
+#if USING_STDIO
+    sprintf(s, "%s%s%d", Xes, template, rq$get$task$tokens(0,&dummy));
+#else
+    strcpy(s, Xes);
     strcat(s, template);
     numtoa(&s[strlen(s)], rq$get$task$tokens(0,&dummy));
+#endif
 
     return 1;
 }
@@ -177,15 +187,27 @@ char *s;
     char *string();
     unsigned cp, error, status, dummy;
 
-    os_reset_input();
-    
     cp = rq$c$create$command$connection(fileno(stdin),fileno(stdout),0,&error);
     if (!error) {
 	rq$c$send$command(cp,string(s),&status,&error);
 	rq$c$delete$command$connection(cp,&dummy);
     }
     
-    os_set_input();
     return error?(error|0x8000):(status&0x7fff);
 }
+
+
+int
+os_cclass(c)
+register unsigned char c;
+{
+    if (c == '\t' && !list)
+	return 2;
+    if (c == '' || c < ' ')
+	return 1;
+    if (c & 0x80)
+	return 3;
+    return 0;
+}
+
 #endif

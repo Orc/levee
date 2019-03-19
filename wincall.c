@@ -211,9 +211,16 @@ dotfile()
 }
 
 int
-os_mktemp(char *dest, const char *template)
+os_mktemp(char *dest, int size, const char *template)
 {
     char *tmpdir = getenv("TEMP");
+    int required = 12 + (tmpdir ? strlen(tmpdir) : 0) + strlen(template);
+
+    unless (size > required) {
+	errno = E2BIG;
+	return 0;
+    }
+
 
 #if USING_STDIO
     if ( tmpdir )
@@ -401,11 +408,24 @@ os_initialize()
     return 0;
 }
 
+    
 os_restore()
 {
     return 1;
 }
 
+
+os_cclass(c)
+register unsigned char c;
+{
+    if (c == '\t' && !list)
+	return 2;
+    if (c == '' || c < ' ')
+	return 1;
+    if (c & 0x80)
+	return 3;
+    return 0;
+}
 
 void
 set_input()
@@ -449,7 +469,7 @@ getKey()
 
 	while ( tty_stdin.cur_ev < tty_stdin.nr_ev ) {
 	    int idx = tty_stdin.cur_ev++;
-	    
+
 	    if ( tty_stdin.events[idx].EventType == KEY_EVENT) {
 		KEY_EVENT_RECORD *key;
 		key = &tty_stdin.events[idx].Event.KeyEvent;
@@ -473,7 +493,7 @@ basename(s)
 register char *s;
 {
     register char *p;
-    
+
     for (p = s+strlen(s); --p > s; )
 	if (*p == '/' || *p == '\\' || *p == ':')
 	    return p+1;
