@@ -186,31 +186,34 @@ execute(start, end)
     bool ret = FALSE;
     int size;
     pid_t child;
+    static char tferror[] = "[tempfile error]";
 
-    
-    clrprompt();
-
-    os_mktemp(scratch, "lv");
-    if ( (tf = OPEN_NEW(scratch)) == NOWAY ) {
-	prints("[tempfile error]");
+    unless (os_mktemp(scratch, sizeof scratch, "lv")) {
+	errmsg(tferror);
 	return FALSE;
     }
     
+    if ( (tf = OPEN_NEW(scratch)) == NOWAY ) {
+	prints(tferror);
+	return FALSE;
+    }
+    
+    clrprompt();
     printch('!');
     unless ( lvgetline(instring) )
 	return FALSE;
 
     if ( (size = WRITE_TEXT(tf, core+start, end-start)) == (end-start) ) {
-	if ( (f=cmdopen(instring, scratch, &child)) ) {
+	if ( (f=os_cmdopen(instring, scratch, &child)) ) {
 	    if ( deletion(start, end) && (insertfile(f, 1, start, &size) > 0) )
 		ret = TRUE;
-	    cmdclose(f, child);
+	    os_cmdclose(f, child);
 	}
 	else
 	    error();
     }
     else
-	prints("[tempfile error]");
+	prints(tferror);
 	
     CLOSE_FILE(tf);
     os_unlink(scratch);
