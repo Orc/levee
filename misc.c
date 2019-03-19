@@ -21,6 +21,7 @@
 #include "extern.h"
 #include <stdlib.h>
 #include <ctype.h>
+#include <errno.h>
 
 bool
 lvgetline(str)
@@ -478,6 +479,37 @@ char *s;
 	    *s += 32;
 	s++;
     }
+}
+
+
+/*
+ * return a tempfile name in malloc()ed memory
+ */
+char *
+lvtempfile(char *template)
+{
+    int length=40;
+    char *file = malloc(length);
+    char *p;
+
+    while (file) {
+       if ( os_mktemp(file, length, template) )
+           return file;
+
+       unless (errno == E2BIG) {
+           free(file);
+           return 0;
+       }
+
+       length *= 2;
+       if (p = realloc(file, length))
+           file = p;
+       else {
+           free(file);
+           return 0;
+       }
+    }
+    return 0;
 }
 
 

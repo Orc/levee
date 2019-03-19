@@ -291,7 +291,7 @@ extern int os_cclass(char c);
 
 extern int Max(int,int);
 extern int Min(int,int);
-extern char *tempfile(char*);
+extern char *lvtempfile(char*);
 
 extern FILE* expandfopen(char *file, char *mode);
 

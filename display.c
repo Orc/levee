@@ -358,34 +358,28 @@ register char *out;
 register unsigned c;
 {
     static char hexdig[] = "0123456789ABCDEF";
+    switch (os_cclass(c)) {
+    case 1:    /* printable */
+           out[0] = c;
+           return 1;
+    
+    case 2:    /* tab */
+           {   register int i;
+               int size;
 
-    if (c >= ' ' && c < '') {
-    	out[0] = c;
-    	return 1;
-    }
-    else if (c == '\t' && !list) {
-	register int i;
-	int size;
-
-	for (i = size = tabsize - (curpos.x % tabsize);i > 0;)
-	    out[--i] = ' ';
-	return size;
-    }
-    else if (c < 128) {
-    	out[0] = '^';
-    	out[1] = c^64;
-    	return 2;
-    }
-    else {
-#if OS_DOS
-	out[0] = c;
-	return 1;
-#else
-	out[0] = '\\';
-	out[1] = hexdig[(c>>4)&017];
-	out[2] = hexdig[c&017];
-	return 3;
-#endif
+               for (i = size = tabsize - (curpos.x % tabsize);i > 0;)
+                   out[--i] = ' ';
+               return size;
+           }
+    case 3:    /* control character, represented by ^(c^64) */
+           out[0] = '^';
+           out[1] = c^64;
+           return 2;
+    default:
+           out[0] = '\\';
+           out[1] = hexdig[(c>>4)&017];
+           out[2] = hexdig[c&017];
+           return 3;
     }
 }
 
