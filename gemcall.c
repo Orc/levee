@@ -132,13 +132,21 @@ os_cursor(visible)
 }
 
 
-os_mktemp(dest, template)
+os_mktemp(dest, size template)
 char *dest;
 char *template;
 {
     char *p;
+    static char Xes[] = ".XXXXXX";
+    int required = sizeof(Xes) + strlen(template) + 1;
 
     if (p=getenv("_TMP")) {
+
+	unless ( size > strlen(p) + required + 1 ) {
+	    errno = E2BIG;
+	    return 0;
+	}
+
 	strcpy(dest, p);
 
 	lastchar = dest[strlen(dest)-1];
@@ -146,11 +154,16 @@ char *template;
 	if ( lastchar != '\\' && lastchar != ':' )
 	    strcat(dest, "\\");
     }
-    else
+    else {
+	unless (size > required) {
+	    errno = E2BIG;
+	    return 0;
+	}
 	s[0] = 0;    
+    }
 
 #if USING_STDIO
-    sprintf(dest+strlen(dest), "%s.XXXXXX", template);
+    sprintf(dest+strlen(dest), "%s%s", template, Xes);
 
     return mktemp(dest) != 0;
 #else
@@ -200,6 +213,21 @@ os_Beep()
     return 0;
 #endif
 }
+
+
+int
+cclass(c)
+register int c;
+{
+    if (c >= ' ' && c < '')
+	return 0;
+    if (c == '\t' && !list)
+	return 2;
+    if (c >= 0)
+	return 1;
+    return 3;
+}
+
 
 unsigned
 getKey()

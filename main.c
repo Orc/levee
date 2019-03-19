@@ -83,11 +83,11 @@ char **argv;
 
     fillchar(contexts, sizeof(contexts), -1);
 
-    os_mktemp(undobuf, "$un");
-    os_mktemp(yankbuf, "$ya");
-    os_mktemp(undotmp, "$tm");
+    undobuf = tempfile("$un");
+    yankbuf = tempfile("$ya");
+    undotmp = tempfile("$tm");
     
-    dgotoxy(LINES-1,0);
+    dgotoxy(LINES-1, 0);
 
     
     if ( p = getenv("LVRC") ) {

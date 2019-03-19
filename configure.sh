@@ -134,6 +134,12 @@ AC_CHECK_HEADERS pwd.h && AC_CHECK_HEADERS uuid/uuid.h
 
 AC_CHECK_FUNCS basename && AC_CHECK_HEADERS libgen.h
 
+if AC_TYPE_PID_T ; then
+    AC_DEFINE os_pid_t pid_t
+else
+    AC_DEFINE os_pid_t int
+fi
+
 if [ "$NO_GLOB" ]; then
     TLOG "Using builtin glob()"
 elif AC_CHECK_HEADERS glob.h; then

@@ -68,9 +68,9 @@ char instring[200],	/* Latest input */
      altnm[80] = "";	/* Alternate filename */
 char gcb[16];		/* Command buffer for mutations of insert */
 
-char undobuf[40];
-char undotmp[40];
-char yankbuf[40];
+char *undobuf;
+char *undotmp;
+char *yankbuf;
 
 FILEDESC uread,		/* reading from the undo stack */
 	 uwrite;	/* writing to the undo stack */

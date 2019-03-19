@@ -41,6 +41,7 @@
 #include <uuid/uuid.h>
 #endif
 #endif
+#include <errno.h>
 
 
 /* **** FILE IO ABSTRACTIONS **** */
@@ -239,16 +240,24 @@ os_unlink(char *file)
 
 
 int
-os_mktemp(char *dest, const char *template)
+os_mktemp(char *dest, int size, const char *template)
 {
+    static char Xes[] = ".XXXXXX";
+    static char tmp[] = "/tmp/";
+    
     /* assert |dest| > |/tmp/|+|template|+|XXXXXX| */
+    unless (size > sizeof(tmp) + sizeof(Xes) + strlen(template)) {
+	errno = E2BIG;
+	return 0;
+    }
+
 #if USING_STDIO
-    sprintf(dest, "/tmp/%sXXXXXX", template);
+    sprintf(dest, "%s%s%s", tmp, template, Xes);
     strcpy(dest, template);
 
     return mktemp(dest) != 0;
 #else
-    strcpy(dest, "/tmp");
+    strcpy(dest, tmp);
     strcat(dest, template);
     numtoa(&dest[strlen(dest)], getpid());
 
@@ -404,6 +413,81 @@ os_subshell(char *commandline)
     return system(commandline);
 }
 
+
+/*
+ * plumbing for the ! command: fork off a child process to process
+ * a workfile, return a FILE* that will hold the output.
+ */
+FILE *
+os_cmdopen(char *cmdline, char *workfile, os_pid_t *child)
+{
+    os_pid_t job;
+    int io[2];
+
+
+    if ( pipe(io) < 0 )
+	return NULL;
+
+    if ( (job = fork()) < 0 ) {
+	close(io[0]);
+	close(io[1]);
+	return NULL;
+    }
+
+    if ( job < 0 )
+	return NULL;
+    else if ( job == 0 ) {
+	/* child */
+	int ifd = open(workfile, O_RDONLY);
+
+	close(io[0]);
+	if ( (ifd < 0) || (dup2(ifd, 0) < 0) ) {
+	    close(io[1]);
+	    exit(1);
+	}
+	dup2(io[1], 1);
+	dup2(1,2);
+	
+	execl("/bin/sh", "sh", "-c", cmdline, 0L);
+	close(io[1]);
+	exit(1);
+    }
+    else {
+	/* parent */
+	close(io[1]);
+	*child = job;
+	return fdopen(io[0], "r");
+    }
+}
+
+
+/*
+ * plumbing for the ! command: wait for the child to clean up, the
+ * return exit status.
+ */
+int
+os_cmdclose(FILE *input, os_pid_t child)
+{
+    int status;
+
+    waitpid(child, &status, 0);
+    fclose(input);
+
+    return WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+}
+
+
+int
+os_cclass(char c)
+{
+    if (c == '\t' && !list)
+	return 2;
+    if ( (c > 0 && c < 32) || c == 0x7f)
+	return 0;
+    if (c & 0x80)
+	return 3;
+    return 1;
+}
 
 
 /* put the terminal into raw mode

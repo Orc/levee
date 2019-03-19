@@ -203,4 +203,16 @@ struct glob_t *dta;
     }
     return (char*)0;
 } /* glob */
-#endif
+
+
+os_cclass(c)
+register unsigned char c;
+{
+    if (c == '\t' && !list)
+	return 2;
+    if (c == '' || c < ' ')
+	return 1;
+    if (c & 0x80)
+	return 3;
+    return 0;
+}

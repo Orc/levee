@@ -71,12 +71,23 @@ WRITE_TEXT(FILEDESC f, void *buf, int size)
 }
 
 
-os_mktemp(char *dest, char *template)
+os_mktemp(char *dest, int size, char *template)
 {
     char *p;
     char lastchar;
+    int required;
+
+static char Xes[] = ".XXXXXX";
+
+    required = sizeof(Xes) + strlen(template) + 1;
     
     if (p=getenv("TMP")) {
+
+	unless ( size > strlen(p) + required ) {
+	    errno = E2BIG;
+	    return 0;
+	}
+
 	strcpy(dest, p);
 
 	lastchar = dest[strlen(dest)-1];
@@ -84,17 +95,22 @@ os_mktemp(char *dest, char *template)
 	if ( lastchar != '/' && lastchar != '\\' && lastchar != ':' )
 	    strcat(dest, "/");
     }
-    else
+    else {
+	unless ( size > required ) {
+	    errno = E2BIG;
+	    return 0;
+	}
 	s[0] = 0;
+    }
 #if USING_STDIO
-    sprintf(dest+strlen(dest), "%s.XXXXXX", template);
+    sprintf(dest+strlen(dest), "%s%s", template, Xes);
 
     return mktemp(dest) != 0;
 #else
     strcat(s, template);
     numtoa(dest+strlen(dest), getpid());
 
-    return 0;
+    return 1;
 #endif
 }
 
@@ -175,6 +191,17 @@ os_restore()
     _dos_setvect(0x23, intr_on_ctrlc);
     return 0;
 } /* os_restore */
+
+
+os_cclass(c)
+register unsigned char c;
+{
+    if (c == '\t' && !list)
+	return 2;
+    if (c == '' || c < ' ')
+	return 1;
+    return 0;
+}
 
 
 /*

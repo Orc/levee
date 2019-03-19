@@ -92,10 +92,17 @@ os_rename(char *a,char *b)
 
 
 int
-os_mktemp(char *dest, char *template)
+os_mktemp(char *dest, int size, char *template)
 {
+    static char Xes[] = ".XXXXXX";
+    
+    unless ( size > strlen(dest) + sizeof(Xes) ) {
+	errno = E2BIG;
+	return 0;
+    }
+	
 #if USING_STDIO
-    sprintf(dest, "%s.XXXXXX", template);
+    sprintf(dest, "%s%s", template, Xes);
 
     return mktemp(dest) != 0;
 #else
@@ -171,6 +178,19 @@ os_d_restore()
 {
     return 1;
 }
+
+os_cclass(c)
+register unsigned char c;
+{
+    if (c == '\t' && !list)
+	return 2;
+    if (c == '' || c < ' ')
+	return 1;
+    if (c & 0x80)
+	return 3;
+    return 0;
+}
+
 
 char *
 dotfile()

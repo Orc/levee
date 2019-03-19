@@ -9,8 +9,7 @@ LDFLAGS=@LDFLAGS@
 
 OBJS = blockio.o display.o editcor.o exec.o find.o \
     globals.o insert.o main.o misc.o modify.o move.o \
-    ucsd.o undo.o version.o home.o external.o \
-    @MACHDEP@call.o @LOGGER@
+    ucsd.o undo.o version.o home.o @MACHDEP@call.o @LOGGER@
 
 lev: $(OBJS)
 	$(CC) $(LDFLAGS) -o lev $(OBJS) @LIBS@

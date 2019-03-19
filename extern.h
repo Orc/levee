@@ -19,6 +19,12 @@
  */
 #ifndef GLOBALS_D
 #define GLOBALS_D
+
+#include "config.h"
+
+#include <unistd.h>
+#include <sys/types.h>
+
 extern
 char lastchar,		/* Last character read via peekc */
      ch;		/* Global command char */
@@ -69,9 +75,9 @@ char instring[],		/* Latest input */
      gcb[];			/* Command buffer for mutations of insert */
 	
 extern
-char undobuf[],
-     undotmp[],
-     yankbuf[];
+char *undobuf,
+     *undotmp,
+     *yankbuf;
 
 extern
 FILEDESC uread,			/* reading from the undo stack */
@@ -266,20 +272,26 @@ extern int os_openline();
 extern int os_screensize(int *, int *);
 extern int os_scrollback();
 extern int os_Ping();
+
+
 extern void set_input();
 extern void reset_input();
+extern char *dotfile();
 
-extern int os_mktemp(char *, const char *);
+extern int os_mktemp(char *, int, const char *);
 extern int os_unlink(char *);
 extern int os_rename(char *, char *);
 extern int os_glob(const char *, int, glob_t *);
 extern void os_globfree(glob_t *);
 extern char *os_tilde(char *);
 extern int os_subshell(char *);
+extern FILE* os_cmdopen(char *, char *, os_pid_t *);
+extern int os_cmdclose(FILE*, os_pid_t);
+extern int os_cclass(char c);
 
 extern int Max(int,int);
 extern int Min(int,int);
-extern char * dotfile();
+extern char *tempfile(char*);
 
 extern FILE* expandfopen(char *file, char *mode);
 
