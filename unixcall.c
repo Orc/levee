@@ -32,6 +32,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <sys/ioctl.h>
 
@@ -248,6 +249,97 @@ os_mktemp(char *dest, const char *template)
     return 1;
 #endif
 }
+
+static int
+oops(const char *path, int errno)
+{
+    logit("glob: %s -> %d", path, errno);
+    return 0;
+}
+
+int
+os_glob(const char* pattern, int flags, glob_t *result)
+{
+#if USING_GLOB
+    return glob(pattern, flags|GLOB_NOSORT, oops, result);
+#else
+    /* whoops.  No wildcards here.
+    */
+    char **newlist;
+    int count = 1 + (result->gl_flags & GLOB_DOOFFS ? result->gl_offs : 0);
+
+#if LOGGING
+    if ( result->gl_flags & GLOB_APPEND )
+	logit("os_glob: add %s to arglist", pattern);
+    else
+	logit("os_glob: create new arglist, initialized with %s", pattern);
+#endif
+    
+    if ( result->gl_pathc == 0 )
+	result->gl_flags = flags;
+    
+    if ( result->gl_flags & GLOB_APPEND )
+	count += result->gl_pathc;
+	
+    unless ( flags & GLOB_NOMAGIC ) {
+	if ( strcspn(pattern, "?*") < strlen(pattern) ) {
+	    result->gl_flags |= GLOB_MAGCHAR;
+	    unless (result->gl_flags & GLOB_NOCHECK)
+		return GLOB_NOMATCH;
+	}
+	else
+	    result->gl_flags &= ~GLOB_MAGCHAR;
+    }
+    
+    
+    if ( count >= result->gl_pathalloc ) {
+	result->gl_pathalloc += 50;
+	logit("os_glob: expanding gl_pathv (old pathv=%p, count=%d, pathc=%d)",
+		    result->gl_pathv, count, result->gl_pathc);
+	if ( result->gl_pathv )
+	    newlist = realloc(result->gl_pathv,
+			      result->gl_pathalloc * sizeof result->gl_pathv[0]);
+	else
+	    newlist = calloc(result->gl_pathalloc, sizeof result->gl_pathv[0]);
+	
+	unless (newlist)
+	    return GLOB_NOSPACE;
+
+	result->gl_pathv = newlist;
+    }
+    
+    unless (result->gl_pathv[count-1] = malloc(strlen(pattern)+2))
+	return GLOB_NOSPACE;
+    
+    strcpy(result->gl_pathv[count-1], pattern);
+    if ( result->gl_flags & GLOB_MARK )
+	strcat(result->gl_pathv[count-1], "/");
+    result->gl_pathv[count] = 0;
+    result->gl_pathc++;
+    result->gl_matchc = 1;
+    return 0;
+#endif
+}
+
+void
+os_globfree(glob_t *collection)
+{
+#if USING_GLOB
+    globfree(collection);
+#else
+    int x, start;
+
+    start = collection->gl_flags & GLOB_DOOFFS ? collection->gl_offs : 0;
+
+    for (x=0; x < collection->gl_pathc; x++)
+	if ( collection->gl_pathv[start+x] )
+	    free(collection->gl_pathv[start+x]);
+    if ( collection->gl_pathc )
+	free(collection->gl_pathv);
+    memset(collection, 0, sizeof(collection[0]));
+#endif
+}
+ 
 
 
 /* put the terminal into raw mode

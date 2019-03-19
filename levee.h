@@ -50,6 +50,7 @@ extern void logit(char *, ...);
 
 #define unless(x)	if (!(x))
 #define if(x)		if ((x))
+#define while(x)	while ((x))
 
 extern char *expand(char *f);
 
@@ -292,28 +293,38 @@ struct variable {	/* Settable Variable Record */
 
 /* data structures for wildcard matching
  */
-#if HAVE_GLOB_H
+#if USING_GLOB
 #include <glob.h>
 #else
 
-typedef struct _glob_t {
+typedef struct _glob_t {	/* match the fields in the macos manpage */
     size_t gl_pathc;
+    size_t gl_pathalloc;	/* extra field; allocation slop */
     int gl_matchc;
-    size_t gl_offset;
+    size_t gl_offs;
     int gl_flags;
     char **gl_pathv;
 } glob_t;
 
-/* glob_t flags, from the manpage for libc glob()
+/* glob_t flags, from the macos manpage
  */
-#define GLOB_APPEND	0x01	/* add to the existing pile of files */
-#define GLOB_DOOFFS	0x02	/* put gl_offset empty slots in gl_pathv */
-#define GLOB_ERR	0x04	/* stop when an error happens */
-#define GLOB_MARK	0x08	/* add a trailing / to matched filenames */
-#define GLOB_NOCHECK	0x10	/* treat unmatched patterns as filenames */
-#define GLOB_NOESCAPE	0x20	/* don't allow wildcard escapes */
-#define GLOB_NOSORT	0x40	/* don't sort the matched file list */
-#define GLOB_TILDE	0x80	/* expand ~user & ~ */
+#define GLOB_APPEND	0x001	/* add to the existing pile of files */
+#define GLOB_DOOFFS	0x002	/* put gl_offset empty slots in gl_pathv */
+#define GLOB_ERR	0x004	/* stop when an error happens */
+#define GLOB_MARK	0x008	/* add a trailing / to matched filenames */
+#define GLOB_NOCHECK	0x010	/* treat unmatched patterns as filenames */
+#define GLOB_NOESCAPE	0x020	/* don't allow wildcard escapes */
+#define GLOB_NOSORT	0x040	/* don't sort the matched file list */
+
+#define GLOB_MAGCHAR	0x100	/* set by glob if a wildcard char was found */
+#define GLOB_NOMAGIC	0x200	/* don't expand wildcards */
+#define GLOB_TILDE	0x400	/* expand ~user & ~ */
+
+/* glob() error returns
+ */
+#define GLOB_NOSPACE	1
+#define GLOB_ABORTED	2
+#define GLOB_NOMATCH	3
 
 #endif
 

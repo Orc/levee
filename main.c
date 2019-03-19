@@ -31,9 +31,9 @@ copyright()
 
 
 void
-initialize(count, args)
-int count;
-char **args;
+initialize(argc, argv)
+int argc;
+char **argv;
 /* initialize: set up everything I can in levee */
 {
     int i;
@@ -51,7 +51,7 @@ char **args;
 	version(); copyright();
 	prints("(line mode)");
     }
-    else if ( count <= 1 ) {
+    else if ( argc <= 1 ) {
 	dgotoxy(LINES-1, 0);
 	version(); copyright();
     }
@@ -100,29 +100,30 @@ char **args;
     else if ( p = dotfile() )
 	do_file(p, &xmode, &xquit);
 
-    ++args, --count;
+    ++argv, --argc;
     
 #if SOFT_EOL
     /* USCD pascal-style (and early Macos?) EOL
      */
-    if (count > 0 && strcmp(*args, "-p") == 0 ) {
-	++args, --count;
+    if (argc > 0 && strcmp(*argv, "-p") == 0 ) {
+	++argv, --argc;
 	EOL = '\r';
     }
 #endif
 
-    if (count > 0 && **args == '+') {
-	char *p = *args;
+    if (argc > 0 && **argv == '+') {
+	char *p = *argv;
 	strcpy(startcmd, p[1] ? (1+p) : "$");
-	++args, --count;
+	++argv, --argc;
     }
-    argc = 0;
-    while (count-- > 0)
-	expandargs(*args++, &argc, &argv);
-    if (argc > 0) {
-	strcpy(filenm, argv[0]);
-	if (argc > 1)
-	    toedit(argc);
+    memset(&args, sizeof args, 0);
+    while (argc-- > 0)
+	os_glob(*argv++, GLOB_APPEND|GLOB_NOMAGIC, &args);
+	
+    if (args.gl_pathc > 0) {
+	strcpy(filenm, args.gl_pathv[0]);
+	if (args.gl_pathc > 1)
+	    toedit(args.gl_pathc);
 	inputf(filenm,TRUE);
     }
     else

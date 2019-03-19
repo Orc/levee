@@ -10,8 +10,9 @@ ac_help="
 --partial-install	Don\'t install the lv, lv(1) name links
 --size=NNN		Use a NNN-byte edit buffer
 --stdio			Prefer stdio for i/o
---tputs			Use tputs() to slow down tty output (not with --stdio)
+--tputs			Use tputs() to slow down tty output
 --logging		Log tty output to levee.log
+--noglob		Don't use system glob() even if it exists
 --windows		compile for windows 8+
 --dos			compile for ms-dos or old versions of microsoft windows
 --tos			compile for the Atari ST
@@ -32,6 +33,7 @@ Z--size=*)  SIZE=$(echo Z$1 | sed -e 's/^Z--size=//') ;;
 Z--stdio)   USING_STDIO=1;;
 Z--tputs)   USING_TPUTS=1;;
 Z--logging) USING_LOGGING=1;;
+Z--noglob)  NO_GLOB=1;;
 *)          ac_error=1;;
 esac;shift'
 
@@ -64,28 +66,28 @@ test -n "$USING_STDIO" && AC_DEFINE USING_STDIO 1
 test -n "$USING_TPUTS" && AC_DEFINE USING_TPUTS 1
 
 if [ "$OS_DOS" ]; then
-    AC_DEFINE	SIZE ${SIZE:-32000}
+    AC_DEFINE	EDITSIZE ${SIZE:-32000}
     AC_DEFINE	OS_DOS	1
     AC_SUB	MACHDEP	dos
 elif [ "$OS_OS2" ]; then
-    AC_DEFINE	SIZE ${SIZE:-32000}
+    AC_DEFINE	EDITSIZE ${SIZE:-32000}
     AC_DEFINE	OS_OS2 1
     AC_SUB	MACHDEP os2
 elif [ "$OS_ATARI" ]; then
-    AC_DEFINE	SIZE ${SIZE:-32000}
+    AC_DEFINE	EDITSIZE ${SIZE:-32000}
     AC_DEFINE	OS_ATARI	1
     AC_SUB	MACHDEP	gem
     AC_DEFINE	HAVE_BLKFILL	1
 elif [ "$OS_FLEXOS" ]; then
-    AC_DEFINE	SIZE ${SIZE:-256000}
+    AC_DEFINE	EDITSIZE ${SIZE:-256000}
     AC_DEFINE	OS_FLEXOS	1
     AC_SUB	MACHDEP	flex
 elif [ "$OS_WINDOWS" ]; then
-    AC_DEFINE   SIZE ${SIZE:-256000}
+    AC_DEFINE   EDITSIZE ${SIZE:-256000}
     AC_DEFINE	OS_WINDOWS	1
     AC_SUB	MACHDEP	win
 else
-    AC_DEFINE	SIZE ${SIZE:-256000}
+    AC_DEFINE	EDITSIZE ${SIZE:-256000}
     AC_DEFINE	OS_UNIX	1
     AC_SUB	MACHDEP	unix
 
@@ -127,7 +129,16 @@ else
 fi
 
 AC_CHECK_FUNCS basename && AC_CHECK_HEADERS libgen.h
-AC_CHECK_FUNCS glob && AC_CHECK_HEADERS glob.h
+
+if [ "$NO_GLOB" ]; then
+    TLOG "Using builtin glob()"
+elif AC_CHECK_HEADERS glob.h; then
+    if AC_CHECK_FUNCS 'glob((char*)0, GLOB_NOMAGIC, (void*)0, (void*)0)' glob.h; then
+	AC_DEFINE 'USING_GLOB' 1
+    elif AC_CHECK_FUNCS glob; then
+	TLOG "glob() exists, but doesn't support GLOB_NOMAGIC"
+    fi
+fi
 
 if AC_PROG_LN_S && test -z "$missing_lv"; then
     AC_SUB NOMK ''

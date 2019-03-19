@@ -71,26 +71,26 @@ version()
 
 
 void
-args()
-/* args: print the argument list */
+show_args()
+/* show_args: print the argument list */
 {
     register int i;
     dgotoxy(-1,0);
-    for (i=0; i < argc; i++) {
-	if (curpos.x+strlen(argv[i]) >= COLS)
+    logit("show_args: there %s %d argument%s",
+	(args.gl_pathc == 1) ? "is" : "are",
+	args.gl_pathc,
+	(args.gl_pathc == 1) ? "." : "s.");
+    for (i=0; i < args.gl_pathc; i++) {
+	if (curpos.x+strlen(args.gl_pathv[i]) >= COLS)
 	    exprintln();
 	else if (i > 0)
 	    printch(' ');
-	if (pc == i) {			/* highlight the current filename.. */
-	    d_highlight(1);
-	    prints(argv[i]);
-	    d_highlight(0);
-	}
-	else
-	    prints(argv[i]);
+	if (pc == i) d_highlight(1);
+	prints(args.gl_pathv[i]);
+	if (pc == i) d_highlight(0);
     }
-} /* args */
-    
+} /* show_args */
+
 void
 setcmd()
 {
@@ -100,7 +100,7 @@ setcmd()
 #endif
     char *arg, *num;
     struct variable *vp;
-    
+
     if ( (arg = getarg()) ) {
 	do {
 	    if (*arg != 0) {
@@ -126,19 +126,19 @@ setcmd()
 		}
 		else {
 		    int j;
-                    
-                    if (b)
+
+		    if (b)
 			if (vp->v_tipe == VBOOL)
 			    vp->u->valu = no;
 			else
-			    goto badsettype;
-		    else if (vp->v_tipe == VSTR) {
-			if (vp->u->strp)
-			    free(vp->u->strp);
-			vp->u->strp = (*num) ? strdup(num) : NULL;
-		    }
-		    else
-			if (*num && (j=atoi(num)) >= 0)
+			       goto badsettype;
+		else if (vp->v_tipe == VSTR) {
+		    if (vp->u->strp)
+			free(vp->u->strp);
+		    vp->u->strp = (*num) ? strdup(num) : NULL;
+		}
+		else
+		    if (*num && (j=atoi(num)) >= 0)
 			    vp->u->valu = j;
 			else {
 		  badsettype:
@@ -294,8 +294,8 @@ findarg(name)
 register char *name;
 {
     int j;
-    for (j = 0; j < argc; j++)
-	if (strcmp(argv[j],name) == 0)
+    for (j = 0; j < args.gl_pathc; j++)
+	if (strcmp(args.gl_pathv[j],name) == 0)
 	    return j;
     return -1;
 } /* findarg */
@@ -307,9 +307,13 @@ addarg(name)
 register char *name;
 {
     int where;
-    if ((where = findarg(name)) < 0)
-	return doaddwork(name, &argc, &argv);
-    return where;
+    int rc;
+    
+    if ((where = findarg(name)) >= 0 )
+	return where;
+	
+    rc = os_glob(name, GLOB_APPEND|GLOB_NOMAGIC, &args);
+    return rc ? EOF : args.gl_pathc-1;
 } /* addarg */
 
 
@@ -317,11 +321,6 @@ register char *name;
 char *
 getname()
 {
-    extern int wilderr;
-#if OS_ATARI
-    extern int mapslash;
-    register char *p;
-#endif
     register char *name;
 
     if ( (name = getarg()) ) {
@@ -330,16 +329,9 @@ getname()
 		name = altnm;
 	    else {
 		errmsg("no alt name");
-		wilderr++;
 		return NULL;
 	    }
 	}
-#if OS_ATARI
-	if (mapslash)
-	    for (p=name; *p; p++)
-		if (*p == '/')
-		    *p = '\\';
-#endif
     }
     return name;
 } /* getname */
@@ -620,7 +612,8 @@ writefile()
 	name = filenm;
     if (*name) {
 	if (outputf(name)) {
-	    addarg(name);
+	    if ( addarg(name) < 0 )
+		errmsg("error expanding argument list!");
 	    return YES;
 	}
 	else
@@ -636,31 +629,60 @@ void
 editfile()
 {
     char *name = NULL;	/* file to edit */
-    char **myargv;
-    int myargc;
+    glob_t files;
     int i, newpc;
+    
     if ((name = getarg()) && *name == '+') {
 	strcpy(startcmd, (name[1])?(1+name):"$");
 	name = getarg();
     }
-    myargc=0;
-    if (name)
+    
+    logit("enter editfile");
+    memset(&files, 0, sizeof files);
+    
+    if (name) {
 	do {
-	    if (!expandargs(name, &myargc, &myargv))
+	    if (os_glob(name, GLOB_APPEND|GLOB_NOMAGIC, &files)) {
+		errmsg("file allocation error");
+		os_globfree(&files);
 		return;
+	    }
 	} while ( (name=getarg()) );
-    if (myargc == 0) {
-	if (*filenm)
+    }
+
+    logit("files.gl_pathc = %d", files.gl_pathc);
+	
+    if (files.gl_pathc == 0) {
+	logit(":edit with no args");
+	if (*filenm) {
+	    newpc = pc;
 	    name = filenm;
+	}
 	else
 	    errmsg("no file to edit");
     }
-    else if ((newpc = addarg(myargv[0])) >= 0) {
-	name = argv[pc = newpc];
-	for (i=1; i < myargc && doaddwork(myargv[i], &argc, &argv) >= 0; i++)
-	    ;
+    else if (files.gl_pathc == 1 && (newpc = findarg(files.gl_pathv[0])) >= 0)
+	logit(":edit with one arg (%s)", files.gl_pathv[0]);
+    else {
+	newpc = args.gl_pathc;
+
+	for (i=0; i < files.gl_pathc; i++)
+	    if (os_glob(files.gl_pathv[i], GLOB_APPEND|GLOB_NOMAGIC, &args)) {
+		errmsg("file list error");
+		break;
+	    }
     }
-    killargs(&myargc, &myargv);
+	
+    logit("pc=%d, newpc=%d, args.gl_pathc=%d",
+	    pc, newpc, args.gl_pathc);
+    if (newpc >= 0 && newpc < args.gl_pathc) {
+	pc = newpc;
+	name = args.gl_pathv[pc];
+    }
+	
+    logit("about to globfree(&files)");
+    os_globfree(&files);
+
     if (name && oktoedit(NO))
 	doinput(name);
 }
@@ -706,50 +728,70 @@ nextfile(prev)
 bool prev;
 {
     char *name = NULL;
-    int newpc=pc,
-	myargc=0;
-    char **myargv;
-    bool newlist = NO;
-    
-    if (prev == 0)
-	while ( (name=getarg()) )
-	    if (!expandargs(name, &myargc, &myargv))
+    int rc, i;
+
+    if ( (name = getarg()) == 0 ) {
+	/* :n w/o argument; move forward
+	 */
+	if ( pc >= args.gl_pathc-1 )
+	    errmsg("(no more files)");
+	else if ( oktoedit(autowrite) )
+	    pc++;
+    }
+    else if ( strcmp(name, "-") == 0 ) {
+	/* :n - ; move back, ignore other arguments
+	 */
+	if ( pc == 0 )
+	    errmsg("(no prev files)");
+	else if ( oktoedit(autowrite) )
+	    --pc;
+    }
+    else {
+	/* :n file {...}
+	 */
+	glob_t files;
+	
+	unless (oktoedit(autowrite))
+	    return;
+
+	memset(&files, 0, sizeof files);
+	
+	do {
+	    if (rc = os_glob(name, GLOB_APPEND|GLOB_NOMAGIC, &files)) {
+		errmsg("memory allocation error");
+		os_globfree(&files);
 		return;
-    
-    if (oktoedit(autowrite)) {
-	if (prev || (myargc == 1 && strcmp(myargv[0],"-") == 0)) {
-	    if (pc > 0) {
-		newpc = pc-1;
 	    }
-	    else {
-		prints("(no prev files)");
-		goto killem;
+	} while ( name = getarg() );
+
+	if ( (files.gl_pathc == 1) && (pc = findarg(files.gl_pathv[0])) >= 0) {
+
+	    /* jump to existing file */
+	    ;
+	}
+	else {
+	    /* toss the old args; s-l-o-w-l-y copy the new ones in */
+	    pc = 0;
+	    os_globfree(&args);
+	    for ( i=0; i < files.gl_pathc; i++ ) {
+		rc = os_glob(files.gl_pathv[i], GLOB_APPEND|GLOB_NOMAGIC, &args);
+		if ( rc ) {
+		    errmsg("(memory allocation error)");
+		    break;
+		}
 	    }
 	}
-	else if (myargc == 0) {
-	    if (pc < argc-1) {
-		newpc = 1+pc;
-	    }
-	    else {
-		prints("(no more files)");
-		goto killem;
-	    }
-	}
-	else if (myargc > 1 || (newpc = findarg(myargv[0])) < 0) {
-	    toedit(myargc);
-	    newpc = 0;
-	    newlist++;
-	}
-	doinput(newlist ? myargv[0] : argv[newpc]);
-	pc = newpc;
-	if (newlist) {
-	    killargs(&argc, &argv);
-	    argc = myargc;
-	    argv = myargv;
-	}
-	else
-    killem: if (!prev)
-		killargs(&myargc, &myargv);
+	if ( files.gl_pathc > 0 )
+	    os_globfree(&files);
+    }
+
+    if ( args.gl_pathc >= pc )
+	doinput(args.gl_pathv[pc]);
+    else {
+	/* if we got here and there was an error, we are screwed
+	 * and need to go back to an empty screen
+	 */
+	newfile = YES;
     }
 }
 
@@ -982,9 +1024,10 @@ bool *noquit;
 		    break;
 	    }
 
-	    if (!affirm && (argc-pc > 1)) {	/* any more files to edit? */
+	    if (!affirm && (args.gl_pathc-pc > 1)) {
+	    	/* more files to edit? */
 		printch('(');
-		plural(argc-pc-1," more file");
+		plural(args.gl_pathc-pc-1," more file");
 		prints(" to edit)");
 	    }
 	    else
@@ -998,9 +1041,11 @@ bool *noquit;
 	    break;
 	case EX_FILE:				/* :file */
 	    if ( (cmd=getarg()) ) {		/* :file name */
+		int npc;
 		strcpy(altnm, filenm);
 		strcpy(filenm, cmd);
-		pc = addarg(filenm);
+		if ( (npc = addarg(filenm)) >= 0 )
+		    pc = npc;
 	    }
 	    wr_stat();
 	    break;
@@ -1075,7 +1120,7 @@ bool *noquit;
 	    else ok = NO;
 	    break;
 	case EX_ARGS:				/* :args */
-	    args();
+	    show_args();
 	    break;
 	case EX_VERSION:			/* version */
 	    version();
@@ -1093,9 +1138,9 @@ bool *noquit;
 	    break;
 	case EX_REWIND:
 	    clrmsg();
-	    if (argc > 0 && oktoedit(autowrite)) {
+	    if ( (pc > 0) && (args.gl_pathc > 0) && oktoedit(autowrite) ) {
 		pc = 0;
-		doinput(argv[0]);
+		doinput(args.gl_pathv[0]);
 	    }
 	    break;
 	default:
@@ -1107,4 +1152,5 @@ bool *noquit;
 	errmsg(excmds[what]);
 	prints(" error");
     }
-}
+} /* exec */
+

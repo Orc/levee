@@ -14,7 +14,7 @@ main()
     if ( fscanf(version, "%80s", codeversion) == 1 ) {
 	FILE *version_c;
 
-	if ( version_c = fopen("version.c", "w") ) {
+	if (( version_c = fopen("version.c", "w") )) {
 	    fprintf(version_c, "char codeversion[] = \"%s\";\n", codeversion);
 	    fclose(version_c);
 	    exit(0);

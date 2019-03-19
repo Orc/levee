@@ -39,9 +39,11 @@ bool adjcurr[PARA_BACK+1],
 
 		/* A R G U M E N T S */
 char startcmd[80] = "";	/* initial command after read */
-char **argv;		/* Arguments */
-int  argc=0,		/* # arguments */
-     pc=0;		/* Index into arguments */
+glob_t args;		/* arguments
+			 * argv -> args->gl_pathv
+			 * argc -> args->gl_pathc
+			 */
+int   pc=0;		/* Index into arguments */
 
 		/* M A C R O   S T U F F */
 struct macrecord mbuffer[MAXMACROS];

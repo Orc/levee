@@ -29,18 +29,21 @@ int lastexec;			/* last exec mode command */
 
 extern
 int contexts['z'-'`'+1];	/* Labels */
+
 		/* C O N S T A N T S */
 extern
 bool adjcurr[PARA_BACK+1],
      adjendp[PARA_BACK+1];
+     
 		/* A R G U M E N T S */
 extern
 char startcmd[];	/* initial command after read */
-extern
-char **argv;		/* Arguments */
-extern
-int  argc,		/* # arguments */
-     pc;		/* Index into arguments */
+extern glob_t args;	/* Arguments
+			 * argv -> args->gl_pathv
+			 * argc -> args->gl_pathc
+			 */
+int pc;			/* Index into arguments */
+
 		/* M A C R O   S T U F F */
 extern
 struct macrecord mbuffer[];
@@ -285,7 +288,7 @@ extern char* strdup(char*);
 extern char* basename(char*);
 #endif
 
-extern int os_glob(const char *, int, int(*) (const char *, int), glob_t *);
+extern int os_glob(const char *, int, glob_t *);
 extern void os_globfree(glob_t *);
 
 #endif /*EXTERN_D*/
