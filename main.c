@@ -83,9 +83,9 @@ char **argv;
 
     fillchar(contexts, sizeof(contexts), -1);
 
-    undobuf = tempfile("$un");
-    yankbuf = tempfile("$ya");
-    undotmp = tempfile("$tm");
+    undobuf = lvtempfile("$un");
+    yankbuf = lvtempfile("$ya");
+    undotmp = lvtempfile("$tm");
     
     dgotoxy(LINES-1, 0);
 
