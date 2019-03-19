@@ -952,8 +952,8 @@ char *inp;
     execstr = inp;
     if (j==0)
 	return EX_CR;
-    for (k=0; excmds[k]; k++)
-	if (strncmp(cmd, excmds[k], j) == 0)
+    for (k=0; excmds[k].name; k++)
+	if (excmds[k].active && strncmp(cmd, excmds[k].name, j) == 0)
 	    return k;
     return ERR;
 }
@@ -1148,7 +1148,7 @@ bool *noquit;
     }
     lastexec = what;
     if (!ok) {
-	errmsg(excmds[what]);
+	errmsg(excmds[what].name);
 	prints(" error");
     }
 } /* exec */

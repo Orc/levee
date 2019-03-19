@@ -61,7 +61,7 @@ char **argv;
     for (i = 0;i < MAXMACROS;i++)
 	mbuffer[i].token = 0;
     core[0] = EOL;
-	
+
     yank.size = ERR;		/* no yanks yet */
     
     undo.blockp = undo.ptr = 0;

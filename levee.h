@@ -290,6 +290,10 @@ struct variable {	/* Settable Variable Record */
     union optionrec *u;		/* pointer to it */
 };
 
+typedef struct {
+    char *name;
+    int active;	/* disabled if a feature is not available on a given platform */
+} excmd_t;
 
 /* data structures for wildcard matching
  */

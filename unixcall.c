@@ -256,18 +256,15 @@ os_mktemp(char *dest, const char *template)
 #endif
 }
 
-static int
-oops(const char *path, int errno)
-{
-    logit("glob: %s -> %d", path, errno);
-    return 0;
-}
 
+/*
+ * implement the glob() command (with GLOB_NOSORT always set)
+ */
 int
 os_glob(const char* pattern, int flags, glob_t *result)
 {
 #if USING_GLOB
-    return glob(pattern, flags|GLOB_NOSORT, oops, result);
+    return glob(pattern, flags|GLOB_NOSORT, 0, result);
 #else
     /* whoops.  No wildcards here.
     */
@@ -327,6 +324,9 @@ os_glob(const char* pattern, int flags, glob_t *result)
 #endif
 }
 
+/*
+ * clean up a glob_t after use.
+ */
 void
 os_globfree(glob_t *collection)
 {
@@ -347,6 +347,9 @@ os_globfree(glob_t *collection)
 }
 
 
+/*
+ * do ~username expansions on a filename
+ */
 char *
 os_tilde(char *path)
 {
@@ -392,6 +395,9 @@ os_tilde(char *path)
 }
 
 
+/*
+ * implement the :! command
+ */
 int
 os_subshell(char *commandline)
 {

@@ -121,8 +121,9 @@ char codeversion[],		/* Editor version */
      fisro[];			/* permission denied message */
      
 extern
-char *excmds[],
-     wordset[],
+ excmd_t excmds[];
+extern
+char wordset[],
      spaces[];
 extern
 struct variable vars[];
@@ -275,7 +276,6 @@ extern int os_glob(const char *, int, glob_t *);
 extern void os_globfree(glob_t *);
 extern char *os_tilde(char *);
 extern int os_subshell(char *);
-
 
 extern int Max(int,int);
 extern int Min(int,int);

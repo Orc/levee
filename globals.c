@@ -115,38 +115,38 @@ char Erasechar,				/* our erase character */
 char fismod[] = "File is modified",	/* File is modified message */
      fisro[] = "File is readonly";	/* when you can't write the file */
 
-char *excmds[] = {
-	"print",	/* lines to screen */
-	"quit",		/* quit editor */
-	"read",		/* add file to buffer */
-	"edit",		/* replace buffer with file */
-	"write",	/* write out file */
-	"wq",		/* write file and quit */
-	"next",		/* make new arglist or traverse this one */
-	"substitute",	/* pattern */
-	"xit",		/* write changes and quit */
-	"file",		/* show/set file name */
-	"set",		/* options */
-	"rm",		/* a file */
-	"previous",	/* back up in arglist */
-	"delete",	/* lines from buffer */
-	"=",		/* tell line number */
-	"yank",		/* lines from buffer */
-	"put",		/* back yanked lines */
-	"visual",	/* go to visual mode */
-	"exec",		/* go to exec mode */
-	"insert",	/* text below current line */
-	"open",		/* insert text above current line */
-	"change",	/* lines */
-	"undo",		/* last change */
-	"!",		/* shell escape */
-	"map",		/* keyboard macro */
-	"unmap",	/* keyboard macro */
-	"source",	/* read commands from file */
-	"version",	/* print version # */
-	"args",		/* print argument list */
-	"rewind",	/* rewind argument list */
-	NULL
+excmd_t excmds[] = {
+	{ "print", 1},		/* lines to screen */
+	{ "quit", 1},		/* quit editor */
+	{ "read", 1},		/* add file to buffer */
+	{ "edit", 1},		/* replace buffer with file */
+	{ "write", 1},		/* write out file */
+	{ "wq", 1},		/* write file and quit */
+	{ "next", 1},		/* make new arglist or traverse this one */
+	{ "substitute", 1},	/* pattern */
+	{ "xit", 1},		/* write changes and quit */
+	{ "file", 1},		/* show/set file name */
+	{ "set", 1},		/* options */
+	{ "rm", 1},		/* a file */
+	{ "previous", 1},	/* back up in arglist */
+	{ "delete", 1},		/* lines from buffer */
+	{ "=", 1},		/* tell line number */
+	{ "yank", 1},		/* lines from buffer */
+	{ "put", 1},		/* back yanked lines */
+	{ "visual", 1},		/* go to visual mode */
+	{ "exec", 1},		/* go to exec mode */
+	{ "insert", 1},		/* text below current line */
+	{ "open", 1},		/* insert text above current line */
+	{ "change", 1},		/* lines */
+	{ "undo", 1},		/* last change */
+	{ "!", 1},		/* shell escape */
+	{ "map", 1},		/* keyboard macro */
+	{ "unmap", 1},		/* keyboard macro */
+	{ "source", 1},		/* read commands from file */
+	{ "version", 1},	/* print version # */
+	{ "args", 1},		/* print argument list */
+	{ "rewind", 1},		/* rewind argument list */
+	{ NULL }
 };
 
 char wordset[] = "0123456789$_#ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
