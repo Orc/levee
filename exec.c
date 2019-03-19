@@ -727,24 +727,28 @@ void
 nextfile(prev)
 bool prev;
 {
-    char *name = NULL;
+    char *name = getarg();
     int rc, i;
 
-    if ( (name = getarg()) == 0 ) {
-	/* :n w/o argument; move forward
-	 */
-	if ( pc >= args.gl_pathc-1 )
-	    errmsg("(no more files)");
-	else if ( oktoedit(autowrite) )
-	    pc++;
-    }
-    else if ( strcmp(name, "-") == 0 ) {
+    if ( prev || (name && (strcmp(name, "-") == 0)) ) {
 	/* :n - ; move back, ignore other arguments
 	 */
-	if ( pc == 0 )
+	if ( pc == 0 ) {
 	    errmsg("(no prev files)");
+	    return;
+	}
 	else if ( oktoedit(autowrite) )
 	    --pc;
+    }
+    else if ( name == 0 ) {
+	/* :n w/o argument; move forward
+	 */
+	if ( pc >= args.gl_pathc-1 ) {
+	    errmsg("(no more files)");
+	    return;
+	}
+	else if ( oktoedit(autowrite) )
+	    pc++;
     }
     else {
 	/* :n file {...}
