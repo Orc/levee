@@ -35,6 +35,12 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <sys/ioctl.h>
+#if HAVE_PWD_H
+#include <pwd.h>
+#if HAVE_UUID_UUID_H
+#include <uuid/uuid.h>
+#endif
+#endif
 
 
 /* **** FILE IO ABSTRACTIONS **** */
@@ -145,7 +151,7 @@ os_scrolldown()
 int
 os_openline()
 {
-    return 0;
+return 0;
 }
 
 int
@@ -245,7 +251,7 @@ os_mktemp(char *dest, const char *template)
     strcpy(dest, "/tmp");
     strcat(dest, template);
     numtoa(&dest[strlen(dest)], getpid());
-    
+
     return 1;
 #endif
 }
@@ -274,13 +280,13 @@ os_glob(const char* pattern, int flags, glob_t *result)
     else
 	logit("os_glob: create new arglist, initialized with %s", pattern);
 #endif
-    
+
     if ( result->gl_pathc == 0 )
 	result->gl_flags = flags;
-    
+
     if ( result->gl_flags & GLOB_APPEND )
 	count += result->gl_pathc;
-	
+
     unless ( flags & GLOB_NOMAGIC ) {
 	if ( strcspn(pattern, "?*") < strlen(pattern) ) {
 	    result->gl_flags |= GLOB_MAGCHAR;
@@ -290,8 +296,8 @@ os_glob(const char* pattern, int flags, glob_t *result)
 	else
 	    result->gl_flags &= ~GLOB_MAGCHAR;
     }
-    
-    
+
+
     if ( count >= result->gl_pathalloc ) {
 	result->gl_pathalloc += 50;
 	logit("os_glob: expanding gl_pathv (old pathv=%p, count=%d, pathc=%d)",
@@ -301,16 +307,16 @@ os_glob(const char* pattern, int flags, glob_t *result)
 			      result->gl_pathalloc * sizeof result->gl_pathv[0]);
 	else
 	    newlist = calloc(result->gl_pathalloc, sizeof result->gl_pathv[0]);
-	
+
 	unless (newlist)
 	    return GLOB_NOSPACE;
 
 	result->gl_pathv = newlist;
     }
-    
+
     unless (result->gl_pathv[count-1] = malloc(strlen(pattern)+2))
 	return GLOB_NOSPACE;
-    
+
     strcpy(result->gl_pathv[count-1], pattern);
     if ( result->gl_flags & GLOB_MARK )
 	strcat(result->gl_pathv[count-1], "/");
@@ -339,7 +345,52 @@ os_globfree(glob_t *collection)
     memset(collection, 0, sizeof(collection[0]));
 #endif
 }
- 
+
+
+char *
+os_tilde(char *path)
+{
+#if HAVE_PWD_H
+    char *name, *slash, *expanded;
+    struct passwd *user;
+
+    logit("os_expand %s", path);
+    unless ( path && (*path == '~') )
+	return 0;
+
+    /* ourself or someone else? */
+    unless ( slash = strchr(path, '/') )
+	return 0;
+
+    unless ( name = malloc(slash-path) )
+	return 0;
+
+    strncpy(name, 1+path, (slash-path)-1);
+    name[(slash-path)-1] = 0;
+
+    if ( *name )
+	user = getpwnam(name);
+    else
+	user = getpwuid(getuid());
+
+    free(name);
+
+    unless (user)
+	return 0;
+
+    if (expanded = malloc(strlen(user->pw_dir)+1+strlen(slash)+1)) {
+	strcpy(expanded, user->pw_dir);
+	strcat(expanded, slash);
+
+	logit("os_expand -> %s", expanded);
+    }
+
+    return expanded;
+#else
+    return 0;
+#endif
+}
+
 
 
 /* put the terminal into raw mode
@@ -406,12 +457,7 @@ getKey()
 
 	select(1, &input, 0, 0, 0);
 	if( read(0,c,1) == 1) {
-#if 0
-	    if (c[0] >= ' ' && c[0] < 127 )
-		fprintf(stderr, "getKey -> %c\n", c[0]);
-	    else
-		fprintf(stderr, "getKey -> %02x\n", (unsigned char)c[0]);
-#endif
+	    logit("getKey -> %c", c[0]);
 	    return c[0];
 	}
     }

@@ -271,7 +271,7 @@ unmap()
 {
     int i;
     char *arg;
-    
+
     if ( (arg=getarg()) ) {
 	if (strlen(arg) == 1) {
 	    undefine(lookup(*arg));
@@ -308,10 +308,10 @@ register char *name;
 {
     int where;
     int rc;
-    
+
     if ((where = findarg(name)) >= 0 )
 	return where;
-	
+
     rc = os_glob(name, GLOB_APPEND|GLOB_NOMAGIC, &args);
     return rc ? EOF : args.gl_pathc-1;
 } /* addarg */
@@ -354,7 +354,7 @@ cutandpaste()
     char delim;
     register char *ip;
     register char *dp;
-    
+
     zerostack(&undo);
     ip = execstr;
     if (*ip != '&') {
@@ -453,7 +453,7 @@ bool newbuf;
 
     if (newbuf)
 	readonly = NO;
-	
+
     zerostack(&undo);
 
     if ( newbuf ) {
@@ -463,7 +463,7 @@ bool newbuf;
     else {
 	fixupline(bseekeol(curr));
     }
-    
+
     printch('"');
     prints(fname);
     prints("\" ");
@@ -508,33 +508,28 @@ backup(name)
 char *name;
 {
     char *back, *expanded;
-#if !OS_UNIX
     char *p;
-#endif
+    int size;
 
-    expanded = expand(name);
+    if ( expanded = os_tilde(name) )
+	name = expanded;
 
-    back = malloc( 5 + (expanded ? strlen(expanded) : strlen(name)) );
+    if ( back = malloc( 5 + strlen(name)) ) {
 
-    if ( ! back ) {
-	printf("--cannot back up!--");
-	return;
-    }
-
-    strcpy(back, expanded ? expanded : name);
+	strcpy(back, name);
 #if OS_UNIX
-    strcat(back, "~");
+	strcat(back, "~");
 #else
-    p = strrchr(basename(back), '.');
-    if (p)
-	strcpy(1+p, ",bkp");
-    else
-	strcat(back, ".bkp");
+	strcpy( (p=strrchr(basename(back), '.')) ? p : back, ".bkp" );
 #endif
-    
-    os_unlink(back);
-    os_rename(expanded ? expanded : name, back);
-    free(back);
+
+	os_unlink(back);
+	os_rename(name, back);
+	free(back);
+    }
+    else
+	printf("--cannot back up!--");
+
     if ( expanded )
 	free(expanded);
 } /* backup */
@@ -607,7 +602,7 @@ bool
 writefile()
 {
     char *name;
-    
+
     if ((name=getname()) == NULL)
 	name = filenm;
     if (*name) {
@@ -631,15 +626,15 @@ editfile()
     char *name = NULL;	/* file to edit */
     glob_t files;
     int i, newpc;
-    
+
     if ((name = getarg()) && *name == '+') {
 	strcpy(startcmd, (name[1])?(1+name):"$");
 	name = getarg();
     }
-    
+
     logit("enter editfile");
     memset(&files, 0, sizeof files);
-    
+
     if (name) {
 	do {
 	    if (os_glob(name, GLOB_APPEND|GLOB_NOMAGIC, &files)) {
@@ -651,7 +646,7 @@ editfile()
     }
 
     logit("files.gl_pathc = %d", files.gl_pathc);
-	
+
     if (files.gl_pathc == 0) {
 	logit(":edit with no args");
 	if (*filenm) {
@@ -672,14 +667,14 @@ editfile()
 		break;
 	    }
     }
-	
+
     logit("pc=%d, newpc=%d, args.gl_pathc=%d",
 	    pc, newpc, args.gl_pathc);
     if (newpc >= 0 && newpc < args.gl_pathc) {
 	pc = newpc;
 	name = args.gl_pathv[pc];
     }
-	
+
     logit("about to globfree(&files)");
     os_globfree(&files);
 
@@ -715,7 +710,7 @@ void
 readfile()
 {
     char *name;
-    
+
     if ( (name=getarg()) )
 	inputf(name,NO);
     else
@@ -754,12 +749,12 @@ bool prev;
 	/* :n file {...}
 	 */
 	glob_t files;
-	
+
 	unless (oktoedit(autowrite))
 	    return;
 
 	memset(&files, 0, sizeof files);
-	
+
 	do {
 	    if (rc = os_glob(name, GLOB_APPEND|GLOB_NOMAGIC, &files)) {
 		errmsg("memory allocation error");
@@ -862,7 +857,7 @@ bool *noquit;
 {
     char line[120];
     FILE *fp;
-    
+
     if ((fp = expandfopen(fname,"r")) != NULL) {
 	indirect = YES;
 	while (fgets(line,120,fp) && indirect) {
@@ -973,7 +968,7 @@ bool *noquit;
 {
     int  what;
     bool ok;
-    
+
     what = parse(cmd);
     ok = YES;
     if (diddled) {

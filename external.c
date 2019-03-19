@@ -83,7 +83,7 @@ cmdclose(FILE *input, pid_t child)
 }
 
 
-#ifdef DEBUG
+#if DEBUG
 
 main(argc, argv)
 char **argv;

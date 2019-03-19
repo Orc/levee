@@ -239,8 +239,12 @@ dinitialize()
 
     CL = tgetstr("cl", &bufp);
     CE = tgetstr("ce", &bufp);
+#if 0
     unless ( BELL = tgetstr("vb", &bufp) )
 	BELL = "\007";
+#else
+    BELL = "\007";
+#endif
     OL = tgetstr("al", &bufp);
     UpS = tgetstr("sr", &bufp);
 	

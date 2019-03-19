@@ -128,6 +128,10 @@ else
     AC_CHECK_HEADERS termios.h && AC_CHECK_FUNCS tcgetattr
 fi
 
+# for os_expand()
+#
+AC_CHECK_HEADERS pwd.h && AC_CHECK_HEADERS uuid/uuid.h
+
 AC_CHECK_FUNCS basename && AC_CHECK_HEADERS libgen.h
 
 if [ "$NO_GLOB" ]; then
@@ -135,12 +139,12 @@ if [ "$NO_GLOB" ]; then
 elif AC_CHECK_HEADERS glob.h; then
     if AC_CHECK_FUNCS 'glob((char*)0, GLOB_NOMAGIC, (void*)0, (void*)0)' glob.h; then
 	AC_DEFINE 'USING_GLOB' 1
-    elif AC_CHECK_FUNCS glob; then
+    elif AC_QUIET AC_CHECK_FUNCS glob; then
 	TLOG "glob() exists, but doesn't support GLOB_NOMAGIC"
     fi
 fi
 
-if AC_PROG_LN_S && test -z "$missing_lv"; then
+if AC_QUIET AC_PROG_LN_S && test -z "$missing_lv"; then
     AC_SUB NOMK ''
 else
     AC_SUB NOMK '@#'
