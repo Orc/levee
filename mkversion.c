@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+int
 main()
 {
     FILE *version = fopen("VERSION", "r");
