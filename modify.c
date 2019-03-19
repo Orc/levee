@@ -157,14 +157,14 @@ restart:
 	if (*query) {
 	    /*>>>> don't delete -- keep for future use
 	    if (visual) {
-		dgotoxy(yp,setX(i));puts("?");
+		dgotoxy(setX(i), yp);puts("?");
 	    }
 	    else {
 	    <<<<*/
 		println();
 		writeline(-1,-1,bseekeol(i));
 		println();
-		dgotoxy(-1,setX(i));
+		dgotoxy(setX(i), -1);
 		prints("^?");
 	    /*>>>>
 	    }

@@ -313,9 +313,9 @@ cmdtype cmd;
 		break;
 	    case CHANGE_C:
 		if (endp <= pend+1) {
-		    dgotoxy(setY(endp-1), setX(endp-1));
+		    dgotoxy(setX(endp-1), setY(endp-1));
 		    printch('$');
-		    dgotoxy(yp, xp);
+		    dgotoxy(xp, yp);
 		}
 		if (deletion(curr, endp))
 		    ok = ((newend = insertion(1, 0, &disp, &endY, TRUE)) >= 0);
@@ -346,7 +346,7 @@ cmdtype cmd;
 		    else /* if (cmd == I_AT_NONWHITE) */
 			curr = skipws(lstart);
 		    xp = setX(curr);
-		    dgotoxy(yp,xp);
+		    dgotoxy(xp,yp);
 		}
 		newend = insertion(count, 0, &disp, &endY, TRUE);
 		ok = (newend >= 0);
@@ -425,7 +425,7 @@ cmdtype cmd;
 killredo:
 	rcb[0] = 0;
     }
-    dgotoxy(yp, xp);
+    dgotoxy(xp, yp);
     if (xerox)
 	*rcp = 0;	/* terminate the redo */
     redoing = FALSE;
@@ -469,7 +469,7 @@ unsigned char code;
 	curr = np;
 	yp = settop(nl);
 	redisplay(TRUE);
-	dgotoxy(yp,xp);
+	dgotoxy(xp,yp);
     }
     else
 	error();
@@ -554,7 +554,7 @@ bool down;
     
     setpos(skipws(curr));	/* initialize new position - first nonwhite */
     yp = setY(curr);
-    dgotoxy(yp, xp);		/* go there */
+    dgotoxy(xp, yp);		/* go there */
 }
 
 exec_type
@@ -571,7 +571,7 @@ editcore()
     }
     if (diddled || zotscreen)		/* redisplay? */
 	redisplay(FALSE);
-    dgotoxy(yp, xp);			/* and move the cursor */
+    dgotoxy(xp, yp);			/* and move the cursor */
 
     for (;;) {
 	s_wrapped = 0;
@@ -582,7 +582,7 @@ editcore()
 	switch (cmd = movemap[(unsigned int)ch]) {
 	  case FILE_C:
 	    wr_stat();			/* write file stats */
-	    dgotoxy(yp, xp);
+	    dgotoxy(xp, yp);
 	    break;
 
 	  case WINDOW_UP:
@@ -592,7 +592,7 @@ editcore()
 
 	  case REDRAW_C:			/* redraw the window */
 	    redisplay(TRUE);
-	    dgotoxy(yp, xp);
+	    dgotoxy(xp, yp);
 	    break;
 
 	  case MARKER_C:			/* set a marker */

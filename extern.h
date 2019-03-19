@@ -219,7 +219,6 @@ extern int scan(), findDLE(), setY(), skipws(), nextline(), setX();
 extern int insertion(), chop(), fixcore(), lookup(), to_index();
 extern int doaddwork(), addfile(), expandargs(), to_line();
 extern int findfwd(), findback(), lvgetcontext(), getKey();
-extern int cclass();
 extern int insertfile();
 
 extern void strput(), numtoa(), clrprompt(), setend(), error();
@@ -287,7 +286,12 @@ extern char *os_tilde(char *);
 extern int os_subshell(char *);
 extern FILE* os_cmdopen(char *, char *, os_pid_t *);
 extern int os_cmdclose(FILE*, os_pid_t);
-extern int os_cclass(char c);
+
+extern int os_cclass(unsigned int c);
+#define CC_CTRL  0
+#define CC_PRINT 1
+#define CC_TAB   2
+#define CC_OTHER 3
 
 extern int Max(int,int);
 extern int Min(int,int);

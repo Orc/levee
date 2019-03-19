@@ -217,15 +217,15 @@ os_Beep()
 
 int
 cclass(c)
-register int c;
+unsigned int c;
 {
-    if (c >= ' ' && c < '')
-	return 0;
     if (c == '\t' && !list)
-	return 2;
-    if (c >= 0)
-	return 1;
-    return 3;
+	return CC_TAB;
+
+    if (c == 127 || c < 32 )
+	return CC_CTRL;
+    
+    return CC_PRINT;
 }
 
 

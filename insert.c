@@ -59,11 +59,11 @@ bool visual;
 		curpos.y = *yp;
 	    }
 	    else {
-		dgotoxy(1+(*yp), 0);
+		dgotoxy(0, 1+(*yp));
 		dclear_to_eol();
 	    }
 	}
-	dgotoxy(-1, currDLE);
+	dgotoxy(currDLE, -1);
     }
     else {
 	if (autoindent)
@@ -90,7 +90,7 @@ bool visual;
 			currDLE = Min(COLS,currDLE+shiftwidth);
 		    else
 			currDLE = Max(0,currDLE-shiftwidth);
-		    dgotoxy(-1, currDLE);
+		    dgotoxy(currDLE, -1);
 		}
 	} while (!(c = line(core, cp, endd-1, &len)));
 	if (Dflag && (len > 0 || c == ESC)) {
@@ -129,7 +129,7 @@ bool visual;
 	    }
 	    if (!autoindent)		/* reset currDLE? */
 		currDLE = 0;
-	    dgotoxy(-1, currDLE);
+	    dgotoxy(currDLE, -1);
 	}
     } while (c != ESC && cp <= endd-INSSIZE);
     *dp = cp;					/* start display here */

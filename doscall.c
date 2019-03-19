@@ -194,13 +194,13 @@ os_restore()
 
 
 os_cclass(c)
-register unsigned char c;
+unsigned int c;
 {
     if (c == '\t' && !list)
-	return 2;
-    if (c == '' || c < ' ')
-	return 1;
-    return 0;
+	return CC_TAB;
+    if (c == 127 || c < ' ')
+	return CC_CTRL;
+    return CC_PRINT;
 }
 
 

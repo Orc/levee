@@ -239,7 +239,7 @@ cmdtype cmd;
 	    error();
 	break;
     }
-    dgotoxy(yp, xp);
+    dgotoxy(xp, yp);
 }
     
 int
@@ -253,11 +253,19 @@ int ip, col;
 
     tcol = 0;
     while (tcol < col && ip < endd)
-	switch (cclass(core[ip++])) {
-	    case 0: tcol++;    break;
-	    case 1: tcol += 2; break;
-	    case 3: tcol += 3; break;
-	    case 2: tcol = tabsize*(1+(tcol/tabsize)); break;
+	switch (os_cclass(core[ip++])) {
+	    case CC_TAB:
+		    tcol = tabsize*(1+(tcol/tabsize));
+		    break;
+	    case CC_CTRL:
+		    tcol += 2;
+		    break;
+	    case CC_PRINT:
+		    tcol++;
+		    break;
+	    default:
+		    tcol += 3;
+		    break;
 	}
     return(ip);
 }

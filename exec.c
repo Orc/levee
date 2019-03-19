@@ -28,7 +28,7 @@ char *string;
 void
 clrmsg()
 {
-    dgotoxy(-1,0);
+    dgotoxy(0, -1);
     dclear_to_eol();
 } /* clrmsg */
 
@@ -37,7 +37,7 @@ void
 errmsg(msg)
 char *msg;
 {
-    dgotoxy(-1,0);
+    dgotoxy(0, -1);
     prints(msg);
     dclear_to_eol();
 } /* errmsg */
@@ -75,7 +75,7 @@ show_args()
 /* show_args: print the argument list */
 {
     register int i;
-    dgotoxy(-1,0);
+    dgotoxy(0, -1);
     logit("show_args: there %s %d argument%s",
 	(args.gl_pathc == 1) ? "is" : "are",
 	args.gl_pathc,
@@ -164,14 +164,14 @@ setcmd()
 			prints("no ");
 		    prints(vp->v_name);
 		    if (vp->u->strp) {
-			dgotoxy(-1, 10);
+			dgotoxy(10, -1);
 			prints("= ");
 			prints(vp->u->strp);
 		    }
 		    break;
 		default:
 		    prints(vp->v_name);
-		    dgotoxy(-1, 10);
+		    dgotoxy(10, -1);
 		    prints("= ");
 		    printi(vp->u->valu);
 		    break;
@@ -190,7 +190,7 @@ int i;
     if (i >= 0) {
 	exprintln();
 	printch(mbuffer[i].token);
-	dgotoxy(-1,3);
+	dgotoxy(3, -1);
 	if (movemap[(unsigned int)(mbuffer[i].token)] == INSMACRO)
 	    prints("!= ");
 	else
@@ -1127,6 +1127,9 @@ bool *noquit;
 	case EX_ESCAPE:			/* shell escape hack */
 	    zotscreen = YES;
 	    exprintln();
+#if USING_STDIO
+	    fflush(stdout);
+#endif
 	    if (*execstr) {
 		reset_input();
 		os_subshell(execstr);

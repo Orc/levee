@@ -478,15 +478,15 @@ os_cmdclose(FILE *input, os_pid_t child)
 
 
 int
-os_cclass(char c)
+os_cclass(unsigned int c)
 {
     if (c == '\t' && !list)
-	return 2;
-    if ( (c > 0 && c < 32) || c == 0x7f)
-	return 0;
+	return CC_TAB;
+    if ( c < 32 || c == 127 )
+	return CC_CTRL;
     if (c & 0x80)
-	return 3;
-    return 1;
+	return CC_OTHER;
+    return CC_PRINT;
 }
 
 

@@ -113,11 +113,19 @@ int cp;
     top = bseekeol(cp);
     xp = 0;
     while (top < cp) {
-	switch (cclass(core[top])) {
-	    case 0 : xp++; break;
-	    case 1 : xp += 2; break;
-	    case 2 : xp = tabsize*(1+(xp/tabsize)); break;
-	    case 3 : xp += 3; break;
+	switch (os_cclass(core[top])) {
+	    case CC_TAB:
+		    xp = tabsize*(1+(xp/tabsize));
+		    break;
+	    case CC_CTRL:
+		    xp += 2;
+		    break;
+	    case CC_PRINT:
+		    xp++;
+		    break;
+	    default:
+		    xp += 3;
+		    break;
 	}
 	top++;
     }
@@ -180,36 +188,6 @@ int *a,*b;
     *a = *b;
     *b = c;
 } /* swap */
-
-
-int
-#if OS_ATARI
-cclass(c)
-register int c;
-{
-    if (c >= ' ' && c < '')
-	return 0;
-    if (c == '\t' && !list)
-	return 2;
-    if (c >= 0)
-	return 1;
-    return 3;
-} /* cclass */
-#else
-cclass(c)
-register unsigned char c;
-{
-    if (c == '\t' && !list)
-	return 2;
-    if (c == '' || c < ' ')
-	return 1;
-#if !OS_DOS
-    if (c & 0x80)
-	return 3;
-#endif
-    return 0;
-} /* cclass */
-#endif
 
 
 void
@@ -310,13 +288,21 @@ void
 back_up(c)
 char c;
 {
-    switch (cclass(c)) {
-	case 0: ixp--; break;
-	case 1: ixp -= 2; break;
-	case 2: ixp = tabstack[--tabptr]; break;
-	case 3: ixp -= 3; break;
+    switch (os_cclass(c)) {
+	case CC_TAB:
+	    ixp = tabstack[--tabptr];
+	    break;
+	case CC_CTRL:
+	    ixp -= 2;
+	    break;
+	case CC_PRINT:
+	    ixp--;
+	    break;
+	default:
+	    ixp -= 3;
+	    break;
     }
-    dgotoxy(-1,ixp);
+    dgotoxy(ixp, -1);
 } /* back_up */
 
 
@@ -352,7 +338,7 @@ int start, endd, *size;
 	else if (c == Eraseline) {
 	    ip = start;
 	    tabptr = 0;
-	    dgotoxy(-1,ixp=col0);
+	    dgotoxy(ixp=col0, -1);
 	}
 	else if (c == Erasechar) {
 	    if (ip>start)
@@ -372,14 +358,20 @@ int start, endd, *size;
 	    if (ip < endd) {
 		if (c == '')
 		    c = readchar();
-		switch (cclass(c)) {
-		    case 0 : ixp++; break;
-		    case 1 : ixp += 2; break;
-		    case 2 :
+		switch (os_cclass(c)) {
+		    case CC_TAB:
 			tabstack[tabptr++] = ixp;
 			ixp = tabsize*(1+(ixp/tabsize));
 			break;
-		    case 3 : ixp += 3; break;
+		    case CC_CTRL:
+			ixp += 2;
+			break;
+		    case CC_PRINT:
+			ixp++;
+			break;
+		    default:
+			ixp += 3;
+			break;
 		}
 		s[ip++] = c;
 		printch(c);
@@ -410,7 +402,7 @@ resetX()
 {
     if (deranged) {
 	xp = setX(curr);
-	dgotoxy(-1, xp);
+	dgotoxy(xp, -1);
 	deranged = FALSE;
     }
 } /* resetX */

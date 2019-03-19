@@ -51,9 +51,12 @@ char **argv;
 	version(); copyright();
 	prints("(line mode)");
     }
-    else if ( argc <= 1 ) {
-	dgotoxy(LINES-1, 0);
-	version(); copyright();
+    else {
+	dgotoxy(0, LINES-1);
+	if ( argc <= 1 ) {
+	    version();
+	    copyright();
+	}
     }
 
 
@@ -86,9 +89,6 @@ char **argv;
     undobuf = lvtempfile("$un");
     yankbuf = lvtempfile("$ya");
     undotmp = lvtempfile("$tm");
-    
-    dgotoxy(LINES-1, 0);
-
     
     if ( p = getenv("LVRC") ) {
 	extern char* execstr;

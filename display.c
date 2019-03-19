@@ -34,7 +34,7 @@
 /* do a gotoXY -- allowing -1 for same row/column
  */
 void 
-dgotoxy(y,x)
+dgotoxy(x,y)
 {
     if (y == -1)
 	y = curpos.y;
@@ -358,25 +358,23 @@ register char *out;
 register unsigned c;
 {
     static char hexdig[] = "0123456789ABCDEF";
-    switch (os_cclass(c)) {
-    case 1:    /* printable */
-           out[0] = c;
-           return 1;
-    
-    case 2:    /* tab */
-           {   register int i;
-               int size;
+    register int i;
+    int size;
 
-               for (i = size = tabsize - (curpos.x % tabsize);i > 0;)
-                   out[--i] = ' ';
-               return size;
-           }
-    case 3:    /* control character, represented by ^(c^64) */
-           out[0] = '^';
-           out[1] = c^64;
-           return 2;
+    switch (os_cclass(c)) {
+    case CC_TAB:
+	    for (i = size = tabsize - (curpos.x % tabsize);i > 0;)
+		out[--i] = ' ';
+	    return size;
+    case CC_CTRL:    /* control character, represented by ^(c^64) */
+	    out[0] = '^';
+	    out[1] = c^64;
+	    return 2;
+    case CC_PRINT:    /* printable */
+	    out[0] = c;
+	    return 1;
     default:
-           out[0] = '\\';
+	    out[0] = '\\';
            out[1] = hexdig[(c>>4)&017];
            out[2] = hexdig[c&017];
            return 3;
@@ -436,9 +434,9 @@ int y,x,start;
     
     endd = fseekeol(start);
     if (start==0 || core[start-1] == EOL)
-	dgotoxy(y, 0);
+	dgotoxy(0, y);
     else
-	dgotoxy(y, x);
+	dgotoxy(x, y);
     oxp = curpos.x;
 
     while (start < endd && curpos.x < COLS) {
@@ -478,7 +476,7 @@ bool rest;
     }
     if (rest && sp >= bufmax)
 	while (y<LINES-1) { /* fill screen with ~ */
-	    dgotoxy(y, 0);
+	    dgotoxy(0, y);
 	    printch('~'); dclear_to_eol();
 	    y++;
 	}
@@ -543,7 +541,7 @@ int top,bottom;
 void 
 clrprompt()
 {
-    dgotoxy(LINES-1,0);
+    dgotoxy(0, LINES-1);
     dclear_to_eol();
 }
 

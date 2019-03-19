@@ -199,15 +199,15 @@ char *s;
 
 int
 os_cclass(c)
-register unsigned char c;
+unsigned int c;
 {
     if (c == '\t' && !list)
-	return 2;
-    if (c == '' || c < ' ')
-	return 1;
+	return CC_TAB;
+    if (c == 127 || c < ' ')
+	return CC_CTRL;
     if (c & 0x80)
-	return 3;
-    return 0;
+	return CC_OTHER;
+    return CC_PRINT;
 }
 
 #endif
