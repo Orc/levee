@@ -1129,7 +1129,7 @@ bool *noquit;
 	    exprintln();
 	    if (*execstr) {
 		reset_input();
-		system(execstr);
+		os_subshell(execstr);
 		set_input();
 	    }
 	    else

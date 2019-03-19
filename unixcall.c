@@ -392,6 +392,13 @@ os_tilde(char *path)
 }
 
 
+int
+os_subshell(char *commandline)
+{
+    return system(commandline);
+}
+
+
 
 /* put the terminal into raw mode
  */

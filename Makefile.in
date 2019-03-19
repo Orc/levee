@@ -18,6 +18,9 @@ lev: $(OBJS)
 version.c: mkversion VERSION
 	./mkversion
 
+mkversion    : mkversion.c
+	$(CC) $(CFLAGS) -o mkversion mkversion.c
+
 clean:
 	rm -f *.o lev mkversion version.c
 
@@ -39,7 +42,6 @@ install.man:
 # Dependencies
 
 version.o    : version.c
-mkversion    : mkversion.c
 blockio.o    : levee.h extern.h blockio.c config.h
 display.o    : levee.h extern.h termcap.i display.c config.h
 editcor.o    : levee.h extern.h editcor.c config.h external.h
