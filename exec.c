@@ -164,14 +164,14 @@ setcmd()
 			prints("no ");
 		    prints(vp->v_name);
 		    if (vp->u->strp) {
-			dwrite("          ", 10-strlen(vp->v_name));
+			dgotoxy(-1, 10);
 			prints("= ");
 			prints(vp->u->strp);
 		    }
 		    break;
 		default:
 		    prints(vp->v_name);
-		    dwrite("          ", 10-strlen(vp->v_name));
+		    dgotoxy(-1, 10);
 		    prints("= ");
 		    printi(vp->u->valu);
 		    break;

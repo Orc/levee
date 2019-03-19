@@ -28,7 +28,7 @@ char *str;
 {
     int len;
     char flag;
-    
+
     flag = line(str, 0, COLS-curpos.x, &len);
     str[len] = 0;
     dclear_to_eol();
@@ -108,7 +108,7 @@ setX(cp)
 int cp;
 {
     int top, xp;
-    
+
     top = bseekeol(cp);
     xp = 0;
     while (top < cp) {
@@ -129,7 +129,7 @@ setY(cp)
 int cp;
 {
     int yp, ix;
-    
+
     ix = ptop;
     yp = -1;
     cp = Min(cp,bufmax-1);
@@ -167,14 +167,14 @@ int line;
     }
     return(cp);
 } /* to_index */
-    
+
 
 void
 swap(a,b)
 int *a,*b;
 {
     int c;
-    
+
     c = *a;
     *a = *b;
     *b = c;
@@ -247,7 +247,7 @@ lookup(c)
 char c;
 {
     int ix = MAXMACROS;
-    
+
     while (--ix >= 0 && mbuffer[ix].token != c)
 	;
     return ix;
@@ -259,7 +259,7 @@ fixmarkers(base,offset)
 int base,offset;
 {
     unsigned char c;
-    
+
     for (c = 0;c<'z'-'`';c++)
 	if (contexts[c] > base) {
 	    if (contexts[c]+offset < base || contexts[c]+offset >= bufmax)
@@ -280,30 +280,31 @@ wr_stat()
 	prints("\" ");
 	if (newfile)
 	    prints("<New file> ");
+	printch(' ');
+	if (readonly)
+	    prints("<readonly> ");
+	else if (modified)
+	    prints("<Modified> ");
+
+	if (bufmax > 0) {
+	    prints(" line ");
+	    printi(to_line(curr));
+	    prints(" -");
+	    printi((int)((long)(curr*100L)/(long)bufmax));
+	    prints("%-");
+	}
+	else
+	    prints("-empty-");
     }
     else
 	prints("No file");
-    printch(' ');
-    if (readonly)
-	prints("<readonly> ");
-    else if (modified)
-	prints("<Modified> ");
-    if (bufmax > 0) {
-	prints(" line ");
-	printi(to_line(curr));
-	prints(" -");
-	printi((int)((long)(curr*100L)/(long)bufmax));
-	prints("%-");
-    }
-    else
-	prints("-empty-");
 } /* wr_stat */
 
 
 static int  tabptr,
 	    tabstack[20],
 	    ixp;
-	
+
 void
 back_up(c)
 char c;
@@ -333,7 +334,7 @@ int start, endd, *size;
     int col0,
 	ip;
     unsigned char c;
-    
+
     col0 = ixp = curpos.x;
     ip = start;
     tabptr = 0;
@@ -419,7 +420,7 @@ void
 setend()
 {
     int bottom, count;
-    
+
     bottom = ptop;
     count = LINES-1;
     while (bottom < bufmax && count > 0) {
@@ -438,7 +439,7 @@ settop(lines)
 int lines;
 {
     int top, yp;
-    
+
     top = curr;
     yp = -1;
     do {
@@ -453,6 +454,7 @@ int lines;
 
 
 
+int
 Max(a,b)
 {
     return (a>b) ? a : b;
@@ -460,6 +462,7 @@ Max(a,b)
 
 
 
+int
 Min(a,b)
 {
     return (a<b) ? a : b;

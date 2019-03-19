@@ -160,8 +160,6 @@ exec_type emode;
 	    more = (mode == E_EDIT);
 	if (mode != E_VISUAL && curpos.x > 0)
 	    println();
-	else
-	    dgotoxy(-1,0);
     } while (more && noquit);
     if (zotscreen)
 	clrprompt();
@@ -185,6 +183,9 @@ char **argv;
 
     os_unlink(undobuf);
     os_unlink(yankbuf);
+
+    if ( curpos.x )
+	println();
 
     reset_input();
     os_restore();
