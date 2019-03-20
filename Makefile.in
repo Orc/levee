@@ -43,9 +43,8 @@ install.man:
 version.o    : version.c
 blockio.o    : levee.h extern.h blockio.c config.h
 display.o    : levee.h extern.h termcap.i display.c config.h
-editcor.o    : levee.h extern.h editcor.c config.h external.h
+editcor.o    : levee.h extern.h editcor.c config.h
 exec.o       : levee.h extern.h exec.c config.h
-external.o   : external.c external.h
 find.o       : levee.h extern.h grep.h find.c config.h
 globals.o    : levee.h globals.c config.h
 insert.o     : levee.h extern.h insert.c config.h

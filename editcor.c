@@ -19,7 +19,6 @@
  */
 #include "levee.h"
 #include "extern.h"
-#include "external.h"
 #include <stdlib.h>
 #include <unistd.h>
 #include <ctype.h>
