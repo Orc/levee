@@ -545,7 +545,7 @@ char *fname;
     int status;
     zerostack(&undo);		/* undo doesn't survive past write */
     if (high < 0)
-	high = (low < 0) ? (bufmax-1) : (1+fseekeol(low));
+	high = (low < 0) ? (bufmax-1) : (fseekeol(low));
     if (low < 0)
 	low  = 0;
 
