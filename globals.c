@@ -109,9 +109,6 @@ char *TERMNAME,		/* will be set in termcap handling */
      *SO,
      *SE;
 
-char *other_screen,	/* termcap 'ti' ; switch to alternate screen */
-     *this_screen;	/* termcap 'te' ; switch to regular screen */
-
 char Erasechar,				/* our erase character */
      Eraseline;				/* and line-kill character */
 
