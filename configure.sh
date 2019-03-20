@@ -134,6 +134,8 @@ AC_CHECK_HEADERS pwd.h && AC_CHECK_HEADERS uuid/uuid.h
 
 AC_CHECK_FUNCS basename && AC_CHECK_HEADERS libgen.h
 
+AC_CHECK_HEADERS sys/wait.h
+
 if AC_TYPE_PID_T ; then
     AC_DEFINE os_pid_t pid_t
 else

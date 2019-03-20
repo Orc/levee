@@ -31,6 +31,9 @@
 #include <string.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#if HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
 #include <unistd.h>
 #include <stdlib.h>
 #include <ctype.h>
