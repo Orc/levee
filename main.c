@@ -138,7 +138,7 @@ exec_type emode;
 	 noquit;		/* quit flag for :q, :xit, :wq */
     exec_type mode;
 
-    zotscreen = diddled = FALSE;
+    zotscreen = redraw = FALSE;
     noquit = TRUE;
 
     if (lineonly)
@@ -173,7 +173,7 @@ char **argv;
 {
     initialize(argc, argv);
 
-    diddled = TRUE;	/* force screen redraw when we enter editcore() */
+    redraw = TRUE;	/* force screen redraw when we enter editcore() */
     if (lineonly)
 	while (execmode(E_EDIT))
 	    prints("(no visual mode)");

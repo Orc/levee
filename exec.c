@@ -145,7 +145,7 @@ setcmd()
 			    errmsg("bad set type");
 			    continue;
 			}
-		    diddled |= vp->v_flags & V_DISPLAY;
+		    redraw |= vp->v_flags & V_DISPLAY;
 		}
 	    }
 	} while ( (arg = getarg()) );
@@ -388,7 +388,7 @@ splat:	errmsg("bad substitute");
     do {
 	low = chop(low, &high, NO, &askme);
 	if (low > -1) {
-	    diddled = YES;
+	    redraw = YES;
 	    num++;
 	    if (printme) {
 		exprintln();
@@ -436,7 +436,7 @@ insertfile(FILE *f, int insert, int at, int *fsize)
 	if (onright > 0)
 	    moveleft(&core[high], &core[at+(*fsize)], onright);
     }
-    diddled = YES;
+    redraw = YES;
     return rc;
 } /* insertfile */
 
@@ -472,6 +472,7 @@ bool newbuf;
 	fsize = 0;
 	if (newbuf)
 	    newfile = YES;
+	redraw = TRUE;
     }
     else {
 	rc = insertfile(f, !newbuf, low, &fsize);
@@ -544,13 +545,15 @@ char *fname;
     int status;
     zerostack(&undo);		/* undo doesn't survive past write */
     if (high < 0)
-	high = (low < 0) ? bufmax : (1+fseekeol(low));
+	high = (low < 0) ? (bufmax-1) : (1+fseekeol(low));
     if (low < 0)
 	low  = 0;
+
+    high++;
     printch('"');
     prints(fname);
     prints("\" ");
-    whole = (low == 0 && high >= bufmax-1);
+    whole = (low == 0 && high >= (bufmax-1));
     if (whole && autocopy)
 	backup(fname);
     if ( (f=expandfopen(fname, "w")) ) {
@@ -632,7 +635,6 @@ editfile()
 	name = getarg();
     }
 
-    logit("enter editfile");
     memset(&files, 0, sizeof files);
 
     if (name) {
@@ -818,7 +820,7 @@ int dft;
     }
     else {
 	curr = low;
-	diddled = YES;
+	redraw = YES;
     }
 }
 
@@ -883,7 +885,7 @@ bool flag;
     low = insertion(1,setstep[flag],&i,&i,NO)-1;
     if (low >= 0)
 	curr = low;
-    diddled = YES;
+    redraw = YES;
 }
 
 
@@ -971,7 +973,7 @@ bool *noquit;
 
     what = parse(cmd);
     ok = YES;
-    if (diddled) {
+    if (redraw) {
 	lstart = bseekeol(curr);
 	lend = fseekeol(curr);
     }
@@ -1069,13 +1071,13 @@ bool *noquit;
 		ok = deletion(low,high);
 	    else
 		ok = doyank(low,high);
-	    diddled = YES;
+	    redraw = YES;
 	    break;
 	case EX_PUT:				/* :put */
 	    fixupline(lstart);
 	    zerostack(&undo);
 	    ok = putback(low, &high);
-	    diddled = YES;
+	    redraw = YES;
 	    break;
 	case EX_VI:				/* :visual */
 	    *mode = E_VISUAL;
@@ -1113,7 +1115,7 @@ bool *noquit;
 	case EX_UNDO:				/* :undo */
 	    low = fixcore(&high);
 	    if (low >= 0) {
-		diddled = YES;
+		redraw = YES;
 		curr = low;
 	    }
 	    else ok = NO;

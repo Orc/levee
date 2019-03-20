@@ -91,7 +91,7 @@ char *pattern, **cp, *endp;
     }
     return FALSE;
 }
-	
+
 int
 amatch(pattern,start,endp)
 char *pattern, *endp, *start;
@@ -138,7 +138,7 @@ patsize(pattern)
 register char **pattern;
 {
     register int count;
-    
+
     switch (**pattern) {
       case LITCHAR:
 	*pattern += 2;
@@ -162,7 +162,7 @@ register char *linep;
 {
     register char *p = 1+pattern;
     register int count;
-    
+
     if ((count = (*p++)&0xff) == 0)
 	return FALSE;
     while (count--)
@@ -259,11 +259,11 @@ char *string, delim;
 	RE_start[arg] = RE_size[arg] = (-1);
     arg = 0;
     p = pattern;
-    
+
     while ((*string != delim) && (*string != 0)) {
 	oldcp = cp;
 	cp = p;
-	
+
 	if (!magic)		/* kludge for nonmagical patterns */
 	    goto normal;
 	if (*string == ANY)
@@ -412,7 +412,7 @@ int *idx,start;
 	    count = 0;
 	    while (*src >= '0' && *src <= '9')
 		count = (count*10) + *(src++) - '0';
-		
+
 	    addr = to_index(count);
 	break;
 	case '$':
@@ -483,6 +483,15 @@ int
 fseekeol(origin)
 int origin;
 {
+#if 0
+    char *res = memchr(core+origin, EOL, bufmax-origin);
+
+    if ( res )
+	return res-core;
+    else
+	return bufmax;
+#endif
+
     return(origin + scan(bufmax-origin-1,'=',EOL,&core[origin]));
 }
 
@@ -501,7 +510,7 @@ char c;
 bool begline;
 {
     int i;
-    
+
     if (c == '\'')
 	c = '`';
     if (c >= '`' && c <= 'z')

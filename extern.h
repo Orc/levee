@@ -175,7 +175,7 @@ bool modified,		/* File has been modified */
      newline,		/* Last insert/delete included a EOL */
      lineonly,		/* Dumb terminal? */
      zotscreen,		/* do more after command in execmode */
-     diddled;		/* force redraw when I enter editcore */
+     redraw;		/* force redraw when I enter editcore */
      
 extern
 int macro;    /* Index into MCR macro execution stack */

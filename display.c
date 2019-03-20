@@ -49,8 +49,14 @@ dgotoxy(x,y)
     if (x >= COLS)
 	x = COLS-1;
     
-    unless ( os_gotoxy(y,x) )
+    unless ( os_gotoxy(x,y) ) {
+#if 0
+	char *gt = tgoto(CM, x, y);
+	logit("dgotoxy(%d,%s) -> <%s>", x, y, gt);
+#else
 	dputs(tgoto(CM,x,y));
+#endif
+    }
 }
 
 
@@ -75,7 +81,7 @@ void
 dwrite(s,len)
 char *s;
 {
-    if ( len == 0 )
+    if ( len <= 0 )
 	return;
 
     unless ( os_dwrite(s, len) ) {
@@ -237,6 +243,8 @@ dinitialize()
 	    HO = strdup(goto0);
     }
 
+    logit("CM=%s", CM);
+
     CL = tgetstr("cl", &bufp);
     CE = tgetstr("ce", &bufp);
 #if 0
@@ -262,10 +270,6 @@ dinitialize()
     canUPSCROLL = (UpS != NULL);
     CA = (CM != NULL);
     canOL = (OL != NULL);
-
-    logit("canUPSCROLL = %d", canUPSCROLL);
-    logit("CA = %d", CA);
-    logit("canOL = %d", canOL);
 
 #if USING_STDIO
     fflush(stdout);

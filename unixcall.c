@@ -99,7 +99,7 @@ char *s;
 
 
 int
-os_gotoxy(y,x)
+os_gotoxy(x,y)
 {
     return 0;
 }
@@ -247,7 +247,7 @@ os_mktemp(char *dest, int size, const char *template)
 {
     static char Xes[] = ".XXXXXX";
     static char tmp[] = "/tmp/";
-    
+
     /* assert |dest| > |/tmp/|+|template|+|XXXXXX| */
     unless (size > sizeof(tmp) + sizeof(Xes) + strlen(template)) {
 	errno = E2BIG;
@@ -367,35 +367,54 @@ os_tilde(char *path)
 {
 #if HAVE_PWD_H
     char *name, *slash, *expanded;
-    struct passwd *user;
+    char *dir = 0;
+    struct passwd *user=0;
 
-    logit("os_expand %s", path);
-    unless ( path && (*path == '~') )
+    logit("os_tilde %s", path);
+    unless ( path && (path[0] == '~') )
 	return 0;
 
-    /* ourself or someone else? */
-    unless ( slash = strchr(path, '/') )
-	return 0;
+    /* ~ by itself gets special handling; $HOME, then getpwuid */
+    if ( path[1] == '/' ) {
 
-    unless ( name = malloc(slash-path) )
-	return 0;
+	logit("os_tilde: just ~");
 
-    strncpy(name, 1+path, (slash-path)-1);
-    name[(slash-path)-1] = 0;
+	slash = 1+path;
+	unless (dir = getenv("HOME")) {
+	    unless (user = getpwuid(getuid()))
+		return 0;
+	    dir = user->pw_dir;
+	}
+    }
+    else {
+	logit("os_tilde: ~name");
 
-    if ( *name )
+	/* ourself or someone else? */
+	unless ( slash = strchr(path, '/') )
+	    return 0;
+
+	unless ( name = malloc(slash-path) )
+	    return 0;
+
+	strncpy(name, 1+path, (slash-path)-1);
+	name[(slash-path)-1] = 0;
+
+
 	user = getpwnam(name);
-    else
-	user = getpwuid(getuid());
+	free(name);
 
-    free(name);
+	unless (user)
+	    return 0;
 
-    unless (user)
-	return 0;
+	dir = user->pw_dir;
+    }
 
-    if (expanded = malloc(strlen(user->pw_dir)+1+strlen(slash)+1)) {
-	strcpy(expanded, user->pw_dir);
-	strcat(expanded, slash);
+    logit("os_tilde: dir is [%s]", dir);
+
+    if (expanded = malloc(strlen(dir)+strlen(slash)+2)) {
+	strcpy(expanded, dir);
+	strcat(expanded, "/");
+	strcat(expanded, slash+1);
 
 	logit("os_expand -> %s", expanded);
     }
@@ -450,7 +469,7 @@ os_cmdopen(char *cmdline, char *workfile, os_pid_t *child)
 	}
 	dup2(io[1], 1);
 	dup2(1,2);
-	
+
 	execl("/bin/sh", "sh", "-c", cmdline, 0L);
 	close(io[1]);
 	exit(1);

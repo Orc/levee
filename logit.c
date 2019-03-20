@@ -10,19 +10,23 @@ logit(char *fmt, ...)
 {
     va_list args;
     char *line, *p;
+    size_t size;
 
 
-    if ( logfile == 0 )
+    if ( logfile == 0 ) {
 	logfile = fopen("levee.log", "w");
+	setvbuf(logfile, 0, _IOLBF, 0);
+    }
 
     va_start(args, fmt);
 
     if ( vasprintf(&line, fmt, args) >= 0 ) {
-	for (p=line; *p; p++ )
+	for (p=line; *p ; p++ ) {
 	    if ( *p >= ' ' && *p < 127 )
 		fputc(*p, logfile);
 	    else
 		fprintf(logfile, "%%%02x", (unsigned int)(*p));
+	}
 	fputc('\n', logfile);
 	free(line);
     }

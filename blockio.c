@@ -34,10 +34,10 @@ int endd, *size;
 {
     register int chunk;
 
-    chunk = read(fileno(f), core+start, (endd-start)-1);
+    chunk = read(fileno(f), core+start, endd-start);
 
     *size = chunk;
-    return chunk < (endd-start)-1;
+    return chunk < endd-start;
 }
 
 
@@ -48,5 +48,14 @@ putfile(f, start, endd)
 register FILE *f;
 register int start, endd;
 {
-    return write(fileno(f), core+start, endd-start) == (endd-start);
+    int size = (endd-start);
+    int ok;
+
+#if USING_STDIO
+    ok = fwrite(core+start, size, 1, f) == 1;
+#else
+    ok = write(fileno(f), core+start, size) == size;
+#endif
+
+    return ok;
 }

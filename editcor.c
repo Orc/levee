@@ -564,11 +564,11 @@ editcore()
     
     /* rcb[0] = 0; rcp = rcb; */
 
-    if (diddled) {
+    if (redraw) {
 	setpos(skipws(curr));		/* set cursor x position.. */
 	yp = settop(LINES / 2);		/* Y position */
     }
-    if (diddled || zotscreen)		/* redisplay? */
+    if (redraw || zotscreen)		/* redisplay? */
 	redisplay(FALSE);
     dgotoxy(xp, yp);			/* and move the cursor */
 

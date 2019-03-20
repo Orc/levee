@@ -8,13 +8,16 @@
 #ifdef OS_WINDOWS
 
 #include <stdio.h>
+#include <windows.h>
 #include <stdlib.h>
 #include <string.h>
 #include <termcap.h>
+#include <errno.h>
 #include <stdarg.h>
-#include <windows.h>
 #include <io.h>
 #include <fcntl.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 /* **** FILE IO ABSTRACTIONS **** */
 FILEDESC
@@ -67,6 +70,10 @@ WRITE_TEXT(FILEDESC f, void *buf, int size)
 
 /* i/o handling mess
  */
+static struct _iob {
+    char ibuf[4096];
+    int  iptr;
+} iobuf = { .iptr = 0 };
 
 static struct _input_fd {
     HANDLE fd;			/* Windows file descriptor */
@@ -85,9 +92,36 @@ static struct _window_fd {
 } window = { .set=0 };
 
 
+void
+iwrite(char *buf, int size)
+{
+#if 0
+    write(fileno(stdout), buf, size);
+#else
+    register rc;
+    DWORD written;
+
+    rc = WriteFile(window.fd, buf, size, &written, 0);
+
+    if ( written != size )
+	logit("iwrite wanted to write %d, but actually wrote %d", size, written);
+    /* we should care about rc, yes? */
+#endif
+}
+
+void
+iflush()
+{
+    if ( iobuf.iptr > 0 ) {
+	iwrite(iobuf.ibuf, iobuf.iptr);
+	iobuf.iptr = 0;
+    }
+}
+
+
 os_openline()
 {
-    return 0;
+    return 1;
 }
 
 
@@ -126,27 +160,25 @@ os_clearscreen()
     bSuccess = SetConsoleCursorPosition( window.fd, coordScreen );
 
 #endif
-    os_dwrite("\f",1);
     return 0;
 }
 
-int
-os_dwrite(s, len)
-char *s;
-{
-    logit("os_dwrite(\"%s\",%d)", s, len);
-#if USING_STDIO
-    fwrite(s,len,1,stdout);
-#else
-    register rc;
-    DWORD written;
-    
-    rc = WriteFile(window.fd, s, len, &written, 0);
 
-    if ( written != len )
-	logit("os_dwrite wanted to write %d, but actually wrote %d", len, written);
-    /* we should care about rc, yes? */
-#endif
+int
+os_dwrite(ptr, size)
+char *ptr;
+{
+    logit("os_dwrite(\"%.*s\",%d)", size, ptr, size);
+    
+    if ( iobuf.iptr + size > sizeof iobuf.ibuf )
+	iflush();
+
+    if ( size > sizeof iobuf.ibuf )
+	iwrite(ptr, size);
+
+    memcpy(iobuf.ibuf + iobuf.iptr, ptr, size);
+    iobuf.iptr += size;
+    return 1;
 }
 
 
@@ -190,18 +222,25 @@ dotfile()
 {
     static char *dotname = 0;
     char *disk, *path;
+    static char dot[] = "/lv.rc";
 
     unless ( dotname ) {
 	disk = getenv("HOMEDRIVE");
 	path = getenv("HOMEPATH");
 
 	if ( disk && path ) {
-	    dotname = malloc(1+strlen(disk)+strlen(path)+1+strlen("lv,rc"));
+	    int needed = 1+strlen(disk)+strlen(path)+sizeof dot;
+	    
+	    dotname = dotname ? realloc(dotname, needed) : malloc(needed);
 
 	    if ( dotname ) {
+#if USING_STDIO
+		sprintf(dotname, "%s%s%s", disk, path, dot);
+#else
 		strcpy(dotname, disk);
 		strcat(dotname, path);
-		strcat(dotname, "\\lv.rc");
+		strcat(dotname, dot);
+#endif
 
 		return dotname;
 	    }
@@ -220,7 +259,6 @@ os_mktemp(char *dest, int size, const char *template)
 	errno = E2BIG;
 	return 0;
     }
-
 
 #if USING_STDIO
     if ( tmpdir )
@@ -264,7 +302,7 @@ os_clear_to_eol()
 }
 
 static CHAR_INFO clear = { .Char.AsciiChar=' ', .Attributes=0 };
-    
+
 #if 0
 static void
 scroll(lines)
@@ -295,7 +333,7 @@ int *y;
     if ( window.set ) {
 
 	logit( "open_line(->%d)", (*y));
-	
+
 	toscroll.Left = 0;
 	toscroll.Top = *y;
 	toscroll.Right = COLS-1;
@@ -319,10 +357,10 @@ int *y;
 
 	if ( !GetConsoleScreenBufferInfo(window.fd, &xyzzy) )
 	    return 0;
-	
+
 	co = xyzzy.srWindow.Right - xyzzy.srWindow.Left + 1;
 	li = xyzzy.srWindow.Bottom - xyzzy.srWindow.Top + 1;
-	
+
 	logit( "gotten: LINES=%d, COLS=%d", li, co);
 
 	(*x) = co;
@@ -334,22 +372,54 @@ int *y;
 }
 
 
-int
-os_gotoxy(y, x)
+FILE *
+os_cmdopen(char *command, char *workfile, os_pid_t *child)
 {
-#if 1
+    *child = 0;
+
+    return 0;
+}
+
+int
+os_cmdclose(FILE *cmd, os_pid_t child)
+{
+    int status;
+
+    waitpid(child, &status, 0);
+    fclose(cmd);
+
+    return WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+}
+
+
+int
+os_gotoxy(x, y)
+{
     COORD xyzzy;
-    
+
     xyzzy.X = x;
     xyzzy.Y = y;
 
     SetConsoleCursorPosition(window.fd, xyzzy);
+#if 0
     return 1;
 #else
     return 0;
 #endif
 }
 
+
+os_cclass(c)
+unsigned int c;
+{
+    if (c == '\t' && !list)
+	return CC_TAB;
+    if (c == 127 || c < ' ')
+	return CC_CTRL;
+    if (c & 0x80)
+	return CC_OTHER;
+    return CC_PRINT;
+}
 
 /* set up the stdin descriptor for initcon()/fixcon()
  */
@@ -376,14 +446,20 @@ os_initialize()
     _setmode(1, _O_BINARY);
     _setmode(2, _O_BINARY);
 #endif
-    
+
+    /* disable ! command in visual mode
+     */
+    movemap['!'] = BAD_COMMAND;
+
+    /* get our tty handles or die trying
+     */
     if ( !tty_stdin.set ) {
 
 	logit( "getting input fd");
-	
+
 	tty_stdin.cooked = 1;
 	tty_stdin.nr_ev = tty_stdin.cur_ev = 0;
-    
+
 	if ( (tty_stdin.fd = GetStdHandle(STD_INPUT_HANDLE)) == NOPE )
 	    return EOF;
 	GetConsoleMode(tty_stdin.fd, &tty_stdin.mode);
@@ -397,35 +473,164 @@ os_initialize()
 
 	if ( (window.fd = GetStdHandle(STD_OUTPUT_HANDLE)) == NOPE )
 	    return EOF;
-	
+
 	GetConsoleMode(window.fd, &window.mode);
 
 	logit("output mode=%016x", window.mode);
-	
+
 	window.set = 1;
     }
 
     return 0;
 }
 
-    
+
 os_restore()
 {
     return 1;
 }
 
 
-os_cclass(c)
-unsigned int c;
+os_subshell(char *cmdline)
 {
-    if (c == '\t' && !list)
-	return CC_TAB;
-    if (c == 127 || c < ' ')
-	return CC_CTRL;
-    if (c & 0x80)
-	return CC_OTHER;
-    return CC_PRINT;
+    return system(cmdline);
 }
+
+
+/*
+ * implement the glob() command (with GLOB_NOSORT always set)
+ */
+
+
+/* local function to add a single file (broken out so I can implement
+ * wildcards using _findfirst/_findnext)
+ */
+static int
+glob_addfile(char *file, int count, glob_t *result)
+{
+    char **newlist;
+
+    logit("os_glob: adding %s", file);
+    if ( count >= result->gl_pathalloc ) {
+	result->gl_pathalloc += 50;
+	logit("os_glob: expanding gl_pathv (old pathv=%p, count=%d, pathc=%d)",
+		    result->gl_pathv, count, result->gl_pathc);
+	if ( result->gl_pathv )
+	    newlist = realloc(result->gl_pathv,
+			      result->gl_pathalloc * sizeof result->gl_pathv[0]);
+	else
+	    newlist = calloc(result->gl_pathalloc, sizeof result->gl_pathv[0]);
+
+	unless (newlist)
+	    return GLOB_NOSPACE;
+
+	result->gl_pathv = newlist;
+    }
+
+    unless (result->gl_pathv[count-1] = malloc(strlen(file)+2))
+	return GLOB_NOSPACE;
+
+    strcpy(result->gl_pathv[count-1], file);
+    if ( result->gl_flags & GLOB_MARK )
+	strcat(result->gl_pathv[count-1], "/");
+    result->gl_pathv[count] = 0;
+    result->gl_pathc++;
+    result->gl_matchc = 1;
+    logit("os_glob: count=%d, pathc=%d,matchc=%d",
+	    count, result->gl_pathc, result->gl_matchc);
+    return 0;
+}
+
+
+/*
+ * non-sorting glob with windows wildcarding
+ */
+int
+os_glob(const char* pattern, int flags, glob_t *result)
+{
+    int count = 1 + (result->gl_flags & GLOB_DOOFFS ? result->gl_offs : 0);
+
+#if LOGGING
+    if ( result->gl_flags & GLOB_APPEND )
+	logit("os_glob: add %s to arglist", pattern);
+    else
+	logit("os_glob: create new arglist, initialized with %s", pattern);
+#endif
+
+    if ( result->gl_pathc == 0 )
+	result->gl_flags = flags;
+
+    if ( result->gl_flags & GLOB_APPEND )
+	count += result->gl_pathc;
+
+    unless ( flags & GLOB_NOMAGIC ) {
+	if ( strcspn(pattern, "?*") < strlen(pattern) ) {
+	    result->gl_flags |= GLOB_MAGCHAR;
+	    unless (result->gl_flags & GLOB_NOCHECK)
+		return GLOB_NOMATCH;
+	}
+	else
+	    result->gl_flags &= ~GLOB_MAGCHAR;
+    }
+
+    return glob_addfile((char*)pattern, count, result);
+}
+
+
+/*
+ * clean up a glob_t after use.
+ */
+void
+os_globfree(glob_t *collection)
+{
+    int x, start;
+
+    start = collection->gl_flags & GLOB_DOOFFS ? collection->gl_offs : 0;
+
+    for (x=0; x < collection->gl_pathc; x++)
+	if ( collection->gl_pathv[start+x] )
+	    free(collection->gl_pathv[start+x]);
+    if ( collection->gl_pathc )
+	free(collection->gl_pathv);
+    memset(collection, 0, sizeof(collection[0]));
+}
+
+
+/*
+ * do ~username expansions on a filename
+ */
+char *
+os_tilde(char *path)
+{
+    char *expanded;
+    char *disk,*dir;
+
+    logit("os_tilde %s", path);
+
+    /* ~ only for now
+     */
+
+    unless ( path && (path[0] == '~') && (strcspn(path, "/\\") == 1) )
+	return 0;
+
+    unless ( (disk=getenv("HOMEDRIVE")) && (dir=getenv("HOMEPATH")) )
+	return 0;
+
+    if (expanded = malloc(strlen(disk)+strlen(dir)+strlen(1+path)+1)) {
+#if USING_STDIO
+	sprintf(expanded, "%s%s/%s", disk, dir, 2+path);
+#else
+	strcpy(expanded, disk);
+	strcat(expanded, dir);
+	strcat(expanded, 2+path);
+#endif
+
+	logit("os_tilde -> %s", expanded);
+    }
+
+    return expanded;
+}
+
 
 void
 set_input()
@@ -433,7 +638,9 @@ set_input()
     if ( tty_stdin.set ) {
 	tty_stdin.cooked = 0;
 	SetConsoleMode(tty_stdin.fd, ENABLE_EXTENDED_FLAGS);
-	SetConsoleMode(window.fd, ENABLE_PROCESSED_OUTPUT|ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+	SetConsoleMode(window.fd, ENABLE_PROCESSED_OUTPUT|
+				  ENABLE_VIRTUAL_TERMINAL_PROCESSING|
+				  DISABLE_NEWLINE_AUTO_RETURN);
     }
 }
 
@@ -453,9 +660,11 @@ reset_input()
 int
 getKey()
 {
-#if USING_STDIO
+#if 0 /*USING_STDIO*/
+    logit("getkey: flush stdout");
     fflush(stdout);
 #endif
+    iflush();
     while ( 1 ) {
 	if ( tty_stdin.cur_ev >= tty_stdin.nr_ev ) {
 	    int rc = ReadConsoleInput(tty_stdin.fd, tty_stdin.events,

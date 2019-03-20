@@ -109,6 +109,9 @@ char *TERMNAME,		/* will be set in termcap handling */
      *SO,
      *SE;
 
+char *other_screen,	/* termcap 'ti' ; switch to alternate screen */
+     *this_screen;	/* termcap 'te' ; switch to regular screen */
+
 char Erasechar,				/* our erase character */
      Eraseline;				/* and line-kill character */
 
@@ -214,7 +217,7 @@ bool modified= NO,		/* File has been modified */
      newline = NO,		/* Last insert/delete included a EOL */
      lineonly= NO,		/* Dumb terminal? */
      zotscreen=NO,		/* ask for [more] in execmode */
-     diddled = NO;		/* force new window in editcore */
+     redraw  = NO;		/* force new window in editcore */
 
 int  macro = -1;    		/* Index into MCR */
 char lsearch = 0;		/* for N and n'ing... */
