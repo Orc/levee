@@ -45,18 +45,16 @@ char **argv;
     dscreensize(&COLS, &LINES);
     dofscroll = LINES/2;
 
+    /* print the version# if we can */
     if ( lineonly = !CA ) {
-        dgotoxy(0, 0);
-	dclear_to_eol();
+	dgotoxy(0,0);
 	version(); copyright();
 	prints("(line mode)");
     }
-    else {
-	dgotoxy(0, LINES-1);
-	if ( argc <= 1 ) {
-	    version();
-	    copyright();
-	}
+    else if ( argc <= 1 ) {
+	dgotoxy(0,LINES-1);
+	version();
+	copyright();
     }
 
 

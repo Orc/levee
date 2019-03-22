@@ -114,13 +114,6 @@ char *s;
 
 
 int
-os_newline()
-{
-    return 0;
-}
-
-
-int
 os_clearscreen()
 {
     return 0;
@@ -140,29 +133,34 @@ os_cursor(int visible)
     return 0;
 }
 
+
 int
 os_scrollback()
 {
     return 0;
 }
 
+
 int
-os_scrolldown()
+os_newline()
 {
     return 0;
 }
 
+
 int
 os_openline()
 {
-return 0;
+    return 0;
 }
+
 
 int
 os_highlight(int yes_or_no)
 {
     return 0;
 }
+
 
 int
 os_Ping()

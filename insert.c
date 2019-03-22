@@ -40,7 +40,7 @@ bool visual;
 	if (openflag<0 && bufmax>0 && curr<bufmax) {
 	    curr = 1+lend;
 	    if (visual)
-		dnewline();
+		println();
 	}
 	else {			/* open above current line */
 	    (*yp)--;

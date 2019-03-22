@@ -112,6 +112,7 @@ extern char *TERMNAME,
 	    *BELL,
 	    *CM,
 	    *UpS,
+	    *DownS,
 	    *CURoff,
 	    *CURon,
 	    *SO,
@@ -248,6 +249,7 @@ extern void dgotoxy(int,int);
 extern void dclear_to_eol();
 extern void dclearscreen();
 extern void dnewline();
+extern void dscrollback();
 extern void dopenline();
 extern void d_cursor(int);
 extern void d_highlight(int);
@@ -266,10 +268,10 @@ extern int os_highlight(int);
 extern int os_dwrite(char *, int);
 extern int os_gotoxy(int,int);
 extern int os_initialize();
-extern int os_newline();
 extern int os_openline();
 extern int os_screensize(int *, int *);
 extern int os_scrollback();
+extern int os_newline();
 extern int os_Ping();
 
 

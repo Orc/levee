@@ -177,8 +177,6 @@ d_highlight(yes_or_no)
     unless ( os_highlight(yes_or_no) ) {
 	if ( SO && SE )
 	    dputs( yes_or_no ? SO : SE );
-	else
-	    dputc( yes_or_no ? '[' : ']' );
     }
 }
 
@@ -345,9 +343,9 @@ int num;
 void 
 println()
 {
-    dnewline();
     curpos.x = 0;
     curpos.y = Min(curpos.y+1, LINES-1);
+    dnewline();
 }
 
 
@@ -479,11 +477,23 @@ bool rest;
 	x = 0;
     }
     if (rest && sp >= bufmax)
+	if ( y<LINES-1) {
+	    dgotoxy(0, y);
+	    while (y<LINES-1) {
+		printch('~');
+		dclear_to_eol();
+		if (++y != LINES-1)
+		    dnewline();
+	    }
+	}
+	
+#if 0
 	while (y<LINES-1) { /* fill screen with ~ */
 	    dgotoxy(0, y);
 	    printch('~'); dclear_to_eol();
 	    y++;
 	}
+#endif
     
     d_cursor(1);
 }
