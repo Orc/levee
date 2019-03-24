@@ -316,8 +316,10 @@ cmdtype cmd;
 		    printch('$');
 		    dgotoxy(xp, yp);
 		}
-		if (deletion(curr, endp))
-		    ok = ((newend = insertion(1, 0, &disp, &endY, TRUE)) >= 0);
+		if (deletion(curr, endp)) {
+		    newend = insertion(1, 0, &disp, &endY, TRUE);
+		    ok = (newend >= 0);
+		}
 		else
 		    ok = FALSE;
 		break;

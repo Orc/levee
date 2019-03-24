@@ -486,14 +486,6 @@ bool rest;
 		    dnewline();
 	    }
 	}
-	
-#if 0
-	while (y<LINES-1) { /* fill screen with ~ */
-	    dgotoxy(0, y);
-	    printch('~'); dclear_to_eol();
-	    y++;
-	}
-#endif
     
     d_cursor(1);
 }

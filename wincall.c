@@ -72,11 +72,6 @@ WRITE_TEXT(FILEDESC f, void *buf, int size)
 
 /* i/o handling mess
  */
-static struct _iob {
-    char buffer[4096];
-    int size;
-} iob = { .size = 0 };
-
 static struct _input_fd {
     HANDLE fd;			/* Windows file descriptor */
     DWORD mode;			/* original event mode for ^^ */
@@ -94,36 +89,6 @@ static struct _window_fd {
 } console_out = { .set=0 };
 
 
-static void
-tty_flush()
-{
-    DWORD result;
-
-    if ( iob.size ) {
-	logit("tty_flush: write %d byte%s", iob.size, (iob.size!=1)?"s":"");
-	WriteFile(console_out.fd, iob.buffer, iob.size, &result, NULL);
-	iob.size = 0;
-    }
-}
-
-
-static void
-ttywrite(char *buf, int size)
-{
-    DWORD result;
-
-    if ( iob.size + size > sizeof iob.buffer )
-	tty_flush();
-
-    if ( size > sizeof iob.buffer ) {
-	logit("ttywrite: large write %d bytes", size);
-	WriteFile(console_out.fd, buf, size, &result, NULL);
-    }
-    memcpy(iob.buffer + iob.size, buf, size);
-    iob.size += size;
-}
-
-
 int
 os_dwrite(ptr, size)
 char *ptr;
@@ -131,8 +96,7 @@ char *ptr;
     DWORD result;
 
     logit("os_dwrite(\"%.*s\",%d)", size, ptr, size);
-    ttywrite(ptr, size);
-
+    fwrite(ptr, size, 1, stdout);
     return 1;
 }
 
@@ -140,15 +104,13 @@ char *ptr;
 os_openline()
 {
     dputs("\033[1L");
-    Sleep(10);
     return 1;
 }
 
 
 os_clearscreen()
 {
-    dputs("\033[2J");
-    Sleep(20);
+    dputs("\033[3J\033[2J");
     return 1;
 }
 
@@ -156,7 +118,7 @@ os_clearscreen()
 int
 os_cursor(visible)
 {
-    //dputs(visible ? "\033[?25h" : "\033[?25l");
+    dputs(visible ? "\033[?25h" : "\033[?25l");
     return 1;
 }
 
@@ -164,7 +126,7 @@ os_cursor(visible)
 int
 os_highlight(int visible)
 {
-    dputs(visible ? "\033[27m" : "\033[7m");
+    //dputs(visible ? "\033[27m" : "\033[7m");
     return 1;
 }
 
@@ -180,7 +142,7 @@ os_Ping()
 os_newline()
 {
 #if 0
-    dputs("033[1S");
+    dputs("\033[1T");
 #else
     dputs("\r\n");
 #endif
@@ -192,7 +154,7 @@ int
 os_scrollback()
 {
 #if 0
-    dputs("\033[1T");
+    dputs("\033[1S");
 #endif
     return 1;
 }
@@ -202,7 +164,6 @@ int
 os_clear_to_eol()
 {
     dputs("\033[0K");
-    Sleep(5);
     return 1;
 }
 
@@ -215,7 +176,6 @@ os_gotoxy(x, y)
     sprintf(gt, "\033[%d;%dH", y+1, x+1);
     dputs(gt);
     return 1;
-    
 }
 
 
@@ -345,13 +305,20 @@ unsigned int c;
 int
 os_initialize()
 {
+    static char obuf[4096];
 #define NOPE INVALID_HANDLE_VALUE
 
     int co, li;
     CONSOLE_SCREEN_BUFFER_INFO xyzzy;
-    SMALL_RECT dimensions;
 
-    TERMNAME = "Windows VTY";
+
+    fflush(stdout);
+    _setmode(fileno(stdout), _O_BINARY);
+    setvbuf(stdout, obuf, _IOFBF, sizeof obuf);
+
+    dputs("\033[r");	/* set the scrolling margin to the whole screen */
+
+    TERMNAME = "Windows console";
     Erasechar = '\b';	/* ^H */
     Eraseline = 21;	/* ^U */
 
@@ -363,10 +330,8 @@ os_initialize()
     FkL = CurRT = CurLT = CurUP = CurDN = EOF;
 
     /* yes we can do all these things */
-    canOL = CA = 1;
-
-    /* not this */
     canUPSCROLL = 0;
+    CA = canOL = 1;
 
     /* grab the tty input handle */
 
@@ -381,11 +346,18 @@ os_initialize()
     /* and the tty output handle */
 
     if ( (console_out.fd = GetStdHandle(STD_OUTPUT_HANDLE)) != NOPE ) {
+	DWORD written;
 	GetConsoleMode(console_out.fd, &console_out.mode);
 	logit("output mode=%016x", console_out.mode);
 	console_out.set = 1;
 
 	/* and and the tty dimensions */
+
+
+	unless( WriteConsole(console_out.fd, "hello\r", 6, &written, 0) ) {
+	    fprintf(stderr, "can't run with stdout redirected\n");
+	    exit(1);
+	}
 
 	if (GetConsoleScreenBufferInfo(console_out.fd, &xyzzy)) {
 	    LINES = xyzzy.srWindow.Bottom - xyzzy.srWindow.Top + 1;
@@ -395,15 +367,8 @@ os_initialize()
 	else {
 	    LINES = 24;
 	    COLS = 80;
-	    logit("os_initialize: DEFAULT (windows error %d)"
-		  " LINES=%d, COLS=%d", GetLastError(), LINES, COLS);
+	    logit("os_initialize: DEFAULT LINES=%d, COLS=%d", LINES, COLS);
 	}
-	dimensions.Left = dimensions.Top = 0;
-	dimensions.Right = COLS-1;
-	dimensions.Bottom = LINES-1;
-	
-	SetConsoleWindowInfo(console_out.fd, TRUE, &dimensions);
-	dputs("\033[r");
     }
 
     unless ( console_out.set && console_in.set ) {
@@ -569,9 +534,9 @@ set_input()
     if ( console_in.set ) {
 	console_in.cooked = 0;
 	SetConsoleMode(console_in.fd, ENABLE_EXTENDED_FLAGS);
-	SetConsoleMode(console_out.fd, console_out.mode|
-				       ENABLE_PROCESSED_OUTPUT|
-				       ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+	SetConsoleMode(console_out.fd, ENABLE_PROCESSED_OUTPUT|
+				       ENABLE_VIRTUAL_TERMINAL_PROCESSING|
+				       DISABLE_NEWLINE_AUTO_RETURN);
     }
     os_clearscreen();
     curpos.x = curpos.y = 0;
@@ -581,11 +546,11 @@ set_input()
 void
 reset_input()
 {
+    fflush(stdout);
     if ( console_in.set ) {
 	console_in.cooked = 1;
 	SetConsoleMode(console_in.fd, console_in.mode);
 	SetConsoleMode(console_out.fd, console_out.mode);
-	os_highlight(0);
     }
 }
 
@@ -594,13 +559,7 @@ reset_input()
 int
 getKey()
 {
-    COORD fu;
-    tty_flush();
-    fu.X = curpos.x;
-    fu.Y = curpos.y;
-    SetConsoleCursorPosition(console_out.fd, fu);
-    logit("getKey: SCCP %d,%d", curpos.x, curpos.y);
-    
+    fflush(stdout);
     while ( 1 ) {
 	if ( console_in.cur_ev >= console_in.nr_ev ) {
 	    int rc = ReadConsoleInput(console_in.fd, console_in.events,
@@ -620,7 +579,7 @@ getKey()
 		key = &console_in.events[idx].Event.KeyEvent;
 
 		if ( key->bKeyDown ) {
-		    logit("getkey: -> %c", key->uChar.AsciiChar);
+		    logit("getkey -> %c", key->uChar.AsciiChar);
 		    return key->uChar.AsciiChar;
 		}
 	    }
@@ -647,3 +606,4 @@ register char *s;
 #endif
 
 #endif
+
