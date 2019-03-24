@@ -13,7 +13,7 @@ ac_help="
 --tputs			Use tputs() to slow down tty output
 --logging		Log tty output to levee.log
 --noglob		Don't use system glob() even if it exists
---windows		compile for windows 8+
+--win10			compile for windows 8+
 --dos			compile for ms-dos or old versions of microsoft windows
 --tos			compile for the Atari ST
 --rmx			compile for RMX
@@ -69,23 +69,28 @@ if [ "$OS_DOS" ]; then
     AC_DEFINE	EDITSIZE ${SIZE:-32000}
     AC_DEFINE	OS_DOS	1
     AC_SUB	MACHDEP	dos
+    AC_DEFINE	GLOB_REQUIRED	1
 elif [ "$OS_OS2" ]; then
     AC_DEFINE	EDITSIZE ${SIZE:-32000}
     AC_DEFINE	OS_OS2 1
     AC_SUB	MACHDEP os2
+    AC_DEFINE	GLOB_REQUIRED	1
 elif [ "$OS_ATARI" ]; then
     AC_DEFINE	EDITSIZE ${SIZE:-32000}
     AC_DEFINE	OS_ATARI	1
     AC_SUB	MACHDEP	gem
     AC_DEFINE	HAVE_BLKFILL	1
+    AC_DEFINE	GLOB_REQUIRED	1
 elif [ "$OS_FLEXOS" ]; then
     AC_DEFINE	EDITSIZE ${SIZE:-256000}
     AC_DEFINE	OS_FLEXOS	1
     AC_SUB	MACHDEP	flex
+    AC_DEFINE	GLOB_REQUIRED	1
 elif [ "$OS_WINDOWS" ]; then
     AC_DEFINE   EDITSIZE ${SIZE:-256000}
     AC_DEFINE	OS_WINDOWS	1
     AC_SUB	MACHDEP	win
+    AC_DEFINE	GLOB_REQUIRED	1
 else
     AC_DEFINE	EDITSIZE ${SIZE:-256000}
     AC_DEFINE	OS_UNIX	1
