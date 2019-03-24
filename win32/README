@@ -1,0 +1,14 @@
+This is the configuration for levee on windows 10 (win32, but with
+the mode flag ENABLE_VIRTUAL_TERMINAL_PROCESSING which turns on the
+builtin ansi terminal emulator for commandline programs.  This might
+work on any old version of windows, but all I know is that it's a
+new feature in windows 10.)
+
+
+Instead of running configure.sh, copy win32/config and
+win32/Makefile.{compiler} into the main levee directory and then
+you can run the make program to build levee.
+
+
+As of 24-Mar-2019 the only windows C compiler that's been used
+is PellesC.
