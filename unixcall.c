@@ -243,16 +243,21 @@ os_unlink(char *file)
 int
 os_mktemp(char *dest, int size, const char *template)
 {
+#if USING_MKTEMP
     static char Xes[] = ".XXXXXX";
+#define SZuniq sizeof(Xes)			/* uniqueifier is mktemp */
+#else
+#define SZuniq 10				/* uniqueifier is getpid() */
+#endif
     static char tmp[] = "/tmp/";
 
     /* assert |dest| > |/tmp/|+|template|+|XXXXXX| */
-    unless (size > sizeof(tmp) + sizeof(Xes) + strlen(template)) {
+    unless (size > sizeof(tmp) + SZuniq + strlen(template)) {
 	errno = E2BIG;
 	return 0;
     }
 
-#if USING_STDIO
+#if USING_MKTEMP
     sprintf(dest, "%s%s%s", tmp, template, Xes);
     strcpy(dest, template);
 
