@@ -529,7 +529,7 @@ char *name;
 	free(back);
     }
     else
-	printf("--cannot back up!--");
+	prints(" (cannot back up!) ");
 
     if ( expanded )
 	free(expanded);
