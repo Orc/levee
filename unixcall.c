@@ -530,7 +530,10 @@ set_input()
 void
 reset_input()
 {
-     tcsetattr(0, TCSANOW, &old);
+#if USING_STDIO
+    fflush(stdout);
+#endif
+    tcsetattr(0, TCSANOW, &old);
 }
 
 

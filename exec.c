@@ -1129,9 +1129,6 @@ bool *noquit;
 	case EX_ESCAPE:			/* shell escape hack */
 	    zotscreen = YES;
 	    exprintln();
-#if USING_STDIO
-	    fflush(stdout);
-#endif
 	    if (*execstr) {
 		reset_input();
 		os_subshell(execstr);
