@@ -409,18 +409,21 @@ resetX()
 
 
 /* set end of window */
-void
+int
 setend()
 {
     int bottom, count;
+    int lines = 0;
 
     bottom = ptop;
     count = LINES-1;
     while (bottom < bufmax && count > 0) {
 	bottom = 1+fseekeol(bottom);
 	count--;
+	lines++;
     }
     pend = bottom-1;		/* last char before eol || eof */
+    return lines;
 } /* setend */
 
 

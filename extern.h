@@ -220,9 +220,9 @@ extern int scan(), findDLE(), setY(), skipws(), nextline(), setX();
 extern int insertion(), chop(), fixcore(), lookup(), to_index();
 extern int doaddwork(), addfile(), expandargs(), to_line();
 extern int findfwd(), findback(), lvgetcontext(), getKey();
-extern int insertfile();
+extern int insertfile(), do_file(), setend();;
 
-extern void strput(), numtoa(), clrprompt(), setend(), error();
+extern void strput(), numtoa(), clrprompt(), error();
 extern void insert_to_undo(), resetX(), zerostack(), swap();
 extern void mvcur(), printch(), prints(), writeline(), refresh();
 extern void redisplay(), scrollback(), scrollforward(), prompt();

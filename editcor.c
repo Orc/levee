@@ -237,12 +237,14 @@ cmdtype cmd;
     char    cmdch;
     int     oldc;	/* old count */
     int     endp;	/* end position before change */
+    int     oldmaxY, newmaxY;	/* # lines at pend before/after */
     extern bool s_wrapped;
 
     resetX();				/* un-derange the cursor */
     oldc = newc = -1;
     endY = yp;
     newend = disp = curr;
+    oldmaxY = setY(pend);
     ok = TRUE;				/* so far everything is working */
     cmdch = ch;
     if (cmd != UNDO_C && cmd != YANK_C) {
@@ -397,18 +399,25 @@ cmdtype cmd;
 
     if (ok) {
 	setpos((newc<0)?newend:newc);
-	setend();
+	newmaxY = setend();
+
+	logit("modification (%d) -> %d: endY = %d, setY(newend) = %d, "
+	      "oldmaxY = %d, newmaxY = %d", 
+	      cmd, ok, endY, setY(newend), oldmaxY, newmaxY);
+
 	if (curr < ptop || curr > pend) {
-	    yp = settop(12);
+	    yp = settop(LINES/2);
 	    redisplay(TRUE);
 	}
 	else {
 	    yp = setY(curr);
-	    if (endY != setY(newend))	/* shuffled lines */
+	    if ( (endY != setY(newend)) || (oldmaxY != newmaxY) )
+					/* shuffled lines, refresh rest of page */
 		refresh(setY(disp), setX(disp), disp, pend, TRUE);
 	    else			/* refresh to end position */
 		refresh(setY(disp), setX(disp), disp, newend, FALSE);
 	}
+
 	if (curr >= bufmax && bufmax > 0) {	/* adjust off end of buffer */
 	    setpos(bufmax-1);
 	    yp = setY(curr);
