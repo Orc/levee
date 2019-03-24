@@ -70,6 +70,38 @@ WRITE_TEXT(FILEDESC f, void *buf, int size)
     return write((int)f, buf, size);
 }
 
+
+
+/* *** termcap stubs if we build w/o termcap (display.c assumes
+ * *** the existence of a termcap library and I don't want to
+ * *** put an os ifdef into that code.  plus this will let me
+ * *** do a version of win32 levee that supports terminals other
+ * *** than ansi console emulation if I can find a way to get
+ * *** a cleartext telnet session into a windows box
+ */
+#if !USING_TERMCAP
+char *tgoto(char *cap, int x, int y)
+{
+    return 0;
+}
+
+int tgetnum(char *cap)
+{
+    return 0;
+}
+
+char *tgetstr(char *cap, char **bfr)
+{
+    return 0;
+}
+
+int tgetent(char *buf, char *term)
+{
+    return 0;
+}
+#endif
+
+
 /* i/o handling mess
  */
 static struct _input_fd {
