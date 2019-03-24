@@ -10,6 +10,7 @@
 
 #define OS_WINDOWS 1
 #define os_pid_t pid_t
+#define GLOB_REQUIRED 1
 #define USING_STDIO 1
 #define LOGGING 1
 #define EDITSIZE 256000

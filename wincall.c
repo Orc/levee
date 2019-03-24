@@ -430,6 +430,11 @@ os_subshell(char *cmdline)
  */
 
 
+/*
+ * glob() expands a wildcard, via calls to _dos_findfirst/_next()
+ * and pathname retention.
+ */
+
 /* local function to add a single file (broken out so I can implement
  * wildcards using _findfirst/_findnext)
  */
@@ -470,6 +475,81 @@ glob_addfile(char *file, int count, glob_t *result)
 }
 
 
+/* local function to wildcard expand a filename
+ */
+static int
+glob_wildcard(path, permit_nomatch, count, dta)
+char *path;
+int permit_nomatch;
+int count;
+glob_t *dta;
+{
+    char *path_bfr;		/* full pathname to return */
+    char *file_part;		/* points at file - for filling */
+    char isdotpattern;		/* looking for files starting with . */
+    intptr_t find_ctx;		/* findfirst/findnext context */
+    struct _finddata_t entry;	/* lastest entry found */
+    register st;		/* status from _dos_findxxx */
+    int size;			/* size of path buffer (needed?) */
+
+    unless (path)
+	return -1;
+
+    size = strlen(path) + 256;
+
+    unless (path_bfr = malloc(size))
+	return -1;
+
+    strcpy(path_bfr, path);
+    file_part = basename(path_bfr);
+
+    /* set up initial parameters for DosFindFirst()
+     */
+    if (isdotpattern = (*file_part == '.')) {
+	/* _dos_findfirst() magically expands . and .. into their
+	 * directory names.  Admittedly, there are cases where
+	 * this can be useful, but this is not one of them. So,
+	 * if we find that we're matching . and .., we just
+	 * special-case ourselves into oblivion to get around
+	 * this particular bit of DOS silliness.
+	 */
+	if (file_part[1] == 0 || (file_part[1] == '.' && file_part[2] == 0))
+	    return glob_addfile(path, count, dta);
+
+    }
+
+    unless (find_ctx = _findfirst(path, &entry)) {
+	/* no matches for this pattern; if permit_nomatch,
+	 * add it verbatim to dta, otherwise fail
+	 */
+	free(path_bfr);
+
+	return permit_nomatch ? glob_addfile(path, count, dta) : -1;
+    }
+
+    do {
+	logit("glob_wildcard: file=%s", entry.name);
+	if (entry.name[0] == '.' && !isdotpattern)
+	    continue;
+
+	strcpy(file_part, entry.name);
+
+	if (st = glob_addfile(path_bfr, count, dta)) {
+	    _findclose(find_ctx);
+	    free(path_bfr);
+	    return -1;
+	}
+	++count;
+	st = _findnext(find_ctx, &entry);
+	logit("glob_wildcard: find_next -> %d", st);
+    } while ( st == 0 );
+    //} while ( _findnext(find_ctx, &entry) == 0 );
+    _findclose(find_ctx);
+    free(path_bfr);
+    return 0;
+} /* glob_wildcard */
+
+
 /*
  * non-sorting glob with windows wildcarding
  */
@@ -493,9 +573,15 @@ os_glob(const char* pattern, int flags, glob_t *result)
 
     unless ( flags & GLOB_NOMAGIC ) {
 	if ( strcspn(pattern, "?*") < strlen(pattern) ) {
+	    int stat;
 	    result->gl_flags |= GLOB_MAGCHAR;
-	    unless (result->gl_flags & GLOB_NOCHECK)
-		return GLOB_NOMATCH;
+
+	    stat = glob_wildcard(pattern,
+				 result->gl_flags & GLOB_NOCHECK,
+				 count,
+				 result);
+
+	    return stat ? GLOB_NOMATCH : 0;
 	}
 	else
 	    result->gl_flags &= ~GLOB_MAGCHAR;
