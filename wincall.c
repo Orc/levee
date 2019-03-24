@@ -236,7 +236,7 @@ os_mktemp(char *dest, int size, const char *template)
 	return 0;
     }
 
-#if USING_STDIO
+#if USING_MKTEMP
     if ( tmpdir )
 	sprintf(dest, "%s\\%s.%d", tmpdir, template, getpid());
     else
