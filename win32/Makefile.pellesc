@@ -2,7 +2,7 @@
 
 CC=cc
 
-CFLAGS=-Go -Ze -W0 -I../include
+CFLAGS=-Go -Ze -W0 -Iwin32
 LDFLAGS=-Go -Ze
 
 OBJS = blockio.obj display.obj editcor.obj exec.obj find.obj \
