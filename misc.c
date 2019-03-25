@@ -253,9 +253,9 @@ void
 wr_stat()
 {
     clrprompt();
-    if (filenm[0] != 0) {
+    if ( filenm != F_UNSET ) {
 	printch('"');
-	prints(filenm);
+	prints(args.gl_pathv[filenm]);
 	prints("\" ");
 	if (newfile)
 	    prints("<New file> ");

@@ -44,6 +44,8 @@ glob_t args;		/* arguments
 			 * argc -> args->gl_pathc
 			 */
 int   pc=0;		/* Index into arguments */
+int filenm = F_UNSET,	/* current filename */
+    altnm = F_UNSET;	/* previous filename */
 
 		/* M A C R O   S T U F F */
 struct macrecord mbuffer[MAXMACROS];
@@ -63,9 +65,7 @@ struct undostack undo;			/* To undo a command */
 
 		/* R A N D O M   S T R I N G S */
 
-char instring[200],	/* Latest input */
-     filenm[80] = "",	/* Filename */
-     altnm[80] = "";	/* Alternate filename */
+char instring[200];	/* Latest input */
 char gcb[16];		/* Command buffer for mutations of insert */
 
 char *undobuf;

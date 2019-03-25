@@ -313,7 +313,7 @@ register char *name;
 	return where;
 
     rc = os_glob(name, GLOB_APPEND|GLOB_NOMAGIC, &args);
-    return rc ? EOF : args.gl_pathc-1;
+    return rc ? F_UNSET : args.gl_pathc-1;
 } /* addarg */
 
 
@@ -325,12 +325,12 @@ getname()
 
     if ( (name = getarg()) ) {
 	if ( 0 == strcmp(name,"#") ) {
-	    if (*altnm)
-		name = altnm;
-	    else {
+	    if ( altnm == F_UNSET ) {
 		errmsg("no alt name");
 		return NULL;
 	    }
+	    else
+		return args.gl_pathv[altnm];
 	}
     }
     return name;
@@ -468,7 +468,7 @@ bool newbuf;
     prints(fname);
     prints("\" ");
     if ((f=expandfopen(fname, "r")) == NULL) {
-	prints("[No such file]");
+	prints("[New file]");
 	fsize = 0;
 	if (newbuf)
 	    newfile = YES;
@@ -586,8 +586,8 @@ int writeold;	/* automatically write out changes? */
 	    errmsg(fisro);
 	    return NO;
 	}
-	else if (writeold && *filenm) {
-	    if (!outputf(filenm))
+	else if (writeold && (filenm != F_UNSET) ) {
+	    if (!outputf(args.gl_pathv[filenm]))
 		return NO;
 	    printch(',');
 	}
@@ -605,21 +605,28 @@ bool
 writefile()
 {
     char *name;
+    int fileptr = filenm;
 
-    if ((name=getname()) == NULL)
-	name = filenm;
-    if (*name) {
-	if (outputf(name)) {
-	    if ( addarg(name) < 0 )
-		errmsg("error expanding argument list!");
-	    return YES;
-	}
-	else
-	    strcpy(altnm, name);
-    }
-    else
+    unless (name=getname())
+	name = (filenm == F_UNSET) ? NULL : args.gl_pathv[filenm];
+
+    unless (name) {
 	errmsg("no file to write");
-    return NO;
+	return NO;
+    }
+
+    unless (outputf(name))
+	return NO;
+
+    if ( (filenm == F_UNSET) && ((fileptr=addarg(name)) == F_UNSET) )
+	errmsg("error expanding argument list!");
+
+    if ( fileptr != F_UNSET ) {
+	altnm = filenm;
+	filenm = fileptr;
+    }
+
+    return YES;
 }
 
 
@@ -627,72 +634,42 @@ void
 editfile()
 {
     char *name = NULL;	/* file to edit */
-    glob_t files;
-    int i, newpc;
+    int newpc = F_UNSET;
 
-    if ((name = getarg()) && *name == '+') {
+    if ((name = getname()) && *name == '+') {
 	strcpy(startcmd, (name[1])?(1+name):"$");
-	name = getarg();
+	name = getname();
     }
 
-    memset(&files, 0, sizeof files);
-
-    if (name) {
-	do {
-	    if (os_glob(name, GLOB_APPEND|GLOB_NOMAGIC, &files)) {
-		errmsg("file allocation error");
-		os_globfree(&files);
-		return;
-	    }
-	} while ( (name=getarg()) );
-    }
-
-    logit("files.gl_pathc = %d", files.gl_pathc);
-
-    if (files.gl_pathc == 0) {
+    if ( name == NULL ) {
 	logit(":edit with no args");
-	if (*filenm) {
-	    newpc = pc;
-	    name = filenm;
-	}
-	else
+	if ( pc == F_UNSET ) {
 	    errmsg("no file to edit");
+	    return;
+	}
+	newpc = pc;
     }
-    else if (files.gl_pathc == 1 && (newpc = findarg(files.gl_pathv[0])) >= 0)
-	logit(":edit with one arg (%s)", files.gl_pathv[0]);
     else {
-	newpc = args.gl_pathc;
-
-	for (i=0; i < files.gl_pathc; i++)
-	    if (os_glob(files.gl_pathv[i], GLOB_APPEND|GLOB_NOMAGIC, &args)) {
-		errmsg("file list error");
-		break;
-	    }
+	logit(":edit %s", name);
+	if ((newpc = addarg(name)) == F_UNSET) {
+	    errmsg("file allocation error");
+	    return;
+	}
     }
 
-    logit("pc=%d, newpc=%d, args.gl_pathc=%d",
-	    pc, newpc, args.gl_pathc);
-    if (newpc >= 0 && newpc < args.gl_pathc) {
-	pc = newpc;
-	name = args.gl_pathv[pc];
-    }
-
-    logit("about to globfree(&files)");
-    os_globfree(&files);
-
-    if (name && oktoedit(NO))
-	doinput(name);
+    if ( oktoedit(NO) )
+	doinput(newpc);
 }
 
 
 void
-doinput(name)
-char *name;
+doinput(fileptr)
+int fileptr;
 {
-    inputf(name, YES);
-    if ( name != filenm ) {
-	strcpy(altnm, filenm);
-	strcpy(filenm, name);
+    inputf(args.gl_pathv[fileptr], YES);
+    if ( fileptr != filenm ) {
+	altnm = filenm;
+	filenm = fileptr;
     }
 }
 
@@ -787,7 +764,7 @@ bool prev;
     }
 
     if ( args.gl_pathc >= pc )
-	doinput(args.gl_pathv[pc]);
+	doinput(pc);
     else {
 	/* if we got here and there was an error, we are screwed
 	 * and need to go back to an empty screen
@@ -1042,11 +1019,11 @@ bool *noquit;
 	    break;
 	case EX_FILE:				/* :file */
 	    if ( (cmd=getarg()) ) {		/* :file name */
-		int npc;
-		strcpy(altnm, filenm);
-		strcpy(filenm, cmd);
-		if ( (npc = addarg(filenm)) >= 0 )
-		    pc = npc;
+		int new_pc;
+		if ( (new_pc = addarg(cmd)) != F_UNSET ) {
+		    altnm = filenm;
+		    filenm = pc = new_pc;
+		}
 	    }
 	    wr_stat();
 	    break;
@@ -1139,10 +1116,8 @@ bool *noquit;
 	    break;
 	case EX_REWIND:
 	    clrmsg();
-	    if ( (pc > 0) && (args.gl_pathc > 0) && oktoedit(autowrite) ) {
-		pc = 0;
-		doinput(args.gl_pathv[0]);
-	    }
+	    if ( (pc > 0) && (args.gl_pathc > 0) && oktoedit(autowrite) )
+		doinput(pc=0);
 	    break;
 	default:
 	    prints(":not an editor command.");

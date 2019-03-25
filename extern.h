@@ -48,7 +48,11 @@ extern glob_t args;	/* Arguments
 			 * argv -> args->gl_pathv
 			 * argc -> args->gl_pathc
 			 */
-int pc;			/* Index into arguments */
+extern
+int pc,			/* Index into arguments */
+    filenm,		/* current filename */
+    altnm;		/* previous filename */
+
 
 		/* M A C R O   S T U F F */
 extern
@@ -70,9 +74,9 @@ struct undostack undo;		/* To undo a command */
 		
 extern
 char instring[],		/* Latest input */
-     filenm[],			/* Filename */
-     altnm[],			/* Alternate filename */
      gcb[];			/* Command buffer for mutations of insert */
+
+#define F_UNSET -1
 	
 extern
 char *undobuf,
