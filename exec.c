@@ -492,11 +492,11 @@ bool newbuf;
 	fillchar(contexts, sizeof(contexts), -1);
 	bufmax = fsize;
     }
-    if (*startcmd) {
+    if (startcmd) {
 	count = 1;
 	if (*findparse(startcmd,&curr,low) != 0 || curr < 0)
 	    curr = low;
-	*startcmd = 0;
+	startcmd = 0;
     }
     else
 	curr = low;
@@ -637,7 +637,7 @@ editfile()
     int newpc = F_UNSET;
 
     if ((name = getname()) && *name == '+') {
-	strcpy(startcmd, (name[1])?(1+name):"$");
+	startcmd = name[1] ? 1+name : "$";
 	name = getname();
     }
 

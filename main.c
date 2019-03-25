@@ -111,7 +111,7 @@ char **argv;
 
     if (argc > 0 && **argv == '+') {
 	char *p = *argv;
-	strcpy(startcmd, p[1] ? (1+p) : "$");
+	startcmd = p[1] ? &p[1] : "$";
 	++argv, --argc;
     }
     memset(&args, sizeof args, 0);

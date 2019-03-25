@@ -43,7 +43,7 @@ bool adjcurr[PARA_BACK+1],
      
 		/* A R G U M E N T S */
 extern
-char startcmd[];	/* initial command after read */
+char *startcmd;		/* initial command after read */
 extern glob_t args;	/* Arguments
 			 * argv -> args->gl_pathv
 			 * argc -> args->gl_pathc

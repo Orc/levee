@@ -38,7 +38,7 @@ bool adjcurr[PARA_BACK+1],
      adjendp[PARA_BACK+1];
 
 		/* A R G U M E N T S */
-char startcmd[80] = "";	/* initial command after read */
+char *startcmd = NULL;	/* initial command after read */
 glob_t args;		/* arguments
 			 * argv -> args->gl_pathv
 			 * argc -> args->gl_pathc
