@@ -56,5 +56,5 @@ rmxcall.o    : levee.h rmxcall.c config.h
 ucsd.o       : levee.h extern.h ucsd.c config.h
 undo.o       : levee.h extern.h undo.c config.h
 unixcall.o   : levee.h extern.h unixcall.c config.h
-wildargs.o   : levee.h extern.h wildargs.c config.h
+home.o       : levee.h extern.h home.c config.h
 logit.o      : logit.c
