@@ -1,6 +1,6 @@
 My tiny (~80k on osx/x86_64; smaller on 32 bit machines) & ancient
-(first written (in USCD pascal; I converted it to C sometime in the
-1980s) sometime in 1979) almost-vi-clone.
+(first written sometime in 1979 (in USCD pascal; I converted it to C
+ sometime in the early 1980s)) almost-vi-clone.
 
 I think it implements about 95% of visual mode;  I still use it on
 most of my machines and only notice things lacking in exec mode
@@ -21,10 +21,7 @@ Over its life it's been built on
 * FreeBSD
 * NetBSD
 * Macosx
-
-(note that it's not been built on anything aside from Unix for _many_ years,
-and it would take a fairly heroic effort to build it on any of those other
-systems anymore even though I do have code in `configure.sh` for them.)
+* Windows 10
 
 The configuration options are
 
@@ -32,10 +29,15 @@ The configuration options are
 *  --partial-install; don't install the lv, lv(1) name links.
 *  --size=NNN; use an NNN-byte editor buffer (this is the maximum sized
    file that can be edited without truncation.
+*  --stdio; use stdio for buffered i/o whenever practical
+*  --logging; write copious logs to levee.log (in the startup directory)
+*  --tputs; write control strings using the pacing functions in termcap
 *  --dos; build for ms-dos
 *  --tos; build for TOS
 *  --rmx; build for iRMX
 *  --flexos; build for flexOS
+*  --win10; build for Windows (only tested on Windows 10)
 *  --prefix; root of where to install things (defaults to /usr/local)
 *  --execdir; where to install binaries ($prefix/bin)
 *  --mandir; where to install the manpages ($prefix/man or $prefix/share/man)
+
