@@ -117,15 +117,15 @@ char **argv;
     memset(&args, sizeof args, 0);
 
 #if GLOB_REQUIRED
+    /* Windows-style OS where command-line wildcards are NOT expanded by
+     * the shell before levee is executed
+     */
+#   define CMDLINE_FLAGS GLOB_APPEND|GLOB_NOCHECK
+#else
     /* Unix-style OS where command-line wildcards are expanded by the shell
      * before levee is executed
      */
 #   define CMDLINE_FLAGS GLOB_APPEND|GLOB_NOMAGIC
-#else
-    /* Windows-style OS where command-line wildcards are NOT expanded by
-     * the shell before levee is executed
-     */
-#   define CMDLINE_FLAGS GLOB_APPEND
 #endif
     while (argc-- > 0)
 	os_glob(*argv++, CMDLINE_FLAGS, &args);
