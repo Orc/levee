@@ -43,8 +43,8 @@ glob_t args;		/* arguments
 			 * argv -> args->gl_pathv
 			 * argc -> args->gl_pathc
 			 */
-int   pc=0;		/* Index into arguments */
-int filenm = F_UNSET,	/* current filename */
+int pc = F_UNSET,	/* Index into arguments */
+    filenm = F_UNSET,	/* current filename */
     altnm = F_UNSET;	/* previous filename */
 
 		/* M A C R O   S T U F F */
@@ -172,20 +172,27 @@ int shiftwidth = 4,
     bell       = YES,
     ignorecase = NO;
 
+#if LOGGING
+int is_logging = YES;
+#endif
+
 struct variable vars[]={
-    {"terminal",  "",	VSTR,	V_CONST,	(void*)&TERMNAME   },
-    {"shiftwidth","sw",	VINT,	0,		(void*)&shiftwidth },
-    {"scroll",	  "",	VINT,	0,		(void*)&dofscroll  },
-    {"tabsize",   "ts",	VINT,	V_DISPLAY,	(void*)&tabsize    },
-    {"autoindent","ai",	VBOOL,	0,		(void*)&autoindent },
-    {"autocopy",  "ac",	VBOOL,	0,		(void*)&autocopy   },
-    {"autowrite", "aw",	VBOOL,	0,		(void*)&autowrite  },
-    {"wrapscan",  "ws",	VBOOL,	0,		(void*)&wrapscan   },
-    {"overwrite", "ow",	VBOOL,	0,		(void*)&overwrite  },
-    {"beautify",  "be",	VBOOL,	0,		(void*)&beautify   },
-    {"list",	  "",	VBOOL,	V_DISPLAY,	(void*)&list       },
-    {"magic",	  "",	VBOOL,	0,		(void*)&magic      },
-    {"ignorecase","ic",	VBOOL,	0,		(void*)&ignorecase },
+#if LOGGING
+    {"DEBUG BUILD","",   VBOOL,	V_CONST,	(void*)&is_logging },
+#endif
+    {"terminal",   "",	 VSTR,	V_CONST,	(void*)&TERMNAME   },
+    {"shiftwidth", "sw", VINT,	0,		(void*)&shiftwidth },
+    {"scroll",	   "",	 VINT,	0,		(void*)&dofscroll  },
+    {"tabsize",    "ts", VINT,	V_DISPLAY,	(void*)&tabsize    },
+    {"autoindent", "ai", VBOOL,	0,		(void*)&autoindent },
+    {"autocopy",   "ac", VBOOL,	0,		(void*)&autocopy   },
+    {"autowrite",  "aw", VBOOL,	0,		(void*)&autowrite  },
+    {"wrapscan",   "ws", VBOOL,	0,		(void*)&wrapscan   },
+    {"overwrite",  "ow", VBOOL,	0,		(void*)&overwrite  },
+    {"beautify",   "be", VBOOL,	0,		(void*)&beautify   },
+    {"list",	   "",	 VBOOL,	V_DISPLAY,	(void*)&list       },
+    {"magic",	   "",	 VBOOL,	0,		(void*)&magic      },
+    {"ignorecase", "ic", VBOOL,	0,		(void*)&ignorecase },
     {"bell",      "",	VBOOL,	0,		(void*)&bell       },
     {NULL}
 };

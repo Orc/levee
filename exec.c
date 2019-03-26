@@ -642,9 +642,9 @@ editfile()
     }
 
     if ( name == NULL ) {
-	logit(":edit with no args");
+	logit(":edit with no args: pc=%d", pc);
 	if ( pc == F_UNSET ) {
-	    errmsg("no file to edit");
+	    errmsg("Nothing to edit");
 	    return;
 	}
 	newpc = pc;

@@ -131,13 +131,11 @@ char **argv;
 	os_glob(*argv++, CMDLINE_FLAGS, &args);
 	
     if (args.gl_pathc > 0) {
-	filenm = 0;
+	pc = filenm = 0;
 	if (args.gl_pathc > 1)
 	    toedit(args.gl_pathc);
 	inputf(args.gl_pathv[filenm], TRUE);
     }
-    else
-	filenm = -1;
 }
 
 bool
