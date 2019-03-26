@@ -713,7 +713,7 @@ bool prev;
     if ( prev || (name && (strcmp(name, "-") == 0)) ) {
 	/* :n - ; move back, ignore other arguments
 	 */
-	if ( pc == 0 ) {
+	if ( pc <= 0 ) {
 	    errmsg("(no prev files)");
 	    return;
 	}
@@ -723,7 +723,7 @@ bool prev;
     else if ( name == 0 ) {
 	/* :n w/o argument; move forward
 	 */
-	if ( pc >= args.gl_pathc-1 ) {
+	if ( pc+1 > args.gl_pathc ) {	/* beware: gl_pathc is unsigned */
 	    errmsg("(no more files)");
 	    return;
 	}
@@ -769,7 +769,7 @@ bool prev;
 	    os_globfree(&files);
     }
 
-    if ( args.gl_pathc >= pc )
+    if ( pc >= 0 && pc < args.gl_pathc )
 	doinput(pc);
     else {
 	/* if we got here and there was an error, we are screwed
