@@ -20,6 +20,7 @@
 #define HAVE_SIGNAL_H 1
 #define HAVE_SIGNAL 1
 #define HAVE_TGETENT 1
+#define HAVE_ERRNO_H 1
 #define HAVE_TERMCAP_H 1
 #define USE_TERMCAP 1
 #define GLOB_REQUIRED 1

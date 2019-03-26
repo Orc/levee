@@ -430,6 +430,26 @@ os_tilde(char *path)
 
 
 /*
+ * return the backup name for a file
+ */
+char *
+os_backupname(char *file)
+{
+    int size;
+    char *p;
+
+    size = strlen(file) + 2;
+
+    unless ( p = calloc(1,size) )
+	return 0;
+
+    strcpy(p, file);
+    strcat(p, "~");
+    return p;
+}
+
+
+/*
  * implement the :! command
  */
 int

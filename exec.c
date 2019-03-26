@@ -3,6 +3,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <strings.h>
+#if HAVE_ERRNO_H
+#include <errno.h>
+#endif
 
 void undefine();
 void fixupline();
@@ -509,27 +513,22 @@ backup(name)
 char *name;
 {
     char *back, *expanded;
-    char *p;
-    int size;
+    int ok = NO;
 
     if ( expanded = os_tilde(name) )
 	name = expanded;
 
-    if ( back = malloc( 5 + strlen(name)) ) {
-
-	strcpy(back, name);
-#if OS_UNIX
-	strcat(back, "~");
-#else
-	strcpy( (p=strrchr(basename(back), '.')) ? p : back, ".bkp" );
-#endif
-
+    if ( back = os_backupname(name) ) {
 	os_unlink(back);
-	os_rename(name, back);
+	ok = os_rename(name, back) == 0;
 	free(back);
     }
-    else
-	prints(" (cannot back up!) ");
+
+    unless (ok) {
+	prints(" (");
+	prints(strerror(errno));
+	prints(")");
+    }
 
     if ( expanded )
 	free(expanded);

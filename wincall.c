@@ -646,6 +646,33 @@ os_tilde(char *path)
 }
 
 
+/*
+ * make a backup file name
+ */
+char *
+os_backupname(char *file)
+{
+    char *p, *base, *ext;
+    int size;
+    int filelen;
+    static char bkp_extension[] = ".bkp";
+
+    base = basename(file);
+    ext = strrchr(base, '.');
+    filelen = strlen(file);
+
+    /* backup buffer length is 1 + |file| + |bkp_extension| - |ext|
+     */
+    size = 1 + strlen(file) + sizeof bkp_extension  - (ext ? strlen(ext) : 0);
+
+    if ( p = calloc(1, size) ) {
+	strcpy(p, file);
+	strcpy(&p[filelen - (ext ? strlen(ext) : 0)], bkp_extension);
+    }
+    return p;
+}
+
+
 void
 set_input()
 {

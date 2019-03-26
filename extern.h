@@ -289,6 +289,7 @@ extern int os_rename(char *, char *);
 extern int os_glob(const char *, int, glob_t *);
 extern void os_globfree(glob_t *);
 extern char *os_tilde(char *);
+extern char *os_backupname(char *);
 extern int os_subshell(char *);
 extern FILE* os_cmdopen(char *, char *, os_pid_t *);
 extern int os_cmdclose(FILE*, os_pid_t);

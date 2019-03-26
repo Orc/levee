@@ -49,11 +49,7 @@ bool visual;
 	if (autoindent)
 	    currDLE = findDLE(lstart, &i, skipws(lstart),0);
 	if (visual) {
-#if TTY_VT52
-	    if (canOL) {
-#else
 	    if (canOL && (*yp) < LINES-2) {
-#endif
 		dopenline();
 		(*yp)++;
 		curpos.y = *yp;
@@ -115,12 +111,7 @@ bool visual;
 	    dclear_to_eol();			/* clear this line */
 	    println();
 	    if (visual) {
-#if OS_RMX
-		/* at OL at bottom kludge... */
 		if (canOL && (*yp) < LINES-2) {
-#else
-		if (canOL) {
-#endif
 		    dopenline();
 		    (*yp)++;
 		}

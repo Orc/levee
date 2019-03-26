@@ -26,7 +26,7 @@
 static void
 copyright()
 {
-     dputs("  Copyright (c) 1983-2019 by David Parsons");
+     dputs(" copyright (c) 1983-2019 by David Parsons");
 }
 
 
@@ -47,7 +47,8 @@ char **argv;
 
     /* print the version# if we can */
     if ( lineonly = !CA ) {
-	version(); copyright();
+	version();
+	copyright();
 	dnewline();
 	prints("(line mode)");
     }
