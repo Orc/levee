@@ -259,8 +259,6 @@ dinitialize()
     SO = tgetstr("so", &bufp);
     SE = tgetstr("se", &bufp);
 
-    dofscroll = LINES/2;
-
     /* set cursor movement keys to zero for now */
     FkL = CurRT = CurLT = CurUP = CurDN = EOF;
 
