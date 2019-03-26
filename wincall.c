@@ -19,8 +19,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-static void scroll(int);
-
 /* **** FILE IO ABSTRACTIONS **** */
 FILEDESC
 OPEN_OLD(char *name)
@@ -292,9 +290,19 @@ os_screensize(x,y)
 int *x;
 int *y;
 {
+    CONSOLE_SCREEN_BUFFER_INFO xyzzy;
 
-    (*x) = COLS;
-    (*y) = LINES;
+
+    if (GetConsoleScreenBufferInfo(console_out.fd, &xyzzy)) {
+	(*y) = xyzzy.srWindow.Bottom - xyzzy.srWindow.Top + 1;
+	(*x) = xyzzy.srWindow.Right - xyzzy.srWindow.Left + 1;
+	logit("os_screensize -> (%d, %d)", (*x), (*y));
+    }
+    else {
+	(*y) = 24;
+	(*x) = 80;
+	logit("os_screensize: -> DEFAULT (%d,%d)", (*x), (*y));
+    }
     return 1;
 }
 
@@ -340,10 +348,6 @@ os_initialize()
     static char obuf[4096];
 #define NOPE INVALID_HANDLE_VALUE
 
-    int co, li;
-    CONSOLE_SCREEN_BUFFER_INFO xyzzy;
-
-
     fflush(stdout);
     _setmode(fileno(stdout), _O_BINARY);
     setvbuf(stdout, obuf, _IOFBF, sizeof obuf);
@@ -362,8 +366,7 @@ os_initialize()
     FkL = CurRT = CurLT = CurUP = CurDN = EOF;
 
     /* yes we can do all these things */
-    canUPSCROLL = 0;
-    CA = canOL = 1;
+    canUPSCROLL = CA = canOL = 1;
 
     /* grab the tty input handle */
 
@@ -386,20 +389,9 @@ os_initialize()
 	/* and and the tty dimensions */
 
 
-	unless( WriteConsole(console_out.fd, "hello\r", 6, &written, 0) ) {
+	unless( WriteConsole(console_out.fd, "?\r", 2, &written, 0) ) {
 	    fprintf(stderr, "can't run with stdout redirected\n");
 	    exit(1);
-	}
-
-	if (GetConsoleScreenBufferInfo(console_out.fd, &xyzzy)) {
-	    LINES = xyzzy.srWindow.Bottom - xyzzy.srWindow.Top + 1;
-	    COLS = xyzzy.srWindow.Right - xyzzy.srWindow.Left + 1;
-	    logit("os_initialize: LINES=%d, COLS=%d", LINES, COLS);
-	}
-	else {
-	    LINES = 24;
-	    COLS = 80;
-	    logit("os_initialize: DEFAULT LINES=%d, COLS=%d", LINES, COLS);
 	}
     }
 
