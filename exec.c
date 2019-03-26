@@ -157,6 +157,8 @@ setcmd()
     else {
 	version(); exprintln();
 	for(vp=vars;vp->u;vp++) {
+	    if ( vp->v_flags & V_ALIAS )
+		continue;
 	    switch (vp->v_tipe) {
 		case VBOOL:
 		    if (!vp->u->valu)

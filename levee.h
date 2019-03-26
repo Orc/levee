@@ -279,8 +279,9 @@ struct tmacro {		/* For running a macro */
     int  m_iter;	/* Number of times to execute */
 };
 
-#define V_CONST	1	/* this option cannot be modified */
-#define V_DISPLAY 2	/* this option affects the display */
+#define V_CONST   0x01	/* this option cannot be modified */
+#define V_DISPLAY 0x02	/* this option affects the display */
+#define V_ALIAS   0x04	/* this option is an alias for another */
 
 struct variable {	/* Settable Variable Record */
     char *v_name;		/* full name */

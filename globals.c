@@ -186,6 +186,7 @@ struct variable vars[]={
     {"tabsize",    "ts", VINT,	V_DISPLAY,	(void*)&tabsize    },
     {"autoindent", "ai", VBOOL,	0,		(void*)&autoindent },
     {"autocopy",   "ac", VBOOL,	0,		(void*)&autocopy   },
+    {"backup",     "",   VBOOL, V_ALIAS,	(void*)&autocopy   },
     {"autowrite",  "aw", VBOOL,	0,		(void*)&autowrite  },
     {"wrapscan",   "ws", VBOOL,	0,		(void*)&wrapscan   },
     {"overwrite",  "ow", VBOOL,	0,		(void*)&overwrite  },
