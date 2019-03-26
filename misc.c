@@ -32,7 +32,12 @@ char *str;
 
     flag = line(str, 0, COLS-curpos.x, &len);
     str[len] = 0;
-    dclear_to_eol();
+    if (lineonly)
+	dnewline();
+#if 0
+    else
+	dclear_to_eol();
+#endif
     return (flag == EOL);
 } /* lvgetline */
 

@@ -165,14 +165,14 @@ setcmd()
 		    prints(vp->v_name);
 		    if (vp->u->strp) {
 			dgotoxy(10, -1);
-			prints("= ");
+			prints(" = ");
 			prints(vp->u->strp);
 		    }
 		    break;
 		default:
 		    prints(vp->v_name);
 		    dgotoxy(10, -1);
-		    prints("= ");
+		    prints(" = ");
 		    printi(vp->u->valu);
 		    break;
 	    }
@@ -655,6 +655,12 @@ editfile()
 	    errmsg("file allocation error");
 	    return;
 	}
+#if LOOSELY_COMPATABLE
+	/* copy the rest of the files into the arglist
+	 */
+	while (name = getname())
+	    addarg(name);
+#endif
     }
 
     if ( oktoedit(NO) )

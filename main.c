@@ -47,8 +47,8 @@ char **argv;
 
     /* print the version# if we can */
     if ( lineonly = !CA ) {
-	dgotoxy(0,0);
 	version(); copyright();
+	dnewline();
 	prints("(line mode)");
     }
     else if ( argc <= 1 ) {

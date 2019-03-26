@@ -216,7 +216,6 @@ dinitialize()
     static char iob[4096];
 #endif
     char *term, *bufp;
-    register st;
     
     if (os_initialize())
 	return;
@@ -228,7 +227,7 @@ dinitialize()
     unless ( term=getenv("TERM") )
 	term = "dumb";
     
-    st = tgetent(tcbuf, term);
+    tgetent(tcbuf, term);
 
     TERMNAME = term;
     bufp = tcbuf+2048;
