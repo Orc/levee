@@ -723,7 +723,7 @@ bool prev;
     else if ( name == 0 ) {
 	/* :n w/o argument; move forward
 	 */
-	if ( pc+1 > args.gl_pathc ) {	/* beware: gl_pathc is unsigned */
+	if ( pc+1 >= args.gl_pathc ) {	/* beware: gl_pathc is unsigned */
 	    errmsg("(no more files)");
 	    return;
 	}
