@@ -1,0 +1,197 @@
+Levee has been made slightly more portable by stripping all of the system
+dependent code out of the mainline and putting it into their own files.
+(unixcall.c for the unix interface, wincall for the win32 interface, etc)
+and calling more-abstract functions that end up calling the os-specific
+ones.
+
+
+The prototypes for these functions are in extern.h
+
+
+# raw file i/o
+
+Raw file i/o (for reading and writing internal buffers) needs to *not*
+be subject to any sort of character translation (mapping newlines to/from
+cr/lf on windows, dos, or tos).   These functions are in the os-specific
+files:
+
+  1. FILEDESC OPEN_NEW(char *filename)
+    Creates a new file/reinitializes an existing file
+    ( on unix:  open(file, O_RDWR|O_CREAT|O_TRUNC, 0600) )
+
+  2. FILEDESC OPEN_OLD(char *filename)
+    Opens an existing file
+    ( on unix: open(file, O_RDWR) )
+
+  3. int READ_TEXT(FILEDESC file, void *buf, int size)
+    Reads from a file
+    ( on unix: read(file, buf, size) )
+    
+  4. int WRITE_TEXT(FILEDESC file, void *buf, int size)
+    Writes to a file
+    ( on unix: write(file, buf, size) )
+
+  5. long SEEK_POSITION(FILEDESC file, long offset, int mode)
+    Seeks to a particular position in a file
+    ( on unix: lseek(file, offset, mode) )
+
+  6. void CLOSE_FILE(FILEDESC file)
+    Closes a file
+    ( on unix: close(file)
+
+FILEDESC is *not* an integer handle.  It could be one, a Win32 HANDLE,
+a FILE*, or some homegrown sort of descriptor.
+
+
+# display i/o
+
+Levee is designed around termcap (terminfo, for you USG heathens)
+and does all screen output through d{name} functions defined in
+display.c.   These functions interact with the os-specific functions
+with the following code:
+
+    void
+    d{function}(args)
+    {
+	 if ( os_{function}(args) )
+	     return;
+
+	 /* termcap interface goes here */
+    }
+
+So if the os-specific function does all the work, it returns nonzero
+to tell the display function that it doesn't need to do the regular
+curses code.
+
+the os-specific functions that are called through a corresponding
+d-function are:
+
+  1. int os_clear_to_eol()
+      Clears from the cursor to the end of the line (termcap: CL entry)
+  2. int os_clearscreen()
+      Clears the entire screen and positions the cursor at (0,0)
+      (termcap: CE entry)
+  3. int os_newline()
+      Do a newline, scrolling if we're at the bottom of the screen
+      (termcap: \r\n for both)
+  4. int os_openline()
+      Insert an empty line at the cursor y position
+      (termcap: OL entry)
+  5. int os_scrollback()
+      Scroll up (move the contents of the display down one line, fill
+      the top line with spaces)
+      (termcap: sr entry)
+  6. int os_gotoxy(int x, int y)
+      Positions the cursor at (x,y)  (termcap: CM entry + tgoto() function)
+  7. int os_highlight(int yes_or_no)
+      Tell the terminal to highlight/not highlight  all subsequent text
+      (termcap: SO, SE entries)
+  8. int os_cursor(int visible)
+      Tell the terminal to hide or unhide the cursor.  This is a relic
+      of serial consoles where screen painting is slow enough to have
+      an annoying screen flicker as the cursor dashes around the screen.
+      (termcap: ve, vi entries)
+  9. int os_initialize()
+      On unix, get our termcap entry, set stdio buffering if wanted,
+      and set canUPSCROLL, CA (cursor-addressable terminal), and 
+      canOL (terminal has an open/insertline capacity)
+ 10. int int os_restore()
+      Does any miscellaneous cleanup needed before quitting levee.
+ 11. int os_screensize(int *x, int *y)
+      Set x & y to the number of rows & columns on the terminal.
+      On unix, there are ioctls that get the terminal size, and
+      failing that there's the co & li termcap entries.
+ 12. int os_Ping()
+      Ring the bell (or flash the screen.)   This is abstracted out
+      for systems that support visual bells or that you need to do 
+      a handmade bell tone to avoid an annoying default.
+
+In addition,there are 4 i/o functions that don't have any shim functions
+in display.c, because they're completely os-dependent
+
+  1.int getKey()
+      return a keypress from the console, waiting for it to show up.
+  2. void set_input()
+      Save the current input mode & set up the console for nonbuffered
+      input, so we can do key-at-a-time input
+  3. void reset_input()
+      Reset the console to the original input mode.
+  4. int os_cclass(char c)
+      Tells what sort of character c is, for output formatting:
+	CC_CTRL: It's a control character
+	CC_PRINT: It's a printable character
+	CC_TAB: it's a tab.
+	CC_OTHER: It's something else
+
+      Levee prints CC_CTRL characters as '^'(c^64), CC_PRINT as
+      just the character, CC_TAB as enough spaces to bring us over
+      to the next tabstop, and CC_OTHER as a 3-digit escape sequence
+      ('\', then the hex value of the character padded out to 2
+      spaces with '0')
+ 
+
+# Wildcard matching
+
+Some of the platforms that levee runs on have shells that don't expand
+wildcard filenames, so to avoid the annoyance of `vi *.c` trying to
+edit the file `*.c`, the argument list is expanded (on platforms where
+GLOB_REQUIRED is set) by wildcard matching.
+
+SOME platforms have the glob() function defined in their libc, but not
+enough of them, so the whole globbing process is abstracted to os-specific
+functions
+
+  1. int os_glob(char *pattern, int flags, glob_t *result)
+      Does the same as the unix glob() function, except that GL_NOSORT
+      is added to the glob flags.
+
+  2. void os_globfree(glob_t *result)
+      Does the same as the unix globfree() function.
+     
+     
+# Miscellaneous os-specific functions
+
+  1. FILE *os_cmdopen(FILE *cmd, char *input, os_pid_t *child)
+      Open a pipe from an external command that will process 
+      the input file and return the processed text through the
+      pipe. Wildly os-dependent, and if your os doesn't have
+      enough system infrastructure to do pipes, you should (as
+      well as having od_cmdopen() return 0) set movemap['!']
+      to BAD_COMMAND in your os_initialize() function.
+      
+  2. int os_cmdclose(FILE *cmd, os_pid_t child)
+      Wait for the external command to finish, the close the pipe.
+      
+  3. int os_dwrite(char *text, int size)
+      Write text to the display in an os-dependent manner.
+
+      
+  4. int os_rename(char *old, char *new)
+      Rename a file (unix: rename() or the unlink/link/unlink dance)
+
+  5. int os_subshell(char *command)
+      run an interactive shell, executing command. If your os 
+      doesn't have the system infrastructure to support this,
+      you should also set excmds[EX_ESCAPE].active = 0 so levee
+      won't even allow this command.
+
+  6. int os_unlink(char *file)
+      Unlink/remove a file.
+
+  7. char *os_mktemp(char *dest, int szdest, char *template))
+      Create a temporary filename that includes template as part
+      of the name, then returns it in dynamic memory that needs
+      to be freed when you're done with it.
+
+  8. char *dotfile()
+      Create a path pointing at your rc file (.lvrc on unix) and
+      returns it in dynamic memory.
+
+  9. char *os_tilde(char *path)
+      Expands leading ~'s (and, optionally ~name's) on path and
+      returns the expanded path in dynamic memory.
+
+ 10. char *os_backupname(char *path)
+      Generates a backup file name for path, then returns it in
+      dynamic memory.
+
