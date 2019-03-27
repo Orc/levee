@@ -926,6 +926,13 @@ char *inp;
 
 
 /* expand '%' and '#' into gl_pathv[filenm] & gl_pathv[altnm] */
+int expand_err;
+
+#define EXP_OK 0	/* all % & #'s expanded */
+#define EXP_ALT 1	/* tried to expand # w/o altname */
+#define EXP_FILE 2	/* tried to expand % w/o filename */
+#define EXP_MEM 3	/* ran out of memory during expansion */
+
 char *
 expand_line(char *cmd)
 {
@@ -933,12 +940,12 @@ expand_line(char *cmd)
     static int sz_expanded = 0;
     char *new, *r, *cp;
 
-    char *fileptr = (filenm == F_UNSET) ? "%" : args.gl_pathv[filenm];
-    char *altptr  = (altnm == F_UNSET) ? "#" : args.gl_pathv[altnm];
+    char *fileptr = (filenm == F_UNSET) ? 0 : args.gl_pathv[filenm];
+    char *altptr  = (altnm == F_UNSET) ? 0 : args.gl_pathv[altnm];
     int count_percent = 0,
 	count_hash = 0,
-	sz_fileptr = strlen(fileptr),
-	sz_altptr  = strlen(altptr),
+	sz_fileptr = fileptr ? strlen(fileptr) : 0,
+	sz_altptr  = altptr ? strlen(altptr) : 0,
 	size = strlen(cmd)+1;
 
     /* first scan across the command line counting up #'s and %'s */
@@ -949,9 +956,21 @@ expand_line(char *cmd)
 	    count_hash++;
     }
 
+    expand_err = EXP_OK;
+
     /* if the cmdline doesn't need to be expanded just return it */
     unless (count_percent+count_hash)
 	return cmd;
+
+    if ( count_percent && !fileptr ) {
+	expand_err = EXP_FILE;
+	return 0;
+    }
+
+    if ( count_hash && !altptr ) {
+	expand_err = EXP_ALT;
+	return 0;
+    }
 
     /* find the needed size for the expanded filename and,
      * if needed, expand the buffer to fit it
@@ -966,8 +985,10 @@ expand_line(char *cmd)
 	else
 	    new = malloc(size);
 
-	unless (new)
+	unless (new) {
+	    expand_err = EXP_MEM;
 	    return 0;
+	}
 	
 	expanded = new;
 	sz_expanded = size;
@@ -1005,8 +1026,17 @@ bool *noquit;
     char *expanded = expand_line(cmd);
 
     unless (expanded) {
-	errmsg("Out of memory");
-	return;
+	switch ( expand_err ) {
+	default:    /* if all else fails, blame Canada^Wmalloc */
+		    errmsg("Out of memory");
+		    return;
+	case EXP_ALT:
+		    errmsg("No alternate file for #");
+		    return;
+	case EXP_FILE:
+		    errmsg("No file for %");
+		    return;
+	}
     }
 
     what = parse(expanded);
