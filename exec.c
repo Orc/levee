@@ -949,7 +949,9 @@ expand_line(char *cmd)
 	    count_hash++;
     }
 
-    logit("expand_line: %%'s = %d, #'s = %d", count_percent, count_hash);
+    /* if the cmdline doesn't need to be expanded just return it */
+    unless (count_percent+count_hash)
+	return cmd;
 
     /* find the needed size for the expanded filename and,
      * if needed, expand the buffer to fit it
