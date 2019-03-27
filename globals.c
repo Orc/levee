@@ -128,7 +128,7 @@ excmd_t excmds[] = {
 	{ "xit", 1},		/* write changes and quit */
 	{ "file", 1},		/* show/set file name */
 	{ "set", 1},		/* options */
-	{ "rm", 1},		/* a file */
+	{ "rm", 0},		/* a file (never implemented?) */
 	{ "previous", 1},	/* back up in arglist */
 	{ "delete", 1},		/* lines from buffer */
 	{ "=", 1},		/* tell line number */

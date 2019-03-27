@@ -220,10 +220,6 @@
     (.) read [file]
 	put the contents of 'file' after the current line.
 
----------------
-    rm file
-	Delete 'file' from disk.
-
     Levee.					A Screen Oriented Editor.
 ---------------
     set [option=value]
@@ -348,8 +344,8 @@ NOTE:	If you are running Levee on RMX or Osy/SWOs, it will read
     Levee.					A Screen Oriented Editor.
 ---------------
     undo
-	Undo the last modification to the file (except :edit, :next, :rm,
-    or :write.) You can only undo the last change to a file -- undo counts
+	Undo the last modification to the file (except :edit, :next, or
+    :write.) You can only undo the last change to a file -- undo counts
     as a change. :undo followed by :undo does nothing to the file.
 
 ---------------
