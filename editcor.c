@@ -199,7 +199,7 @@ execute(start, end)
     
     clrprompt();
     printch('!');
-    unless ( lvgetline(instring) )
+    unless ( lvgetline(instring, sizeof instring) )
 	return FALSE;
 
     if ( (size = WRITE_TEXT(tf, core+start, end-start)) == (end-start) ) {

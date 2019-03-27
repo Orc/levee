@@ -287,6 +287,8 @@ drestore()
 void
 Ping()
 {
+    unless (bell)	/* if the bell is turned off, do nothing */
+	return;
     unless ( os_Ping() )
 	dputs(BELL);
 }

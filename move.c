@@ -162,7 +162,7 @@ cmdtype cmd;
 	clrprompt();
 	if (cmd == PATT_FWD || cmd == PATT_BACK) {
 	    printch(tsearch = instring[0] = chars[cmd-PATT_FWD]);
-	    if (!lvgetline(&instring[1]))
+	    if (!lvgetline(&instring[1], sizeof(instring) -1))
 		return ESCAPED;	/* needs to skip later tests */
 	}
 	else {

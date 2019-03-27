@@ -72,8 +72,9 @@ extern
 struct undostack undo;		/* To undo a command */
 		/* R A N D O M   S T R I N G S */
 		
+#define SZ_INSTRING 200
 extern
-char instring[],		/* Latest input */
+char instring[SZ_INSTRING],	/* Latest input */
      gcb[];			/* Command buffer for mutations of insert */
 
 #define F_UNSET -1

@@ -323,26 +323,6 @@ register char *name;
 } /* addarg */
 
 
-/* get a file name argument (substitute alt file for #) */
-char *
-getname()
-{
-    register char *name;
-
-    if ( (name = getarg()) ) {
-	if ( 0 == strcmp(name,"#") ) {
-	    if ( altnm == F_UNSET ) {
-		errmsg("no alt name");
-		return NULL;
-	    }
-	    else
-		return args.gl_pathv[altnm];
-	}
-    }
-    return name;
-} /* getname */
-
-
 /* CAUTION: these make exec not quite recursive */
 int  high,low;		/* low && high end of command range */
 bool affirm;		/* cmd! */
@@ -608,7 +588,7 @@ writefile()
     char *name;
     int fileptr = filenm;
 
-    unless (name=getname())
+    unless (name=getarg())
 	name = (filenm == F_UNSET) ? NULL : args.gl_pathv[filenm];
 
     unless (name) {
@@ -637,9 +617,9 @@ editfile()
     char *name = NULL;	/* file to edit */
     int newpc = F_UNSET;
 
-    if ((name = getname()) && *name == '+') {
+    if ((name = getarg()) && *name == '+') {
 	startcmd = name[1] ? 1+name : "$";
-	name = getname();
+	name = getarg();
     }
 
     if ( name == NULL ) {
@@ -659,7 +639,7 @@ editfile()
 #if LOOSELY_COMPATABLE
 	/* copy the rest of the files into the arglist
 	 */
-	while (name = getname())
+	while (name = getarg())
 	    addarg(name);
 #endif
     }
@@ -945,7 +925,73 @@ char *inp;
 }
 
 
-/* inner loop of execmode */
+/* expand '%' and '#' into gl_pathv[filenm] & gl_pathv[altnm] */
+char *
+expand_line(char *cmd)
+{
+    static char *expanded = 0;
+    static int sz_expanded = 0;
+    char *new, *r, *cp;
+
+    char *fileptr = (filenm == F_UNSET) ? "%" : args.gl_pathv[filenm];
+    char *altptr  = (altnm == F_UNSET) ? "#" : args.gl_pathv[altnm];
+    int count_percent = 0,
+	count_hash = 0,
+	sz_fileptr = strlen(fileptr),
+	sz_altptr  = strlen(altptr),
+	size = strlen(cmd)+1;
+
+    /* first scan across the command line counting up #'s and %'s */
+    for (r = cmd; r < cmd + size; r++ ) {
+	if ( *r == '%' )
+	    count_percent++;
+	else if ( *r == '#' )
+	    count_hash++;
+    }
+
+    logit("expand_line: %%'s = %d, #'s = %d", count_percent, count_hash);
+
+    /* find the needed size for the expanded filename and,
+     * if needed, expand the buffer to fit it
+     */
+    size += (count_percent*sz_fileptr) + (count_hash*sz_altptr);
+
+    logit("expand_line: needed size = %d", size);
+
+    if ( size > sz_expanded ) {
+	if ( expanded )
+	    new = realloc(expanded, size);
+	else
+	    new = malloc(size);
+
+	unless (new)
+	    return 0;
+	
+	expanded = new;
+	sz_expanded = size;
+    }
+
+
+    /* replace all %'s & #'s */
+    for (cp = cmd, r = expanded; *cp; ++cp ) {
+	if ( *cp == '%' ) {
+	    memcpy(r, fileptr, sz_fileptr);
+	    r += sz_fileptr;
+	}
+	else if ( *cp == '#' ) {
+	    memcpy(r, altptr, sz_altptr);
+	    r += sz_altptr;
+	}
+	else
+	    *r++ = *cp;
+    }
+    *r = 0;
+    logit("expand_line: expanded = %s", expanded);
+    
+    return expanded;
+}
+
+ /* inner loop of execmode */
 void
 exec(cmd, mode, noquit)
 char *cmd;
@@ -954,8 +1000,14 @@ bool *noquit;
 {
     int  what;
     bool ok;
+    char *expanded = expand_line(cmd);
 
-    what = parse(cmd);
+    unless (expanded) {
+	errmsg("Out of memory");
+	return;
+    }
+
+    what = parse(expanded);
     ok = YES;
     if (redraw) {
 	lstart = bseekeol(curr);
@@ -1127,7 +1179,7 @@ bool *noquit;
 		doinput(pc=0);
 	    break;
 	default:
-	    prints(":not an editor command.");
+	    errmsg("not an editor command.");
 	    break;
     }
     lastexec = what;

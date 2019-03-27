@@ -92,7 +92,8 @@ char **argv;
     if ( p = getenv("LVRC") ) {
 	extern char* execstr;
 	
-	strcpy(instring,p);
+	strncpy(instring, p, SZ_INSTRING-1);
+	instring[SZ_INSTRING-1] = 0;
 	execstr = instring;
 	setcmd();
     }
@@ -156,7 +157,7 @@ exec_type emode;
     mode=emode;
     do {
 	prompt(FALSE,":");
-	if (lvgetline(instring))
+	if (lvgetline(instring, sizeof instring))
 	    exec(instring, &mode, &noquit);
 	indirect = FALSE;
 	if (mode == E_VISUAL && zotscreen && noquit) {	/*ask for more*/

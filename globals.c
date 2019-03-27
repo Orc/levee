@@ -65,8 +65,8 @@ struct undostack undo;			/* To undo a command */
 
 		/* R A N D O M   S T R I N G S */
 
-char instring[200];	/* Latest input */
-char gcb[16];		/* Command buffer for mutations of insert */
+char instring[SZ_INSTRING];	/* Latest input */
+char gcb[16];			/* Command buffer for mutations of insert */
 
 char *undobuf;
 char *undotmp;

@@ -24,13 +24,13 @@
 #include <errno.h>
 
 bool
-lvgetline(str)
+lvgetline(str, size)
 char *str;
 {
     int len;
     char flag;
 
-    flag = line(str, 0, COLS-curpos.x, &len);
+    flag = line(str, 0, Min(size, COLS-curpos.x), &len);
     str[len] = 0;
     if (lineonly)
 	dnewline();
@@ -204,8 +204,7 @@ error()
 	rcb[0] = 0;
     xerox = FALSE;
 
-    if (bell)
-	Ping();
+    Ping();
 } /* error */
 
 
@@ -308,6 +307,7 @@ char c;
 	    break;
     }
     dgotoxy(ixp, -1);
+    dclear_to_eol();
 } /* back_up */
 
 
