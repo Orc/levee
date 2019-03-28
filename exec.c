@@ -11,7 +11,7 @@
 void undefine();
 void fixupline();
 void doinput();
-static int parse(char **);
+char *findbounds(char *);
 
 /*
  * do a newline and set flags.
@@ -685,15 +685,16 @@ dotag()
 
     fileptr = addarg(result.filename);
 
+    tagmagic = 1;
     if ( fileptr == filenm ) {
-	tag = result.pattern;
-	parse(&tag);
+	findbounds(result.pattern);
 	fixupline(bseekeol(curr));
     }
     else if ( fileptr != F_UNSET ) {
 	startcmd = result.pattern;
 	doinput(fileptr);
     }
+    tagmagic = 0;
 }
 
 

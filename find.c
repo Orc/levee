@@ -272,6 +272,8 @@ char *string, delim;
 	    concatch(LSTART);
 	else if ((*string == LEND) && (string[1] == delim || string[1] == 0))
 	    concatch(LEND);
+	else if (tagmagic)
+	    goto normal;
 	else if (*string == CCL)
 	    string = badccl(1+string);
 	else if ((*string == CLOSURE) && (p > pattern)) {

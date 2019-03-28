@@ -172,6 +172,8 @@ int shiftwidth = 4,
     bell       = YES,
     ignorecase = NO;
 
+int tagmagic   = NO;
+
 #if LOGGING
 int is_logging = YES;
 #endif
