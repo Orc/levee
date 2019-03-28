@@ -349,12 +349,14 @@ cutandpaste()
     register char *dp;
 
     zerostack(&undo);
+    logit("cutandpaste: [%s]", execstr);
     ip = execstr;
     if (*ip != '&') {
-	delim = *ip;
-	ip = makepat(1+ip,delim);			/* get search */
-	if (ip == NULL)
+	delim = *ip++;
+	logit("cutandpaste: pattern starts delim = %c, rest = %s", delim, ip);
+	unless ( ip = makepat(ip,delim) )	/* get search */
 	    goto splat;
+
 	dp = dst;
 	while (*ip && *ip != delim) {
 	    if (*ip == '\\' && ip[1] != 0)
@@ -362,6 +364,9 @@ cutandpaste()
 	    *dp++ = *ip++;
 	}
 	*dp = 0;
+
+	logit("cutandpaste: replacement = [%s]", dst);
+
 	if (*ip == delim) {
 	    while (*++ip)
 		switch (*ip) {
@@ -865,65 +870,90 @@ char *
 findbounds(ip)
 char *ip;
 {
+    logit("findbounds: [%s]", ip);
     ip = findparse(ip, &low, curr);	/* get the low address */
-    if (low >= 0) {
-	low = bseekeol(low);		/* at start of line */
-	if (*ip == ',') {		/* high address? */
-	    ip++;
-	    count = 0;
-	    ip = findparse(ip, &high, curr);
-	    if (high >= 0) {
-		high = fseekeol(high);
-		return(ip);
-	    }
-	}
-	else
-	    return(ip);
-    }
+
+    unless ( low >= 0 ) {
+    logit("findbounds: no");
     return(0);
+    }
+
+    low = bseekeol(low);		/* at start of line */
+    if (*ip == ',') {		/* high address? */
+	ip++;
+	count = 0;
+	ip = findparse(ip, &high, curr);
+	if (high >= 0)
+	    high = fseekeol(high);
+    }
+    logit("findbounds: low=%d, high=%d", low, high);
+    return(ip);
 }
 
 
 /* parse the command line for lineranges && a command */
 int
 parse(inp)
-char *inp;
+char **inp;
 {
     int j,k;
-    char cmd[80];
+    char *cmd, *token;
+    static char badaddr[] = "Bad address";
+
+    token = *inp;
+
     low = high = ERR;
     affirm = 0;
-    if (*inp == '%') {
-	moveright(inp, 2+inp, 1+strlen(inp));
-	inp[0]='1';
-	inp[1]=',';
-	inp[2]='$';
-    }
-    while (isspace(*inp))
-	++inp;
-    if (strchr(".$-+0123456789?/`'", *inp))
-	if (!(inp=findbounds(inp))) {
-	    errmsg("bad address");
+
+    while (isspace(*token))
+	++token;
+
+    if (*token == '%') {
+	if ( findbounds("1,$") )
+	    ++token;
+	else {
+	    errmsg(badaddr);
 	    return ERR;
 	}
-    while (isspace(*inp))
-	++inp;
-    j = 0;
-    while (isalpha(*inp))
-	cmd[j++] = *inp++;
-    if (*inp == '!') {
-	if (j == 0)
-	    cmd[j++] = '!';
-	else
-	    affirm++;
-	inp++;
     }
-    else if (*inp == '=' && j == 0)
-	cmd[j++] = '=';
-    while (isspace(*inp))
-	++inp;
+    else if (strchr(".$-+0123456789?/`'", *token)) {
+	unless ( token=findbounds(token) ) {
+	    errmsg(badaddr);
+	    return ERR;
+	}
+    }
+
+    while (isspace(*token))
+	++token;
+
+    cmd = token;
+    j = 0;
+    while (isalpha(*token)) {
+	token++;
+	j++;
+    }
+
+    if (*token == '!') {
+	if ( token == cmd )
+	    j++;	/* ! command */
+	else
+	    affirm++;	/* otherwise a emphatic command (e!, for instance) */
+	token++;
+    }
+    else if (*token == '=' && j == 0) {
+	++token;
+	++j;
+    }
+
+    while (isspace(*token))
+	++token;
+
+    (*inp) = token;
+
     if (j==0)
 	return EX_CR;
+
+    logit("parse: cmd is [%.*s]", j, cmd);
     for (k=0; excmds[k].name; k++)
 	if (excmds[k].active && strncmp(cmd, excmds[k].name, j) == 0)
 	    return k;
@@ -995,7 +1025,7 @@ expand_line(char *cmd)
 	    expand_err = EXP_MEM;
 	    return 0;
 	}
-	
+
 	expanded = new;
 	sz_expanded = size;
     }
@@ -1016,7 +1046,7 @@ expand_line(char *cmd)
     }
     *r = 0;
     logit("expand_line: expanded = %s", expanded);
-    
+
     return expanded;
 }
 
@@ -1031,7 +1061,7 @@ bool *noquit;
     bool ok;
     char *expanded;
 
-    if ( (what = parse(cmd)) == ERR ) {
+    if ( (what = parse(&cmd)) == ERR ) {
 	errmsg("Not an editor command.");
 	return;
     }
@@ -1060,6 +1090,7 @@ bool *noquit;
 	lstart = bseekeol(curr);
 	lend = fseekeol(curr);
     }
+
     switch (what) {
 	case EX_QUIT:				/* :quit */
 	    if (affirm || what == lastexec || !modified)
