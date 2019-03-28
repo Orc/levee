@@ -118,8 +118,8 @@ char **argv;
 	    case 't':	/* edit file containing a tag */
 		if ( find_tag(optarg, strlen(optarg), &tag) ) {
 		    startcmd = tag.pattern;
-		    os_glob(tag.filename, GLOB_NOMAGIC|GLOB_APPEND, &args);
-		    inputf(args.gl_pathv[0], TRUE);
+		    if (!os_glob(tag.filename, GLOB_NOMAGIC|GLOB_APPEND, &args))
+			doinput(0);
 		}
 		else {
 		    dgotoxy(0,LINES-1);

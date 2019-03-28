@@ -681,8 +681,7 @@ dotag()
     }
     logit("dotag: filename=%s, pattern=%s", result.filename, result.pattern);
 
-    dgotoxy(0, -1);
-    dclear_to_eol();
+    clrmsg();
 
     fileptr = addarg(result.filename);
 

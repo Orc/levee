@@ -233,7 +233,7 @@ extern void redisplay(), scrollback(), scrollforward(), prompt();
 extern void setpos(), resetX(), insertmacro(), wr_stat();
 extern void movearound(), printi(), println(), killargs();
 extern void exec(), initcon(), fixcon(), version(), setcmd();
-extern void toedit(), inputf(), fixmarkers(), errmsg();
+extern void toedit(), doinput(), inputf(), fixmarkers(), errmsg();
 extern void setarg();
 extern char *class();
 
