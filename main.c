@@ -90,11 +90,9 @@ char **argv;
     undotmp = lvtempfile("$tm");
     
     if ( p = getenv("LVRC") ) {
-	extern char* execstr;
-	
 	strncpy(instring, p, SZ_INSTRING-1);
 	instring[SZ_INSTRING-1] = 0;
-	execstr = instring;
+	setarg(instring);
 	setcmd();
     }
     else if ( p = dotfile() )

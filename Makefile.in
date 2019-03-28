@@ -20,6 +20,9 @@ version.c: mkversion VERSION
 mkversion    : mkversion.c
 	$(CC) $(CFLAGS) -o mkversion mkversion.c
 
+tags:	Makefile
+	ctags `echo $(OBJS) | sed -e 's/\.o/.c/g'`
+
 clean:
 	rm -f *.o lev mkversion version.c
 

@@ -48,9 +48,16 @@ char *msg;
 
 
 /* get a space-delimited token */
-char *execstr;			/* if someone calls getarg in the	*/
-				/* wrong place, death will come...	*/
-char *
+
+static char *execstr;
+
+void
+setarg(char *s)
+{
+    execstr = s;
+}
+
+static char *
 getarg()
 {
     char *rv;
@@ -915,7 +922,6 @@ char *inp;
 	cmd[j++] = '=';
     while (isspace(*inp))
 	++inp;
-    execstr = inp;
     if (j==0)
 	return EX_CR;
     for (k=0; excmds[k].name; k++)
@@ -1023,23 +1029,32 @@ bool *noquit;
 {
     int  what;
     bool ok;
-    char *expanded = expand_line(cmd);
+    char *expanded;
 
-    unless (expanded) {
-	switch ( expand_err ) {
-	default:    /* if all else fails, blame Canada^Wmalloc */
-		    errmsg("Out of memory");
-		    return;
-	case EXP_ALT:
-		    errmsg("No alternate file for #");
-		    return;
-	case EXP_FILE:
-		    errmsg("No file for %");
-		    return;
-	}
+    if ( (what = parse(cmd)) == ERR ) {
+	errmsg("Not an editor command.");
+	return;
     }
 
-    what = parse(expanded);
+    if ( excmds[what].expand ) {
+	unless (expanded = expand_line(cmd)) {
+	    switch ( expand_err ) {
+	    default:    /* if all else fails, blame Canada^Wmalloc */
+			errmsg("Out of memory");
+			return;
+	    case EXP_ALT:
+			errmsg("No alternate file for #");
+			return;
+	    case EXP_FILE:
+			errmsg("No file for %");
+			return;
+	    }
+	}
+	setarg(expanded);
+    }
+    else
+	setarg(cmd);
+
     ok = YES;
     if (redraw) {
 	lstart = bseekeol(curr);
@@ -1209,9 +1224,6 @@ bool *noquit;
 	    clrmsg();
 	    if ( (pc > 0) && (args.gl_pathc > 0) && oktoedit(autowrite) )
 		doinput(pc=0);
-	    break;
-	default:
-	    errmsg("not an editor command.");
 	    break;
     }
     lastexec = what;

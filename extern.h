@@ -235,6 +235,7 @@ extern void setpos(), resetX(), insertmacro(), wr_stat();
 extern void movearound(), printi(), println(), killargs();
 extern void exec(), initcon(), fixcon(), version(), setcmd();
 extern void toedit(), inputf(), fixmarkers(), errmsg();
+extern void setarg();
 
 #ifndef moveleft
 extern void moveleft();

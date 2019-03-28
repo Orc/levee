@@ -294,6 +294,7 @@ struct variable {	/* Settable Variable Record */
 typedef struct {
     char *name;
     int active;	/* disabled if a feature is not available on a given platform */
+    int expand;	/* expand % & #'s on the commandline */
 } excmd_t;
 
 /* data structures for wildcard matching
