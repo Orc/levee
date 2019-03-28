@@ -29,7 +29,7 @@ main()
 		continue;
 	    }
 	}
-	printf("%s\t%s\t\%s\n", tag, file, pattern);
+	printf("%s\t%s\t%s\n", tag, file, pattern);
     }
     exit(0);
 }
