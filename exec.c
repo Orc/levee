@@ -627,23 +627,16 @@ writefile()
 void
 editfile()
 {
-    char *name = NULL;	/* file to edit */
+    char *name;	/* file to edit */
     int newpc = F_UNSET;
 
     if ((name = getarg()) && *name == '+') {
 	startcmd = name[1] ? 1+name : "$";
+	logit("editfile: startcmd=%s",startcmd);
 	name = getarg();
     }
 
-    if ( name == NULL ) {
-	logit(":edit with no args: filenm=%d", filenm);
-	if ( filenm == F_UNSET ) {
-	    errmsg("Nothing to edit");
-	    return;
-	}
-	newpc = filenm;
-    }
-    else {
+    if ( name ) {
 	logit(":edit %s", name);
 	if ((newpc = addarg(name)) == F_UNSET) {
 	    errmsg("file allocation error");
@@ -656,6 +649,14 @@ editfile()
 	    addarg(name);
 #endif
     }
+    else {
+	logit(":edit with no args: filenm=%d", filenm);
+	if ( filenm == F_UNSET ) {
+	    errmsg("Nothing to edit");
+	    return;
+	}
+	newpc = filenm;
+    }
 
     if ( oktoedit(NO) )
 	doinput(newpc);
@@ -667,32 +668,32 @@ dotag()
 {
     char *tag;
     Tag result;
+    int fileptr;
 
     unless (tag = getarg()) {
 	errmsg("No tag");
 	return;
     }
+    logit("dotag: tag %s", tag);
     unless ( find_tag(tag, strlen(tag), &result) ) {
 	errmsg("Can't find tag");
 	return;
     }
+    logit("dotag: filename=%s, pattern=%s", result.filename, result.pattern);
 
     dgotoxy(0, -1);
     dclear_to_eol();
 
-    if ( filenm != F_UNSET && !strcmp(result.filename, args.gl_pathv[filenm])) {
-	tag = result.pattern;
+    fileptr = addarg(result.filename);
 
+    if ( fileptr == filenm ) {
+	tag = result.pattern;
 	parse(&tag);
 	fixupline(bseekeol(curr));
     }
-    else {
-	instring[0] = '+';
-	strcpy(instring+1, result.pattern);
-	strcat(instring, " ");
-	strcat(instring, result.filename);
-	setarg(instring);
-	editfile();
+    else if ( fileptr != F_UNSET ) {
+	startcmd = result.pattern;
+	doinput(fileptr);
     }
 }
 
