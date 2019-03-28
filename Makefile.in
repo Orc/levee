@@ -21,8 +21,10 @@ version.c: mkversion VERSION
 mkversion    : mkversion.c
 	$(CC) $(CFLAGS) -o mkversion mkversion.c
 
-tags:	Makefile
+tags:	Makefile fixtags
 	ctags `echo $(OBJS) | sed -e 's/\.o/.c/g'`
+	./fixtags < tags > tagtmp
+	mv -f tagtmp tags
 
 clean:
 	rm -f *.o lev mkversion version.c
@@ -63,3 +65,4 @@ unixcall.o   : levee.h extern.h unixcall.c config.h
 home.o       : levee.h extern.h home.c config.h
 tag.o        : levee.h
 logit.o      : logit.c
+fixtags.o    : fixtags.c
