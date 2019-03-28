@@ -146,6 +146,7 @@ extern int EOL;
 #define EX_VERSION	27
 #define EX_ARGS		28
 #define	EX_REWIND	29
+#define EX_TAG		30
 
 		/* movement return states */
 #define LEGALMOVE	0
@@ -221,6 +222,7 @@ extern int EOL;
 #define REDO_C		79
 #define EDIT_C		80
 #define COLIN_C		81
+#define TAG_C		82
 		    /*macros*/
 #define SOFTMACRO	100
 #define INSMACRO	101
@@ -296,6 +298,17 @@ typedef struct {
     int active;	/* disabled if a feature is not available on a given platform */
     int expand;	/* expand % & #'s on the commandline */
 } excmd_t;
+
+
+/* tag matching
+ */
+typedef struct _tag {
+    char *filename;
+    char *pattern;
+} Tag;
+
+extern int find_tag(char *, int, Tag *);
+
 
 /* data structures for wildcard matching
  */

@@ -43,8 +43,7 @@ glob_t args;		/* arguments
 			 * argv -> args->gl_pathv
 			 * argc -> args->gl_pathc
 			 */
-int pc = F_UNSET,	/* Index into arguments */
-    filenm = F_UNSET,	/* current filename */
+int filenm = F_UNSET,	/* current filename */
     altnm = F_UNSET;	/* previous filename */
 
 		/* M A C R O   S T U F F */
@@ -147,6 +146,7 @@ excmd_t excmds[] = {
 	{ "version", 1, 0},		/* print version # */
 	{ "args", 1, 0},		/* print argument list */
 	{ "rewind", 1, 0},		/* rewind argument list */
+	{ "tag", 1, 0},			/* jump to a tag */
 	{ NULL }
 };
 
@@ -251,7 +251,7 @@ cmdtype movemap[256]={
     /*^Q*/ BAD_COMMAND,
     /*^R*/ REDRAW_C,
     /*^S*/ BAD_COMMAND,
-    /*^T*/ BAD_COMMAND,
+    /*^T*/ TAG_C,
     /*^U*/ WINDOW_DOWN,
     /*^V*/ BAD_COMMAND,
     /*^W*/ BAD_COMMAND,

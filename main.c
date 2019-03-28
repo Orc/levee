@@ -39,6 +39,8 @@ char **argv;
     int i;
     int xmode = E_INIT, xquit;
     char *p;
+    Tag tag;
+    char opt;
 
     dinitialize();
     set_input();
@@ -65,12 +67,12 @@ char **argv;
     core[0] = EOL;
 
     yank.size = ERR;		/* no yanks yet */
-    
+
     undo.blockp = undo.ptr = 0;
-    
+
     fillchar(adjcurr, sizeof(adjcurr), 0);
     fillchar(adjendp, sizeof(adjendp), 0);
-    
+
     adjcurr[BTO_WD]	=	/* more practical to just leave dynamic */
     adjcurr[SENT_BACK]	=
     adjendp[BTO_WD]	=
@@ -88,7 +90,7 @@ char **argv;
     undobuf = lvtempfile("$un");
     yankbuf = lvtempfile("$ya");
     undotmp = lvtempfile("$tm");
-    
+
     if ( p = getenv("LVRC") ) {
 	strncpy(instring, p, SZ_INSTRING-1);
 	instring[SZ_INSTRING-1] = 0;
@@ -98,23 +100,45 @@ char **argv;
     else if ( p = dotfile() )
 	do_file(p, &xmode, &xquit);
 
-    ++argv, --argc;
-    
+    memset(&args, sizeof args, 0);
+
 #if SOFT_EOL
-    /* USCD pascal-style (and early Macos?) EOL
-     */
-    if (argc > 0 && strcmp(*argv, "-p") == 0 ) {
-	++argv, --argc;
-	EOL = '\r';
-    }
+#  define OPTIONS "pt:"
+#else
+#  define OPTIONS "t:"
 #endif
+
+    while ( (opt=getopt(argc, argv, OPTIONS)) != EOF ) {
+	switch (opt) {
+#if SOFT_EOL
+	    case 'p': /* UCSD-style EOL */
+		EOL = '\r';
+		break;
+#endif
+	    case 't':	/* edit file containing a tag */
+		if ( find_tag(optarg, strlen(optarg), &tag) ) {
+		    startcmd = tag.pattern;
+		    os_glob(tag.filename, GLOB_NOMAGIC|GLOB_APPEND, &args);
+		    inputf(args.gl_pathv[0], TRUE);
+		}
+		else {
+		    dgotoxy(0,LINES-1);
+		    errmsg("Can't find tag <");
+		    prints(optarg);
+		    printf(">");
+		}
+		return;
+	}
+    }
+
+    argc -= optind;
+    argv += optind;
 
     if (argc > 0 && **argv == '+') {
 	char *p = *argv;
 	startcmd = p[1] ? &p[1] : "$";
 	++argv, --argc;
     }
-    memset(&args, sizeof args, 0);
 
 #if GLOB_REQUIRED
     /* Windows-style OS where command-line wildcards are NOT expanded by
@@ -124,14 +148,14 @@ char **argv;
 #else
     /* Unix-style OS where command-line wildcards are expanded by the shell
      * before levee is executed
-     */
+ */
 #   define CMDLINE_FLAGS GLOB_APPEND|GLOB_NOMAGIC
 #endif
     while (argc-- > 0)
 	os_glob(*argv++, CMDLINE_FLAGS, &args);
-	
+
     if (args.gl_pathc > 0) {
-	pc = filenm = 0;
+	filenm = 0;
 	if (args.gl_pathc > 1)
 	    toedit(args.gl_pathc);
 	inputf(args.gl_pathv[filenm], TRUE);

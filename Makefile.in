@@ -9,7 +9,8 @@ LDFLAGS=@LDFLAGS@
 
 OBJS = blockio.o display.o editcor.o exec.o find.o \
     globals.o insert.o main.o misc.o modify.o move.o \
-    ucsd.o undo.o version.o home.o @MACHDEP@call.o @LOGGER@
+    ucsd.o undo.o version.o home.o tag.o \
+    @MACHDEP@call.o @LOGGER@
 
 lev: $(OBJS)
 	$(CC) $(LDFLAGS) -o lev $(OBJS) @LIBS@
@@ -60,4 +61,5 @@ ucsd.o       : levee.h extern.h ucsd.c config.h
 undo.o       : levee.h extern.h undo.c config.h
 unixcall.o   : levee.h extern.h unixcall.c config.h
 home.o       : levee.h extern.h home.c config.h
+tag.o        : levee.h
 logit.o      : logit.c

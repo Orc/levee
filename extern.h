@@ -49,8 +49,7 @@ extern glob_t args;	/* Arguments
 			 * argc -> args->gl_pathc
 			 */
 extern
-int pc,			/* Index into arguments */
-    filenm,		/* current filename */
+int filenm,		/* current filename */
     altnm;		/* previous filename */
 
 
@@ -236,6 +235,7 @@ extern void movearound(), printi(), println(), killargs();
 extern void exec(), initcon(), fixcon(), version(), setcmd();
 extern void toedit(), inputf(), fixmarkers(), errmsg();
 extern void setarg();
+extern char *class();
 
 #ifndef moveleft
 extern void moveleft();

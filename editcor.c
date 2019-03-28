@@ -220,6 +220,36 @@ execute(start, end)
     return ret;
 }
 
+bool
+vitag()
+{
+    int start, endd;
+
+    if ( bufmax == 0 || (class(core[curr]) != wordset) ) {
+	error();
+	return NO;
+    }
+
+    start = endd = curr;
+
+    while ( start > 0 && (class(core[start]) == wordset) )
+	--start;
+
+    if ( class(core[start]) != wordset )
+	++start;
+
+    while ( endd < bufmax && (class(core[endd]) == wordset) )
+	++endd;
+
+    --endd;
+
+    strcpy(instring, ":tag ");
+    strncat(instring, &core[start], endd-start+1);
+    strcat(instring, "\r");
+    insertmacro(instring, 1);
+    return YES;
+}
+
 void
 gcount()
 {
@@ -611,6 +641,10 @@ editcore()
 		contexts[ch-'`'] = curr;
 	    else if (ch != ESC)
 		error();
+	    break;
+
+	  case TAG_C:
+	    vitag();
 	    break;
 
 	  case REDO_C:

@@ -11,6 +11,7 @@
 void undefine();
 void fixupline();
 void doinput();
+static int parse(char **);
 
 /*
  * do a newline and set flags.
@@ -96,9 +97,9 @@ show_args()
 	    exprintln();
 	else if (i > 0)
 	    printch(' ');
-	if (pc == i) d_highlight(1);
+	if (filenm == i) d_highlight(1);
 	prints(args.gl_pathv[i]);
-	if (pc == i) d_highlight(0);
+	if (filenm == i) d_highlight(0);
     }
 } /* show_args */
 
@@ -635,12 +636,12 @@ editfile()
     }
 
     if ( name == NULL ) {
-	logit(":edit with no args: pc=%d", pc);
-	if ( pc == F_UNSET ) {
+	logit(":edit with no args: filenm=%d", filenm);
+	if ( filenm == F_UNSET ) {
 	    errmsg("Nothing to edit");
 	    return;
 	}
-	newpc = pc;
+	newpc = filenm;
     }
     else {
 	logit(":edit %s", name);
@@ -662,10 +663,46 @@ editfile()
 
 
 void
+dotag()
+{
+    char *tag;
+    Tag result;
+
+    unless (tag = getarg()) {
+	errmsg("No tag");
+	return;
+    }
+    unless ( find_tag(tag, strlen(tag), &result) ) {
+	errmsg("Can't find tag");
+	return;
+    }
+
+    dgotoxy(0, -1);
+    dclear_to_eol();
+
+    if ( filenm != F_UNSET && !strcmp(result.filename, args.gl_pathv[filenm])) {
+	tag = result.pattern;
+
+	parse(&tag);
+	fixupline(bseekeol(curr));
+    }
+    else {
+	instring[0] = '+';
+	strcpy(instring+1, result.pattern);
+	strcat(instring, " ");
+	strcat(instring, result.filename);
+	setarg(instring);
+	editfile();
+    }
+}
+
+
+void
 doinput(fileptr)
 int fileptr;
 {
     inputf(args.gl_pathv[fileptr], YES);
+
     if ( fileptr != filenm ) {
 	altnm = filenm;
 	filenm = fileptr;
@@ -701,27 +738,29 @@ nextfile(prev)
 bool prev;
 {
     char *name = getarg();
-    int rc, i;
+    int rc, i, current;
 
+    current = filenm;
+    
     if ( prev || (name && (strcmp(name, "-") == 0)) ) {
 	/* :n - ; move back, ignore other arguments
 	 */
-	if ( pc <= 0 ) {
+	if ( current <= 0 ) {
 	    errmsg("(no prev files)");
 	    return;
 	}
 	else if ( oktoedit(autowrite) )
-	    --pc;
+	    --current;
     }
     else if ( name == 0 ) {
 	/* :n w/o argument; move forward
 	 */
-	if ( pc+1 >= args.gl_pathc ) {	/* beware: gl_pathc is unsigned */
+	if ( current+1 >= args.gl_pathc ) {/* beware: gl_pathc is unsigned */
 	    errmsg("(no more files)");
 	    return;
 	}
 	else if ( oktoedit(autowrite) )
-	    pc++;
+	    current++;
     }
     else {
 	/* :n file {...}
@@ -741,14 +780,13 @@ bool prev;
 	    }
 	} while ( name = getarg() );
 
-	if ( (files.gl_pathc == 1) && (pc = findarg(files.gl_pathv[0])) >= 0) {
+	if ( (files.gl_pathc == 1) && (i = findarg(files.gl_pathv[0])) >= 0) {
 
 	    /* jump to existing file */
 	    ;
 	}
 	else {
 	    /* toss the old args; s-l-o-w-l-y copy the new ones in */
-	    pc = 0;
 	    os_globfree(&args);
 	    for ( i=0; i < files.gl_pathc; i++ ) {
 		rc = os_glob(files.gl_pathv[i], GLOB_APPEND|GLOB_NOMAGIC, &args);
@@ -757,13 +795,14 @@ bool prev;
 		    break;
 		}
 	    }
+	    current = 0;
 	}
 	if ( files.gl_pathc > 0 )
 	    os_globfree(&files);
     }
 
-    if ( pc >= 0 && pc < args.gl_pathc )
-	doinput(pc);
+    if ( current != F_UNSET )
+	doinput(current);
     else {
 	/* if we got here and there was an error, we are screwed
 	 * and need to go back to an empty screen
@@ -892,7 +931,7 @@ char *ip;
 
 
 /* parse the command line for lineranges && a command */
-int
+static int
 parse(inp)
 char **inp;
 {
@@ -1139,10 +1178,10 @@ bool *noquit;
 		    break;
 	    }
 
-	    if (!affirm && (args.gl_pathc-pc > 1)) {
+	    if (!affirm && (args.gl_pathc-filenm > 1)) {
 	    	/* more files to edit? */
 		printch('(');
-		plural(args.gl_pathc-pc-1," more file");
+		plural(args.gl_pathc-filenm-1," more file");
 		prints(" to edit)");
 	    }
 	    else
@@ -1159,7 +1198,7 @@ bool *noquit;
 		int new_pc;
 		if ( (new_pc = addarg(cmd)) != F_UNSET ) {
 		    altnm = filenm;
-		    filenm = pc = new_pc;
+		    filenm = new_pc;
 		}
 	    }
 	    wr_stat();
@@ -1253,8 +1292,11 @@ bool *noquit;
 	    break;
 	case EX_REWIND:
 	    clrmsg();
-	    if ( (pc > 0) && (args.gl_pathc > 0) && oktoedit(autowrite) )
-		doinput(pc=0);
+	    if ( (filenm > 0) && (args.gl_pathc > 0) && oktoedit(autowrite) )
+		doinput(0);
+	    break;
+	case EX_TAG:
+	    dotag();
 	    break;
     }
     lastexec = what;
