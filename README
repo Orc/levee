@@ -1,4 +1,4 @@
-My tiny (~57k on osx/x86_64; smaller on 32 bit machines) & ancient
+My tiny (~58k on osx/x86_64; smaller on 32 bit machines) & ancient
 (first written sometime in 1979 (in USCD pascal; I converted it to C
  sometime in the early 1980s)) almost-vi-clone.
 

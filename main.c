@@ -119,9 +119,10 @@ char **argv;
 		if ( find_tag(optarg, strlen(optarg), &tag) ) {
 		    startcmd = tag.pattern;
 		    if (!os_glob(tag.filename, GLOB_NOMAGIC|GLOB_APPEND, &args)) {
-			tagmagic = 1;
+			int wasmagic = magic;
+			magic = 0;
 			doinput(0);
-			tagmagic = 0;
+			magic = wasmagic;
 		    }
 		}
 		else {

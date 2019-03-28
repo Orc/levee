@@ -154,9 +154,6 @@ int autowrite,
 /*extern 
 char *suffix;	*/
 
-/* special RE's for tags */
-extern
-int tagmagic;
 /* For movement routines */
 extern
 int setstep[];

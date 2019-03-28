@@ -264,16 +264,14 @@ char *string, delim;
 	oldcp = cp;
 	cp = p;
 
-	if (!magic)		/* kludge for nonmagical patterns */
-	    goto normal;
-	if (*string == ANY)
-	    concatch(ANY);
-	else if ((*string == LSTART) && (string == start))
+	if ((*string == LSTART) && (string == start))
 	    concatch(LSTART);
 	else if ((*string == LEND) && (string[1] == delim || string[1] == 0))
 	    concatch(LEND);
-	else if (tagmagic)
+	else if (!magic)	/* ^ & $ are significant no matter what */
 	    goto normal;
+	else if (*string == ANY)
+	    concatch(ANY);
 	else if (*string == CCL)
 	    string = badccl(1+string);
 	else if ((*string == CLOSURE) && (p > pattern)) {

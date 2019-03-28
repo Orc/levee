@@ -669,6 +669,7 @@ dotag()
     char *tag;
     Tag result;
     int fileptr;
+    int wasmagic = magic;
 
     unless (tag = getarg()) {
 	errmsg("No tag");
@@ -685,7 +686,7 @@ dotag()
 
     fileptr = addarg(result.filename);
 
-    tagmagic = 1;
+    magic = 0;
     if ( fileptr == filenm ) {
 	findbounds(result.pattern);
 	fixupline(bseekeol(curr));
@@ -694,7 +695,7 @@ dotag()
 	startcmd = result.pattern;
 	doinput(fileptr);
     }
-    tagmagic = 0;
+    magic = wasmagic;
 }
 
 
