@@ -40,7 +40,7 @@ char **argv;
     int xmode = E_INIT, xquit;
     char *p;
     Tag tag;
-    char opt;
+    int opt;
 
     dinitialize();
     set_input();

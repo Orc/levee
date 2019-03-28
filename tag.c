@@ -32,8 +32,8 @@ find_tag(char *tag, int sztag, Tag *ret)
 {
     FILE *tags = fopen("tags", "r");
     static char tagline[120];
-    char *filename = 0;
-    char *pattern = 0;
+    char *filename;
+    char *pattern;
     int count=0;
 
     if ( tags == 0 ) {
