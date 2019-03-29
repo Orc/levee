@@ -47,19 +47,6 @@ char **argv;
     dscreensize(&COLS, &LINES);
     dofscroll = LINES/2;
 
-    /* print the version# if we can */
-    if ( lineonly = !CA ) {
-	version();
-	copyright();
-	dnewline();
-	prints("(line mode)");
-    }
-    else if ( argc <= 1 ) {
-	dgotoxy(0,LINES-1);
-	version();
-	copyright();
-    }
-
 
     /* initialize macro table */
     for (i = 0;i < MAXMACROS;i++)
@@ -143,6 +130,20 @@ char **argv;
 
     argc -= optind;
     argv += optind;
+    
+    /* print the version# if we can */
+    if ( lineonly = !CA ) {
+	version();
+	copyright();
+	dnewline();
+	prints("(line mode)");
+    }
+    else if ( argc <= 1 ) {
+	dgotoxy(0,LINES-1);
+	version();
+	copyright();
+    }
+
 
     if (argc > 0 && **argv == '+') {
 	char *p = *argv;
