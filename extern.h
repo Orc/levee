@@ -174,7 +174,6 @@ bool modified,		/* File has been modified */
      readonly,		/* is this file readonly? */
      needchar,		/* Peekc flag */
      deranged,		/* Up-arrow || down-arrow left xpos in Oz. */
-     indirect,		/* Reading from an indirect file?? */
      redoing,		/* doing a redo? */
      xerox,		/* making a redo buffer? */
      newfile,		/* Editing a new file? */
@@ -182,6 +181,10 @@ bool modified,		/* File has been modified */
      lineonly,		/* Dumb terminal? */
      zotscreen,		/* do more after command in execmode */
      redraw;		/* force redraw when I enter editcore */
+
+extern
+int  is_viewer,		/* set when the -r flag is passed to levee */
+     indirect;		/* Nonzero when reading from an indirect file?? */
      
 extern
 int macro;    /* Index into MCR macro execution stack */
@@ -233,9 +236,10 @@ extern void mvcur(), printch(), prints(), writeline(), refresh();
 extern void redisplay(), scrollback(), scrollforward(), prompt();
 extern void setpos(), resetX(), insertmacro(), wr_stat();
 extern void movearound(), printi(), println(), killargs();
-extern void exec(), initcon(), fixcon(), version(), setcmd();
+extern void initcon(), fixcon(), version(), setcmd();
 extern void toedit(), doinput(), inputf(), fixmarkers(), errmsg();
 extern void setarg();
+extern int exec();
 extern char *class();
 
 #ifndef moveleft

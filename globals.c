@@ -194,7 +194,7 @@ struct variable vars[]={
     {"list",	   "",	 VBOOL,	V_DISPLAY,	(void*)&list       },
     {"magic",	   "",	 VBOOL,	0,		(void*)&magic      },
     {"ignorecase", "ic", VBOOL,	0,		(void*)&ignorecase },
-    {"bell",      "",	VBOOL,	0,		(void*)&bell       },
+    {"bell",       "",	VBOOL,	0,		(void*)&bell       },
     {NULL}
 };
 
@@ -216,7 +216,6 @@ bool modified= NO,		/* File has been modified */
      readonly= NO,		/* is this file readonly? */
      needchar= YES,		/* Peekc flag */
      deranged= NO,		/* Up-arrow || down-arrow left xpos in Oz. */
-     indirect= NO,		/* Reading from an indirect file?? */
      redoing = NO,		/* doing a redo? */
      xerox   = NO,		/* making a redo buffer? */
      newfile = YES,		/* Editing a new file? */
@@ -224,6 +223,10 @@ bool modified= NO,		/* File has been modified */
      lineonly= NO,		/* Dumb terminal? */
      zotscreen=NO,		/* ask for [more] in execmode */
      redraw  = NO;		/* force new window in editcore */
+
+bool is_viewer = NO;		/* set when the -r flag is passed to levee */
+
+int  indirect= 0;		/* Nonzero when we're executing a script */
 
 int  macro = -1;    		/* Index into MCR */
 char lsearch = 0;		/* for N and n'ing... */
@@ -334,7 +337,7 @@ cmdtype movemap[256]={
     /*d */ DELETE_C,
     /*e */ FORWD,
     /*f */ TO_CHAR,
-    /*g */ HARDMACRO,
+    /*g */ BAD_COMMAND,
     /*h */ GO_LEFT,
     /*i */ INSERT_C,
     /*j */ GO_DOWN,

@@ -525,8 +525,6 @@ macrocommand()
     else
 	gcb[0] = 0;
     switch (ch) { /* which macro? */
-	case 'g':			/* go to start of file */
-	    strcat(gcb,"1G"); break;
 	case 'x':			/* x out characters */
 	    strcat(gcb,"dl"); break;
 	case 'X':			/* ... backwards */

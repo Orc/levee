@@ -451,7 +451,7 @@ bool newbuf;
 	rc;
 
     if (newbuf)
-	readonly = NO;
+	readonly = is_viewer;
 
     zerostack(&undo);
 
@@ -483,7 +483,7 @@ bool newbuf;
 	    prints("[read error]");
 	else {
 	    prints("[overflow]");
-	    readonly=1;
+	    readonly=YES;
 	}
 	if (newbuf) newfile = NO;
     }
@@ -575,22 +575,23 @@ oktoedit(writeold)
 /* check and see if it is ok to edit a new file */
 int writeold;	/* automatically write out changes? */
 {
-    if (modified && !affirm) {
-	if (readonly) {
-	    errmsg(fisro);
-	    return NO;
-	}
-	else if (writeold && (filenm != F_UNSET) ) {
-	    if (!outputf(args.gl_pathv[filenm]))
-		return NO;
-	    printch(',');
-	}
-	else {
+    unless (modified)			/* no modifications?  Yes. */			/* otherwise?  Yes. */
+	return YES;
+
+    if (readonly || is_viewer) {	/* readonly or in viewer mode? No. */
+	errmsg(fisro);
+	return NO;
+    }
+    if (writeold) {			/* autowrite? */
+	if ( filenm == F_UNSET ) {	/* no filename? No. */
 	    errmsg(fismod);
 	    return NO;
 	}
+	unless (outputf(args.gl_pathv[filenm]))
+	    return NO;			/* write error?  No. */
+	printch(',');
     }
-    return YES;
+    return YES;				/* otherwise?  Yes. */
 } /* oktoedit */
 
 
@@ -869,23 +870,23 @@ print()
 
 
 bool
-do_file(fname,mode,noquit)
+do_file(fname,mode)
 char *fname;
 exec_type *mode;
-bool *noquit;
 {
     char line[120];
     FILE *fp;
 
     if ((fp = expandfopen(fname,"r")) != NULL) {
-	indirect = YES;
+	++indirect;
 	while (fgets(line,120,fp) && indirect) {
 	    strtok(line, "\n");
-	    if (*line != 0)
-		exec(line,mode,noquit);
+	    if (*line && !exec(line,mode) )
+		break;
 	}
-	indirect = YES;
 	fclose(fp);
+	if ( indirect )
+	    --indirect;
 	return YES;
     }
     return NO;
@@ -1094,20 +1095,22 @@ expand_line(char *cmd)
     return expanded;
 }
 
- /* inner loop of execmode */
-void
-exec(cmd, mode, noquit)
+ /* inner loop of execmode: returns TRUE if it expects to do more
+  * editing, FALSE if it received a quit command.
+  */
+int
+exec(cmd, mode)
 char *cmd;
 exec_type *mode;
-bool *noquit;
 {
     int  what;
-    bool ok;
+    int  exit_now = NO;
+    bool ok = YES;
     char *expanded;
 
     if ( (what = parse(&cmd)) == ERR ) {
 	errmsg("Not an editor command.");
-	return;
+	return NO;
     }
 
     if ( excmds[what].expand ) {
@@ -1115,13 +1118,13 @@ bool *noquit;
 	    switch ( expand_err ) {
 	    default:    /* if all else fails, blame Canada^Wmalloc */
 			errmsg("Out of memory");
-			return;
+			return NO;
 	    case EXP_ALT:
 			errmsg("No alternate file for #");
-			return;
+			return NO;
 	    case EXP_FILE:
 			errmsg("No file for %");
-			return;
+			return NO;
 	    }
 	}
 	setarg(expanded);
@@ -1129,7 +1132,6 @@ bool *noquit;
     else
 	setarg(cmd);
 
-    ok = YES;
     if (redraw) {
 	lstart = bseekeol(curr);
 	lend = fseekeol(curr);
@@ -1138,7 +1140,7 @@ bool *noquit;
     switch (what) {
 	case EX_QUIT:				/* :quit */
 	    if (affirm || what == lastexec || !modified)
-		*noquit = NO;
+		exit_now = YES;
 	    else
 		errmsg(fismod);
 	    break;
@@ -1153,10 +1155,10 @@ bool *noquit;
 	case EX_WRITE:
 	case EX_WQ :				/* :write, :wq */
 	    clrmsg();
-	    if (readonly && !affirm)
+	    if (is_viewer || (readonly && !affirm) )
 		prints(fisro);
-	    else if (writefile() && what==EX_WQ)
-		*noquit = NO;
+	    else if (writefile())
+		exit_now = (what == EX_WQ);
 	    break;
 	case EX_PREV:
 	case EX_NEXT:				/* :next */
@@ -1167,7 +1169,7 @@ bool *noquit;
 	    cutandpaste();
 	    break;
 	case EX_SOURCE:				/* :source */
-	    if ((cmd = getarg()) && !do_file(cmd, mode, noquit)) {
+	    if ((cmd = getarg()) && !do_file(cmd, mode)) {
 		errmsg("cannot open ");
 		prints(cmd);
 	    }
@@ -1190,7 +1192,7 @@ bool *noquit;
 		prints(" to edit)");
 	    }
 	    else
-		*noquit = NO;
+		exit_now = YES;
 	    break;
 	case EX_MAP:
 	    map(affirm);
@@ -1243,6 +1245,9 @@ bool *noquit;
 		clrmsg();
 		nextfile(NO);
 	    }
+	    redraw = YES;
+	    lstart = bseekeol(curr);
+	    lend = fseekeol(curr);
 	    break;
 	case EX_EX:
 	    *mode = E_EDIT;			/* :execmode */
@@ -1311,5 +1316,6 @@ bool *noquit;
 	errmsg(excmds[what].name);
 	prints(" error");
     }
+    return (exit_now) ? YES : NO;
 } /* exec */
 

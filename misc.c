@@ -198,7 +198,7 @@ int *a,*b;
 void
 error()
 {
-    indirect = FALSE;
+    indirect = 0;
     macro = -1;
     if (xerox)
 	rcb[0] = 0;

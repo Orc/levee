@@ -98,14 +98,14 @@ char **argv;
 	setcmd();
     }
     else if ( p = dotfile() )
-	do_file(p, &xmode, &xquit);
+	do_file(p, &xmode);
 
     memset(&args, sizeof args, 0);
 
 #if SOFT_EOL
-#  define OPTIONS "pt:"
+#  define OPTIONS "eprt:"
 #else
-#  define OPTIONS "t:"
+#  define OPTIONS "ert:"
 #endif
 
     while ( (opt=getopt(argc, argv, OPTIONS)) != EOF ) {
@@ -115,6 +115,12 @@ char **argv;
 		EOL = '\r';
 		break;
 #endif
+	    case 'r':	/* readonly */
+		readonly = is_viewer = YES;
+		break;
+	    case 'e':	/* start in exec mode */
+		mode = E_EDIT;
+		break;
 	    case 't':	/* edit file containing a tag */
 		if ( find_tag(optarg, strlen(optarg), &tag) ) {
 		    startcmd = tag.pattern;
@@ -170,12 +176,11 @@ bool
 execmode(emode)
 exec_type emode;
 {
-    bool more,			/* used [more] at end of line */
-	 noquit;		/* quit flag for :q, :xit, :wq */
+    bool more;			/* used [more] at end of line */
     exec_type mode;
+    int exit_now;		/* exec says time to go */
 
     zotscreen = redraw = FALSE;
-    noquit = TRUE;
 
     if (lineonly)
 	println();
@@ -184,9 +189,12 @@ exec_type emode;
     do {
 	prompt(FALSE,":");
 	if (lvgetline(instring, sizeof instring))
-	    exec(instring, &mode, &noquit);
+	    exit_now = exec(instring, &mode);
+	if ( exit_now )
+	    return NO;
+	
 	indirect = FALSE;
-	if (mode == E_VISUAL && zotscreen && noquit) {	/*ask for more*/
+	if (mode == E_VISUAL && zotscreen && !exit_now) {
 	    prints(" [more]");
 	    if ((ch=peekc()) == 13 || ch == ' ' || ch == ':')
 		readchar();
@@ -194,12 +202,14 @@ exec_type emode;
 	}
 	else
 	    more = (mode == E_EDIT);
+
+	logit("execmode: mode=%d, more=%d", mode, more);
 	if (mode != E_VISUAL && curpos.x > 0)
 	    println();
-    } while (more && noquit);
+    } while (more);
     if (zotscreen)
 	clrprompt();
-    return noquit;
+    return YES;
 }
 
 int
@@ -209,13 +219,18 @@ char **argv;
 {
     initialize(argc, argv);
 
-    redraw = TRUE;	/* force screen redraw when we enter editcore() */
     if (lineonly)
 	while (execmode(E_EDIT))
 	    prints("(no visual mode)");
-    else
-	while (execmode(editcore()))
-            /* do nada */;
+    else {
+	/* life is too short not to do a duff's device at least once */
+	switch (mode) {
+	default:do {
+		    mode = editcore();
+	case E_EDIT:1;
+		} while (execmode(mode));
+	}
+    }
 
     os_unlink(undobuf);
     os_unlink(yankbuf);
