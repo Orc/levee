@@ -87,7 +87,7 @@ char **argv;
     else if ( p = dotfile() )
 	do_file(p, &xmode);
 
-    memset(&args, sizeof args, 0);
+    fillchar(&args, sizeof args, 0);
 
 #if SOFT_EOL
 #  define OPTIONS "eprt:"

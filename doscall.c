@@ -204,6 +204,18 @@ unsigned int c;
 }
 
 
+static void
+lowercase(s)
+char *s;
+{
+    while (*s) {
+	if (isupper(*s))
+	    *s += 32;
+	s++;
+    }
+}
+
+
 /*
  * glob() expands a wildcard, via calls to _dos_findfirst/_next()
  * and pathname retention.

@@ -482,18 +482,6 @@ Min(a,b)
 }
 
 
-void
-lowercase(s)
-char *s;
-{
-    while (*s) {
-	if (isupper(*s))
-	    *s += 32;
-	s++;
-    }
-}
-
-
 /*
  * return a tempfile name in malloc()ed memory
  */

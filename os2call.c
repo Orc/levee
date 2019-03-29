@@ -107,6 +107,19 @@ register char *s;
 
 #endif
 
+
+static void
+lowercase(s)
+char *s;
+{
+    while (*s) {
+	if (isupper(*s))
+	    *s += 32;
+	s++;
+    }
+}
+
+
 /*
  * glob() expands a wildcard, via calls to DosFindFirst/Next()
  * and pathname retention.

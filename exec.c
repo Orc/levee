@@ -773,7 +773,7 @@ bool prev;
 	unless (oktoedit(autowrite))
 	    return;
 
-	memset(&files, 0, sizeof files);
+	fillchar(&files, sizeof files, 0);
 
 	do {
 	    if (rc = os_glob(name, GLOB_APPEND|GLOB_NOMAGIC, &files)) {
