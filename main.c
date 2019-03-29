@@ -223,6 +223,7 @@ char **argv;
 	while (execmode(E_EDIT))
 	    prints("(no visual mode)");
     else {
+	redraw = YES;
 	/* life is too short not to do a duff's device at least once */
 	switch (mode) {
 	default:do {
