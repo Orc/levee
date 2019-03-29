@@ -743,7 +743,7 @@ bool prev;
     int rc, i, current;
 
     current = filenm;
-    
+
     if ( prev || (name && (strcmp(name, "-") == 0)) ) {
 	/* :n - ; move back, ignore other arguments
 	 */
@@ -966,6 +966,9 @@ char **inp;
 
     while (isspace(*token))
 	++token;
+
+    if ( *token == '"' )
+	return EX_COMMENT;
 
     cmd = token;
     j = 0;
@@ -1299,6 +1302,8 @@ bool *noquit;
 	    break;
 	case EX_TAG:
 	    dotag();
+	    break;
+	case EX_COMMENT:
 	    break;
     }
     lastexec = what;

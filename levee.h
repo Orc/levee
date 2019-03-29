@@ -115,6 +115,7 @@ extern int EOL;
 #define MAXPAT	((int)300)
 
 		/* exec mode commands */
+#define EX_COMMENT	(ERR-2)
 #define	EX_CR		(ERR-1)
 #define EX_PR		0
 #define EX_QUIT		1
