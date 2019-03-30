@@ -131,6 +131,13 @@ char **argv;
     argc -= optind;
     argv += optind;
     
+    if (argc > 0 && **argv == '+') {
+	char *p = *argv;
+	startcmd = p[1] ? &p[1] : "$";
+	++argv, --argc;
+    }
+
+
     /* print the version# if we can */
     if ( lineonly = !CA ) {
 	version();
@@ -138,18 +145,12 @@ char **argv;
 	dnewline();
 	prints("(line mode)");
     }
-    else if ( argc <= 1 ) {
+    else if ( argc < 1 ) {
 	dgotoxy(0,LINES-1);
 	version();
 	copyright();
     }
 
-
-    if (argc > 0 && **argv == '+') {
-	char *p = *argv;
-	startcmd = p[1] ? &p[1] : "$";
-	++argv, --argc;
-    }
 
 #if GLOB_REQUIRED
     /* Windows-style OS where command-line wildcards are NOT expanded by
