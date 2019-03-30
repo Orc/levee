@@ -162,7 +162,7 @@ functions
   2. int os_cmdclose(FILE *cmd, os_pid_t child)
       Wait for the external command to finish, the close the pipe.
       
-  3. int os_dwrite(char *text, int size)
+  3. int os_write(char *text, int size)
       Write text to the display in an os-dependent manner.
 
       
