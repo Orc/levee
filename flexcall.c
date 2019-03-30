@@ -115,7 +115,7 @@ os_mktemp(char *dest, int size, char *template)
 
 /* **** OS-SPECIFIC DISPLAY I/O **** */
 
-os_dwrite(s, len)
+os_write(s, len)
 char *s;
 {
     s_write(0x01, 1L, s, len, 0L);

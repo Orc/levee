@@ -628,6 +628,8 @@ editcore()
 	    scroll(cmd==WINDOW_UP);		/* scroll the window */
 	    break;
 
+	  case FULL_REDRAW_C:
+	    dclearscreen();
 	  case REDRAW_C:			/* redraw the window */
 	    redisplay(TRUE);
 	    dgotoxy(xp, yp);

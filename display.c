@@ -84,7 +84,7 @@ char *s;
     if ( len <= 0 )
 	return;
 
-    unless ( os_dwrite(s, len) ) {
+    unless ( os_write(s, len) ) {
 	logit("dwrite <%.*s>(%d)", len, s, len);
 #if USING_STDIO
 	fwrite(s, len, 1, stdout);

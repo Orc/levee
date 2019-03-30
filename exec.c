@@ -379,7 +379,7 @@ cutandpaste()
 	}
     }
     if (*lastpatt == 0) {
-splat:	errmsg("bad substitute");
+ splat:	errmsg("bad substitute");
 	return;
     }
     fixupline(bseekeol(curr));

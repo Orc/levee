@@ -224,6 +224,7 @@ extern int EOL;
 #define EDIT_C		80
 #define COLIN_C		81
 #define TAG_C		82
+#define FULL_REDRAW_C	83
 		    /*macros*/
 #define SOFTMACRO	100
 #define INSMACRO	101

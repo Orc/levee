@@ -120,12 +120,12 @@ static struct _window_fd {
 
 
 int
-os_dwrite(ptr, size)
+os_write(ptr, size)
 char *ptr;
 {
     DWORD result;
 
-    logit("os_dwrite(\"%.*s\",%d)", size, ptr, size);
+    logit("os_write(\"%.*s\",%d)", size, ptr, size);
     fwrite(ptr, size, 1, stdout);
     return 1;
 }
@@ -420,6 +420,24 @@ os_subshell(char *cmdline)
 /*
  * implement the glob() command (with GLOB_NOSORT always set)
  */
+
+
+#if !HAVE_BASENAME
+/*
+ * basename() returns the filename part of a pathname
+ */
+char *
+basename(s)
+register char *s;
+{
+    register char *p;
+
+    for (p = s+strlen(s); --p > s; )
+	if (*p == '/' || *p == '\\' || *p == ':')
+	    return p+1;
+    return s;
+} /* basename */
+#endif
 
 
 /*
@@ -724,23 +742,5 @@ getKey()
     }
     return EOF;
 }
-
-#if !HAVE_BASENAME
-/*
- * basename() returns the filename part of a pathname
- */
-char *
-basename(s)
-register char *s;
-{
-    register char *p;
-
-    for (p = s+strlen(s); --p > s; )
-	if (*p == '/' || *p == '\\' || *p == ':')
-	    return p+1;
-    return s;
-} /* basename */
-#endif
-
 #endif
 

@@ -79,7 +79,7 @@ WRITE_TEXT(FILEDESC f, void *buffer,int size)
 }
 
 
-os_dwrite(s,len)
+os_write(s,len)
 char *s;
 {
     return 0;
@@ -245,21 +245,5 @@ getKey()
     return c;
 } /* getKey */
 
-
-/*
- * basename() returns the filename part of a pathname
- */
-char *
-basename(s)
-register char *s;
-{
-    register char *p = s;
-    
-    for (p = s+strlen(s); --p > s; )
-	if ( *p == '\\' || *p == ':' )
-	    return p+1;
-    return s;
-} /* basename */
-#endif
 
 #endif /*OS_ATARI*/

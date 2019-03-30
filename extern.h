@@ -276,7 +276,7 @@ extern int os_clear_to_eol();
 extern int os_clearscreen();
 extern int os_cursor(int);
 extern int os_highlight(int);
-extern int os_dwrite(char *, int);
+extern int os_write(char *, int);
 extern int os_gotoxy(int,int);
 extern int os_initialize();
 extern int os_openline();

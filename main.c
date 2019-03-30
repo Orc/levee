@@ -242,6 +242,6 @@ char **argv;
 	println();
 
     reset_input();
-    os_restore();
+    drestore();
     exit(0);
 }

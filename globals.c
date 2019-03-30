@@ -252,7 +252,7 @@ cmdtype movemap[256]={
     /*^O*/ BAD_COMMAND,
     /*^P*/ BAD_COMMAND,
     /*^Q*/ BAD_COMMAND,
-    /*^R*/ REDRAW_C,
+    /*^R*/ FULL_REDRAW_C,
     /*^S*/ BAD_COMMAND,
     /*^T*/ BAD_COMMAND,		/* in case I put a tabstack in */
     /*^U*/ WINDOW_DOWN,

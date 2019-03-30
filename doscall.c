@@ -216,6 +216,24 @@ char *s;
 }
 
 
+#if !HAVE_BASENAME
+/*
+ * basename() returns the filename part of a pathname
+ */
+static char *
+basename(s)
+register char *s;
+{
+    register char *p = s;
+    
+    for (p = s+strlen(s); p > s; --p)
+	if (p[-1] == '/' || p[-1] == '\\' || p[-1] == ':')
+	    return p;
+    return s;
+} /* basename */
+#endif
+
+
 /*
  * glob() expands a wildcard, via calls to _dos_findfirst/_next()
  * and pathname retention.
@@ -307,22 +325,5 @@ struct glob_t *dta;
     return (char*)0;
 } /* glob */
 
-
-#if !HAVE_BASENAME
-/*
- * basename() returns the filename part of a pathname
- */
-char *
-basename(s)
-register char *s;
-{
-    register char *p = s;
-    
-    for (p = s+strlen(s); p > s; --p)
-	if (p[-1] == '/' || p[-1] == '\\' || p[-1] == ':')
-	    return p;
-    return s;
-} /* basename */
-#endif
-
 #endif /*OS_DOS*/
+

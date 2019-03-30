@@ -78,7 +78,7 @@ WRITE_TEXT(FILESPEC f, char *buffer, int size)
 }
 
 
-os_dwrite(s,len)
+os_write(s,len)
 char *s;
 {
     int dummy;

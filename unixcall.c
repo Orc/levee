@@ -106,14 +106,6 @@ os_gotoxy(x,y)
 
 
 int
-os_dwrite(s,len)
-char *s;
-{
-    return 0;
-}
-
-
-int
 os_clearscreen()
 {
     return 0;
@@ -607,16 +599,5 @@ getKey()
 	}
     }
 }
-
-#if !HAVE_BASENAME
-char *
-basename(s)
-char *s;
-{
-    char *p = strrchr(s, '/');
-
-    return p ? 1+p : s;
-}
-#endif
 
 #endif
