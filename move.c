@@ -37,67 +37,69 @@ cmdtype cmd;
 {
     static char chars[2] = {'/','?'};
     char tsearch;
+    char *ip;
+    int pos;
 
     *newpos = ERR;
     switch (cmd) {			/* move around */
     
     case GO_LEFT:
-	*newpos = Max(lstart, curp-Max(count,1));
+	pos = Max(lstart, curp-Max(count,1));
 	break;
 
     case GO_RIGHT:
-	*newpos = Min(lend, curp+Max(count,1));
+	pos = Min(lend, curp+Max(count,1));
 	break;
 
     case GO_UP:
     case GO_DOWN:
-	*newpos = nextline(cmd==GO_DOWN, curp, count);
-	if (*newpos >= 0 && *newpos < bufmax)
-	    *newpos = findcol(*newpos,xp);
+	pos = nextline(cmd==GO_DOWN, curp, count);
+	if (pos >= 0 && pos < bufmax)
+	    pos = findcol(pos,xp);
 	break;
 
     case FORWD:
     case TO_WD:
     case BACK_WD:
     case BTO_WD:
-	*newpos = moveword(curp,(cmd <= TO_WD),(cmd==TO_WD || cmd==BTO_WD));
+	pos = moveword(curp,(cmd <= TO_WD),(cmd==TO_WD || cmd==BTO_WD));
 	break;
 
     case NOTWHITE:
-	*newpos = skipws(bseekeol(curp));
+	pos = skipws(bseekeol(curp));
 	break;
 
     case TO_COL:
-	*newpos = findcol(curp, count);
+	pos = findcol(curp, count);
 	break;
 
     case TO_EOL:
 	while ( (count-- > 1) && (curp < bufmax) )
 	    curp = 1+fseekeol(curp);
-	*newpos = fseekeol(curp);
+	pos = fseekeol(curp);
 	break;
 
     case PARA_FWD:
 	do
 	    curp = findfwd("^*[ \t$",curp+1,bufmax-1);
-	while (curp != ERR && --count > 0);
-	*newpos = (curp==ERR)?bufmax:curp;
+	while (curp > ERR && --count > 0);
+	pos = (curp>ERR) ? curp : bufmax;
 	break;
 
     case PARA_BACK:
 	do
 	    curp = findback("^*[ \t$",curp-1,0);
-	while (curp != ERR && --count > 0);
-	*newpos = (curp==ERR)?0:curp;
+	while (curp > ERR && --count > 0);
+	pos = (curp>ERR) ? curp : 0;
 	break;
 
     case SENT_FWD:
     case SENT_BACK:
-	*newpos = sentence(curp, cmd==SENT_FWD);
+	pos = sentence(curp, cmd==SENT_FWD);
 	break;
 
     case MATCHEXPR:
-	*newpos = match(curp);
+	pos = match(curp);
 	break;
 
     case TO_CHAR:
@@ -108,23 +110,23 @@ cmdtype cmd;
 	if (ch == ESC)
 	    return ESCAPED;
 	if (cmd<=UPTO_CHAR) {
-	    *newpos = fchar(curp,*newpos);
-	    if (cmd==UPTO_CHAR && *newpos>=0)
-		*newpos = Max(curp, *newpos-1);
+	    pos = fchar(curp,pos);
+	    if (cmd==UPTO_CHAR && pos>=0)
+		pos = Max(curp, pos-1);
 	}
 	else {
-	    *newpos = bchar(curp,*newpos);
-	    if (cmd==BACKTO_CHAR && *newpos>=0)
-		*newpos = Min(curp, *newpos+1);
+	    pos = bchar(curp,pos);
+	    if (cmd==BACKTO_CHAR && pos>=0)
+		pos = Min(curp, pos+1);
 	}
 	break;
 
     case PAGE_BEGIN:
-	*newpos = ptop;
+	pos = ptop;
 	break;
 
     case PAGE_END:
-	*newpos = pend;
+	pos = pend;
 	break;
 
     case PAGE_MIDDLE:
@@ -132,19 +134,19 @@ cmdtype cmd;
 	count = 12;
 	while (count-- > 0 && curp < bufmax)
 	   curp = 1+fseekeol(curp);
-	*newpos = skipws(curp);
+	pos = skipws(curp);
 	break;
 
     case GLOBAL_LINE:
 	if (count <= 0)
-	    *newpos = bufmax-1;
+	    pos = bufmax-1;
 	else
-	    *newpos = to_index(count);
+	    pos = to_index(count);
 	break;
 
     case TO_MARK:
     case TO_MARK_LINE:
-	*newpos = lvgetcontext((char)tolower(readchar()), cmd==TO_MARK_LINE);
+	pos = lvgetcontext((char)tolower(readchar()), cmd==TO_MARK_LINE);
 	break;
 
     case CR_FWD:
@@ -152,7 +154,7 @@ cmdtype cmd;
 	curp = nextline(cmd==CR_FWD, curp, count);
 	if (cmd==CR_BACK && curp > 0)
 	    curp = bseekeol(curp);
-	*newpos = skipws(curp);
+	pos = skipws(curp);
 	break;
 
     case PATT_FWD:
@@ -173,17 +175,18 @@ cmdtype cmd;
 	    prints(lastpatt);
 	    instring[1] = 0;
 	}
-	if (*findparse(instring, newpos, curp)) { /* croaked patt */
-	    *newpos = ERR;
-	    prompt(TRUE,"bad pattern");
-	}
-	else if (*newpos == ERR)
-	    prompt(FALSE,"no match");
+	ip = instring;
+
+	unless ( (pos = findparse(curp, &ip, 0)) > ERR )
+	    prompt(pos == ERR_PATTERN, expr_errstring(pos) );
+	
 	lsearch = tsearch;	/* fixup for N, n */
 	break;
     }
-    if ( ((*newpos) >= 0) && ((*newpos) <= bufmax) )
+    if ( (pos >= 0) && (pos <= bufmax) ) {
+	*newpos = pos;
 	return LEGALMOVE;
+    }
     return BADMOVE;
 }
 

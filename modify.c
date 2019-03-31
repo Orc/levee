@@ -152,8 +152,7 @@ bool visual, *query;
     /*dlen = strlen(dst);*/
 restart:
     count = 1;
-    i = findfwd(pattern, start, *endd);
-    if (i != ERR) {
+    if ( (i = findfwd(pattern, start, *endd)) > ERR ) {
 	if (*query) {
 	    /*>>>> don't delete -- keep for future use
 	    if (visual) {

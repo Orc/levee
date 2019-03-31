@@ -215,7 +215,9 @@ extern findstates findCP();
 extern exec_type editcore();
 
 extern char line(), peekc(), readchar();
-extern char *findparse(),*makepat();
+extern char *expr_errstring();
+extern char *makepat();
+extern int findparse();
 
 extern bool lvgetline();
 extern bool putfile();

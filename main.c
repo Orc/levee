@@ -171,6 +171,8 @@ char **argv;
 	if (args.gl_pathc > 1)
 	    toedit(args.gl_pathc);
 	inputf(args.gl_pathv[filenm], TRUE);
+	if ( mode == E_EDIT )
+	    dnewline();
     }
 }
 
@@ -207,7 +209,7 @@ exec_type emode;
 
 	logit("execmode: mode=%d, more=%d", mode, more);
 	if (mode != E_VISUAL && curpos.x > 0)
-	    println();
+	  println();
     } while (more);
     if (zotscreen)
 	clrprompt();
@@ -221,9 +223,10 @@ char **argv;
 {
     initialize(argc, argv);
 
-    if (lineonly)
+    if (lineonly) {
 	while (execmode(E_EDIT))
 	    prints("(no visual mode)");
+    }
     else {
 	redraw = YES;
 	/* life is too short not to do a duff's device at least once */

@@ -11,7 +11,11 @@
 void undefine();
 void fixupline();
 void doinput();
-char *findbounds(char *);
+
+/* CAUTION: these make exec not quite recursive */
+int  high,low;		/* low && high end of command range */
+bool affirm;		/* cmd! */
+
 
 /*
  * do a newline and set flags.
@@ -82,6 +86,45 @@ version()
 } /* version */
 
 
+/* figure out a address range for a command */
+char *
+findbounds(ip)
+char *ip;
+{
+    /* get the low address */
+    logit("findbounds: low (%d,&[%s],0)", curr, ip);
+    if ( (low = findparse(curr, &ip, 0)) > ERR )
+	low = bseekeol(low);		/* at start of line */
+    else if (low != ERR_UNKNOWN) {
+	exprintln();
+	prints(expr_errstring(low));
+	return 0;
+    }
+
+    if (*ip == ',') {		/* high address? */
+	int offset = 0;
+
+	ip++;
+
+	if ( *ip == '/' || *ip == '+' )
+	    offset=1;
+	else if ( *ip == '?' || *ip == '-' )
+	    offset=-1;
+
+	logit("findbound: high (%d, &[%s], %d", low, ip, offset);
+
+	unless ( (high = findparse(curr, &ip, offset)) > ERR ) {
+	    exprintln();
+	    prints(expr_errstring(high));
+	    return 0;
+	}
+	high = fseekeol(high);
+    }
+    logit("findbounds: low=%d, high=%d", low, high);
+    return(ip);
+}
+
+
 void
 show_args()
 /* show_args: print the argument list */
@@ -107,9 +150,6 @@ void
 setcmd()
 {
     bool no = NO,b;
-#if 0
-    int len,i;
-#endif
     char *arg, *num;
     struct variable *vp;
 
@@ -331,9 +371,6 @@ register char *name;
 } /* addarg */
 
 
-/* CAUTION: these make exec not quite recursive */
-int  high,low;		/* low && high end of command range */
-bool affirm;		/* cmd! */
 /* s/[src]/dst[/options] */
 /* s& */
 void
@@ -346,6 +383,7 @@ cutandpaste()
     int oldcurr = curr;
     int  num;
     char delim;
+    int  lastlow;
     register char *ip;
     register char *dp;
 
@@ -354,7 +392,6 @@ cutandpaste()
     ip = execstr;
     if (*ip != '&') {
 	delim = *ip++;
-	logit("cutandpaste: pattern starts delim = %c, rest = %s", delim, ip);
 	unless ( ip = makepat(ip,delim) )	/* get search */
 	    goto splat;
 
@@ -383,27 +420,36 @@ cutandpaste()
 	return;
     }
     fixupline(bseekeol(curr));
+    lastlow = 0;
     num = 0;
     do {
-	low = chop(low, &high, NO, &askme);
-	if (low > -1) {
-	    redraw = YES;
-	    num++;
-	    if (printme) {
-		exprintln();
-		writeline(-1,-1,bseekeol(low));
-	    }
-	    if (newcurr < 0)
-		newcurr = low;
-	    if (!glob)
-		low = 1+fseekeol(low);
+	unless ( (low = chop(low, &high, NO, &askme)) > ERR )
+	    break;
+
+	redraw = YES;
+	num++;
+	if (printme) {
+	    exprintln();
+	    writeline(-1,-1,bseekeol(low));
 	}
-    } while (low >= 0);
+	if (newcurr < 0)
+	    newcurr = low;
+	if (!glob)
+	    low = 1+fseekeol(low);
+
+	if ( low < lastlow ) {
+	    logit("low went backwards: lastlow=%d, low=%d", lastlow, low);
+	    errmsg("low went backwards?");
+	    break;
+	}
+	lastlow = low;
+    } while (low > ERR);
     if (num > 0) {
 	exprintln();
 	plural(num," substitution");
     }
-    fixupline((newcurr > -1) ? newcurr : oldcurr);
+    curr = (newcurr > -1) ? newcurr : oldcurr;
+    //fixupline((newcurr > -1) ? newcurr : oldcurr);
 } /* cutandpaste */
 
 
@@ -459,9 +505,8 @@ bool newbuf;
 	modified = NO;
 	low = 0;
     }
-    else {
+    else
 	fixupline(bseekeol(curr));
-    }
 
     printch('"');
     prints(fname);
@@ -492,9 +537,17 @@ bool newbuf;
 	bufmax = fsize;
     }
     if (startcmd) {
-	count = 1;
-	if (*findparse(startcmd,&curr,low) != 0 || curr < 0)
-	    curr = low;
+	int addr;
+
+	if ( (addr = findparse(low, &startcmd, 0)) > ERR ) {
+	    if (*startcmd == 0 || *startcmd == ';' )
+		curr = addr;
+	}
+	else {
+	    prints(" [");
+	    prints(expr_errstring(addr));
+	    printch(']');
+	}
 	startcmd = 0;
     }
     else
@@ -816,28 +869,32 @@ bool prev;
 
 
 /*
- * set up low, high; set dot to low
+ * set up low, high; set dot to high
  */
 void
 fixupline(dft)
 int dft;
 {
+    int newpos;
+
     if (low < 0)
 	low = dft;
     if (high < 0)
-	high = fseekeol(low)+1;
+	high = fseekeol(low);
     else if (high < low) {		/* flip high & low */
 	int tmp;
 	tmp = high;
 	high = low;
 	low = tmp;
     }
-    if (low >= ptop && low < pend) {
-	setpos(skipws(low));
+    newpos = (high<=0)?low:high;
+    //if (low >= ptop && low < pend) {
+    if (newpos >= ptop && newpos < pend) {
+	setpos(skipws(newpos));
 	yp = setY(curr);
     }
     else {
-	curr = low;
+	curr = newpos;
 	redraw = YES;
     }
 }
@@ -857,8 +914,10 @@ whatline()
 void
 print()
 {
+    goto justwrite;
     do {
 	exprintln();
+    justwrite:
 	writeline(-1, 0, low);
 	low = fseekeol(low) + 1;
     } while (low < high);
@@ -906,41 +965,14 @@ bool flag;
     redraw = YES;
 }
 
-
-/* figure out a address range for a command */
-char *
-findbounds(ip)
-char *ip;
-{
-    logit("findbounds: [%s]", ip);
-    ip = findparse(ip, &low, curr);	/* get the low address */
-
-    unless ( low >= 0 ) {
-    logit("findbounds: no");
-    return(0);
-    }
-
-    low = bseekeol(low);		/* at start of line */
-    if (*ip == ',') {		/* high address? */
-	ip++;
-	count = 0;
-	ip = findparse(ip, &high, curr);
-	if (high >= 0)
-	    high = fseekeol(high);
-    }
-    logit("findbounds: low=%d, high=%d", low, high);
-    return(ip);
-}
-
-
 /* parse the command line for lineranges && a command */
 static int
-parse(inp)
+parse(inp, default_cmd)
 char **inp;
+char *default_cmd;
 {
     int j,k;
     char *cmd, *token;
-    static char badaddr[] = "Bad address";
 
     token = *inp;
 
@@ -950,26 +982,23 @@ char **inp;
     while (isspace(*token))
 	++token;
 
+    unless (*token)
+	token = default_cmd;
+
     if (*token == '%') {
-	if ( findbounds("1,$") )
-	    ++token;
-	else {
-	    errmsg(badaddr);
-	    return ERR;
-	}
+	findbounds("1,$");
+	++token;
     }
-    else if (strchr(".$-+0123456789?/`'", *token)) {
-	unless ( token=findbounds(token) ) {
-	    errmsg(badaddr);
-	    return ERR;
-	}
-    }
+    else if ( (token=findbounds(token)) == 0 )
+	return ERR;
 
     while (isspace(*token))
 	++token;
 
-    if ( *token == '"' )
-	return EX_COMMENT;
+    if ( *token == 0 )
+	return EX_CR;
+    else if ( *token == '"' )
+	return (low > ERR) ? EX_PR : EX_COMMENT;
 
     cmd = token;
     j = 0;
@@ -996,7 +1025,7 @@ char **inp;
     (*inp) = token;
 
     if (j==0)
-	return EX_CR;
+	return ERR;
 
     logit("parse: cmd is [%.*s]", j, cmd);
     for (k=0; excmds[k].name; k++)
@@ -1108,8 +1137,11 @@ exec_type *mode;
     bool ok = YES;
     char *expanded;
 
-    if ( (what = parse(&cmd)) == ERR ) {
-	errmsg("Not an editor command.");
+    what = parse(&cmd, (*mode==E_EDIT) ? "+1" : "");
+
+    if ( what == EX_UNKNOWN || what <= ERR ) {
+	if ( what == EX_UNKNOWN )
+	    errmsg("Not an editor command.");
 	return NO;
     }
 
@@ -1132,10 +1164,8 @@ exec_type *mode;
     else
 	setarg(cmd);
 
-    if (redraw) {
-	lstart = bseekeol(curr);
-	lend = fseekeol(curr);
-    }
+    if ( what != EX_CR && (*mode) == E_EDIT )
+	exprintln();
 
     switch (what) {
 	case EX_QUIT:				/* :quit */
@@ -1215,8 +1245,9 @@ exec_type *mode;
 	    break;
 	case EX_CR:
 	case EX_PR:				/* :print */
-	    fixupline(bseekeol(curr));
-	    if (what == EX_PR)
+	    //fixupline(bseekeol(curr));
+	    fixupline(curr);
+	    if ((*mode) == E_EDIT || what == EX_PR)
 		print();
 	    break;
 	case EX_LINE:				/* := */
@@ -1308,8 +1339,6 @@ exec_type *mode;
 	case EX_TAG:
 	    dotag();
 	    break;
-	case EX_COMMENT:
-	    break;
     }
     lastexec = what;
     if (!ok) {
@@ -1318,4 +1347,3 @@ exec_type *mode;
     }
     return (exit_now) ? YES : NO;
 } /* exec */
-

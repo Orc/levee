@@ -21,6 +21,7 @@
 #include "extern.h"
 #include "grep.h"
 #include <ctype.h>
+#include <stdlib.h>
 
 int amatch();
 int locate();
@@ -332,7 +333,7 @@ int start, endp;
 	 if ((start = REmatch(pattern, start, ep)) <= ep)
 	     return start;
      }
-     return ERR;
+     return ERR_NOMATCH;
  }
 
 int
@@ -343,122 +344,177 @@ int start, endp;
 {
     int ep,i;
 
-     while (start > endp) {
-	 ep = bseekeol(start);
-	 if ((i = REmatch(pattern, ep, start)) <= start)
-	     return i;
-	 start = ep-1;
-     }
-     return ERR;
- }
+    while (start > endp) {
+	ep = bseekeol(start);
+	if ((i = REmatch(pattern, ep, start)) <= start)
+	    return i;
+	start = ep-1;
+    }
+    return ERR_NOMATCH;
+}
+
+
+char *
+expr_errstring(errno)
+{
+    switch (errno) {
+    case ERR_NOMATCH:	return "Pattern not found";
+    case ERR_PATTERN:	return "Unreadable pattern";
+    case ERR_RANGE:	return "Out of range";
+    case ERR_UNDEF:	return "Marker unset";
+    case ERR_EXPR:	return "Impossible address";
+    default:		return "error?";
+    }
+
+}
+
 
 bool s_wrapped = 0;
 
-char *
-search(pat, start)
+int
+search(start, bufp)
 /* get a token for find & find it in the buffer
  */
-char *pat;
-int *start;
+char **bufp;
 {
-    bool forwd;
     int  pos;
-    char *p;
+    char marker = **bufp;
+    bool forwd = (lsearch = marker) == '/';
 
-    forwd = ((lsearch = *pat) == '/');
-    if ((p=makepat(pat+1,*pat)) == NULL) {
-	*start = ERR;
-	return pat;
-    }
+
+    unless ( *bufp = makepat(1+(*bufp), marker) )
+	return ERR_PATTERN;
+
+
     do {
 	if (forwd) {
-	    pos = findfwd(pattern, (*start)+1, bufmax-1);
-	    if ((pos == ERR) && wrapscan) {
+	    pos = findfwd(pattern, start+1, bufmax-1);
+	    if ((pos == ERR_NOMATCH) && wrapscan) {
 		s_wrapped = 1;
-		pos = findfwd(pattern, 0, (*start)-1);
+		pos = findfwd(pattern, 0, start-1);
 	    }
 	}
 	else {
-	    pos = findback(pattern, (*start)-1, 0);
-	    if ((pos == ERR) && wrapscan) {
+	    pos = findback(pattern, start-1, 0);
+	    if ((pos == ERR_NOMATCH) && wrapscan) {
 		s_wrapped = 1;
-		pos = findback(pattern, bufmax-1, (*start)+1);
+		pos = findback(pattern, bufmax-1, start+1);
 	    }
 	}
-	*start = pos;
-    } while (--count > 0 && *start != ERR);
-    return p;
+	unless ( pos > ERR ) {
+	    logit("search: error %d", pos);
+	    return pos;
+	}
+	start = pos;
+    } while ( --count > 0);
+
+    return start;
 }
 
-char *
-findparse(src,idx,start) /* driver for ?, /, && : lineranges */
-char *src;
-int *idx,start;
+static int
+address_fragment(start, bufp, offset)
+/* parse part of an address (a /pattern/, ?pattern?, [0-9]*, 0, $) */
+char **bufp;
 {
-    int addr = start;
-    char c;
+    int addr;
 
-    s_wrapped = 0;
+    count = s_wrapped = 0;
 
-    switch (*src) {
-	case '/':
-	case '?':
-	    /* get a token for find & find it in the buffer */
-	    src = search(src,&addr);
-	break;
-	case '0': case '1': case '2': case '3': case '4':
-	case '5': case '6': case '7': case '8': case '9':
+    switch (**bufp) {
+    case '/':			/* search forward */
+	    if ( offset < 0 )
+		return ERR_RANGE;
+	    addr = search(start, bufp);
+	    break;
+    case '?':			/* search backwards */
+	    if ( offset > 0 )
+		return ERR_RANGE;
+	    addr = search(start, bufp);
+	    break;
+
+	    addr = search(start, bufp);
+	    break;
+
+    case '0':			/* line # or offset */
+    case '1': case '2': case '3':
+    case '4': case '5': case '6':
+    case '7': case '8': case '9':
 	    /* fabricate a count */
-	    count = 0;
-	    while (*src >= '0' && *src <= '9')
-		count = (count*10) + *(src++) - '0';
+	    count = strtol(*bufp, bufp, 10);
 
-	    addr = to_index(count);
-	break;
-	case '$':
-	    addr = bufmax-1;
-	    src++;
-	break;
-	case '.' :
-	    src++;
-	break;
-	case '`':
-	case '\'':
-	    addr = lvgetcontext(*(src+1), (*src == '\''));
-	    src += 2;
-	break;
-    }
-
-    while (addr>=0 && (*src =='+' || *src == '-')) {
-	c = *(src++);
-	/* skip delimiter */
-	if (*src == '/' || *src == '?') {
-	    count = 1;
-	    if ((src = search(src,&addr)) == NULL)
-		break;
-	}
-	else {
-	    if (*src >= '0' && *src <= '9') {
-		/* fabricate a count */
-		count = 0;
-		while (*src >= '0' && *src <= '9')
-		    count = (count*10) + *(src++) - '0';
+	    if ( offset ) {
+		if ( count )
+		    addr = nextline((offset>0), start, count);
 	    }
 	    else
-		count = -1;		/* for naked + & - */
-	    if (count == 0)		/* +0 goes to beginning of line */
-		addr = bseekeol(addr);
-	    else {
-		addr = nextline((c=='+'), addr, count);
-		if (c=='-' && addr > 0)
-		    addr = bseekeol(addr);
-	    }
-	    if (addr >= bufmax)
-		addr = -1;
-	}
+		addr = to_index(count);
+	    break;
+
+    case '$':			/* jump to end of file */
+	if ( offset )
+	    return ERR_EXPR;
+	addr = bufmax-1;
+	++(*bufp);
+	break;
+
+    case '.' :
+	if ( offset )
+	    return ERR_EXPR;
+	addr = start;
+	++(*bufp);
+	break;
+
+    default:
+	return ERR_UNKNOWN;
     }
-    *idx = addr;
-    return(src);
+    return addr;
+}
+
+
+int
+findparse(start, bufp, offset) /* driver for ?, /, && : lineranges */
+char **bufp;
+{
+    int addr;
+    char c;
+
+    c = **bufp;
+
+    if ( c == '`' || c == '\'' ) {
+	unless ( (addr = lvgetcontext( (*bufp)[1], c == '\'')) > ERR )
+	    return ERR_UNDEF;
+
+	(*bufp) += 2;
+    }
+    else
+	addr = address_fragment(start, bufp, offset);
+
+    if ( addr > ERR )
+	start = addr;
+    else if ( addr != ERR_UNKNOWN )
+	return addr;
+
+    c = **bufp;
+
+    logit("initial fragment: addr=%d, c=%c", addr, c);
+
+    while ( c == '+' || c == '-' ) {
+	++(*bufp);
+	offset = (c == '+') ? 1 : -1;
+
+	addr = address_fragment(start, bufp, offset);
+
+	if ( addr > ERR )
+	    start = addr;
+	else if ( addr == ERR_UNKNOWN ) {
+	    logit("after+ ERR_UNKNOWN (next char %d)", **bufp);
+	    return nextline( (offset > 0), start, 1);
+	}
+	else
+	    return addr;
+	c = **bufp;
+    }
+    return addr;
 }
 
 int
@@ -466,16 +522,28 @@ nextline(advance,dest,count)
 bool advance;
 int dest,count;
 {
-    if (advance)
+    int start = dest;
+    int ocount= count;
+
+    if (advance) {
 	do {
 	    dest = fseekeol(dest) + 1;
 	    count--;
 	} while (count>0 && dest<bufmax);
-    else
+	if ( count > 0)
+	    return ERR_RANGE;
+    }
+    else {
 	do {
 	    dest = bseekeol(dest) - 1;
 	    count--;
 	} while (count>0 && dest>=0);
+	if ( count > 0)
+	    return ERR_RANGE;
+	dest = bseekeol(dest);
+    }
+    logit("nextline: advance=%d, start=%d, count=%d -> dest=%d",
+		 advance, start, ocount, dest);
     return(dest);
 }
 

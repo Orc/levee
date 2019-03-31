@@ -105,6 +105,12 @@ extern int EOL;
 #define VSTR	2
 
 #define ERR	(-1)
+#define ERR_NOMATCH (ERR-1)	/* pattern didn't match */
+#define ERR_PATTERN (ERR-2)	/* can't compile pattern */
+#define ERR_RANGE   (ERR-3)	/* fell off end/beginning of buffer */
+#define ERR_UNDEF   (ERR-4)	/* undefined marker */
+#define ERR_EXPR    (ERR-5)	/* illegal address expression */
+#define ERR_UNKNOWN (ERR-6)	/* unknown addressing symbol */
 
 		/* Undostack commands */
 #define U_ADDC	'A'
@@ -115,8 +121,6 @@ extern int EOL;
 #define MAXPAT	((int)300)
 
 		/* exec mode commands */
-#define EX_COMMENT	(ERR-2)
-#define	EX_CR		(ERR-1)
 #define EX_PR		0
 #define EX_QUIT		1
 #define EX_READ		2
@@ -148,6 +152,12 @@ extern int EOL;
 #define EX_ARGS		28
 #define	EX_REWIND	29
 #define EX_TAG		30
+
+
+		/* ex commands that aren't in the excmd[] table */
+#define	EX_CR		100
+#define EX_COMMENT	101
+#define EX_UNKNOWN	102
 
 		/* movement return states */
 #define LEGALMOVE	0

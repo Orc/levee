@@ -32,9 +32,9 @@ char *str;
 
     flag = line(str, 0, Min(size, COLS-curpos.x), &len);
     str[len] = 0;
+#if 0
     if (lineonly)
 	dnewline();
-#if 0
     else
 	dclear_to_eol();
 #endif
