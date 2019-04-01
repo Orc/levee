@@ -16,6 +16,8 @@ void doinput();
 int  high,low;		/* low && high end of command range */
 bool affirm;		/* cmd! */
 
+static char noalloc[] = " (out of memory)";
+
 
 /*
  * do a newline and set flags.
@@ -701,7 +703,7 @@ editfile()
     if ( name ) {
 	logit(":edit %s", name);
 	if ((newpc = addarg(name)) == F_UNSET) {
-	    errmsg("file allocation error");
+	    errmsg(noalloc);
 	    return;
 	}
 #if LOOSELY_COMPATABLE
@@ -861,7 +863,7 @@ bool prev;
 
 	do {
 	    if (rc = os_glob(name, GLOB_APPEND|GLOB_NOMAGIC, &files)) {
-		errmsg("memory allocation error");
+		errmsg(noalloc);
 		os_globfree(&files);
 		return;
 	    }
@@ -878,7 +880,7 @@ bool prev;
 	    for ( i=0; i < files.gl_pathc; i++ ) {
 		rc = os_glob(files.gl_pathv[i], GLOB_APPEND|GLOB_NOMAGIC, &args);
 		if ( rc ) {
-		    errmsg("(memory allocation error)");
+		    errmsg(noalloc);
 		    break;
 		}
 	    }
