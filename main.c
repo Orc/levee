@@ -110,7 +110,7 @@ char **argv;
 		break;
 	    case 't':	/* edit file containing a tag */
 		if ( find_tag(optarg, strlen(optarg), &tag) ) {
-		    if (!os_glob(tag.filename, GLOB_NOMAGIC|GLOB_APPEND, &args)) {
+		    if (addarg(tag.filename) > ERR) { /* we will be file 0 */
 			int wasmagic = magic;
 
 			magic = 0;

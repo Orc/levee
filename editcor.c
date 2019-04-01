@@ -304,8 +304,7 @@ goback()
 	    return;
 	}
     }
-    else
-	logit("nothing to pop");
+    error();
 }
 
 void
