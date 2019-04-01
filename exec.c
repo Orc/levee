@@ -725,6 +725,9 @@ dotag()
     int fileptr;
     int wasmagic = magic;
 
+    unless (oktoedit(autowrite))
+	return;
+
     unless (tag = getarg()) {
 	errmsg("No tag");
 	return;
@@ -736,6 +739,7 @@ dotag()
     }
     logit("dotag: filename=%s, pattern=%s", result.filename, result.pattern);
 
+    push_tag(filenm, curr);
     clrmsg();
 
     fileptr = addarg(result.filename);
@@ -750,6 +754,33 @@ dotag()
 	doinput(fileptr);
     }
     magic = wasmagic;
+}
+
+
+void
+poptag()
+{
+    Camefrom *loc = pop_tag();
+
+    unless (loc) {
+	errmsg("empty tag stack");
+	return;
+    }
+
+    if ( loc->fileno == filenm ) {
+	curr = loc->cursor;
+	redraw = YES;
+	return;
+    }
+
+    unless ( oktoedit(autowrite) )
+	return;
+
+    clrprompt();
+    inputf(args.gl_pathv[loc->fileno], YES);
+
+    curr = Min(loc->cursor, bufmax-1);
+    redraw = YES;
 }
 
 
@@ -1338,6 +1369,9 @@ exec_type *mode;
 	    break;
 	case EX_TAG:
 	    dotag();
+	    break;
+	case EX_POPTAG:
+	    poptag();
 	    break;
     }
     lastexec = what;

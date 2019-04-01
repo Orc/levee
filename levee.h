@@ -152,6 +152,7 @@ extern int EOL;
 #define EX_ARGS		28
 #define	EX_REWIND	29
 #define EX_TAG		30
+#define EX_POPTAG	31
 
 
 		/* ex commands that aren't in the excmd[] table */
@@ -235,6 +236,7 @@ extern int EOL;
 #define COLIN_C		81
 #define TAG_C		82
 #define FULL_REDRAW_C	83
+#define POP_TAG		84
 		    /*macros*/
 #define SOFTMACRO	100
 #define INSMACRO	101
@@ -320,6 +322,16 @@ typedef struct _tag {
 } Tag;
 
 extern int find_tag(char *, int, Tag *);
+
+/* tag backlink stack
+ */
+typedef struct _camefrom {
+    int fileno;
+    int cursor;
+} Camefrom;
+
+extern void push_tag(int, int);
+extern Camefrom *pop_tag();
 
 
 /* data structures for wildcard matching

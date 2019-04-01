@@ -147,10 +147,13 @@ excmd_t excmds[] = {
 	{ "args", 1, 0},		/* print argument list */
 	{ "rewind", 1, 0},		/* rewind argument list */
 	{ "tag", 1, 0},			/* jump to a tag */
+	{ "poptag", 1, 0},		/* jump back from a tag */
 	{ NULL }
 };
 
-char wordset[] = "0123456789$_#ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+char wordset[] = "0123456789$_#"
+		 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		 "abcdefghijklmnopqrstuvwxyz";
 #if HARD_EOL
 char spaces[] = { TAB,EOL,' ',0 };
 #else
@@ -254,7 +257,7 @@ cmdtype movemap[256]={
     /*^Q*/ BAD_COMMAND,
     /*^R*/ FULL_REDRAW_C,
     /*^S*/ BAD_COMMAND,
-    /*^T*/ BAD_COMMAND,		/* in case I put a tabstack in */
+    /*^T*/ POP_TAG,
     /*^U*/ WINDOW_DOWN,
     /*^V*/ BAD_COMMAND,
     /*^W*/ BAD_COMMAND,

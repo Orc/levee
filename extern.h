@@ -213,6 +213,9 @@ cmdtype movemap[];
 
 extern findstates findCP();
 extern exec_type editcore();
+extern void maybe_refresh_screen(), doinput();
+extern char *findbounds();
+extern int oktoedit(), addarg();
 
 extern char line(), peekc(), readchar();
 extern char *expr_errstring();

@@ -18,6 +18,7 @@
  * PURPOSE.
  */
 #include "levee.h"
+#include "extern.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -40,7 +41,7 @@ find_tag(char *tag, int sztag, Tag *ret)
 	errno = EBADF;
 	return 0;
     }
-    
+
     while ( fgets(tagline, sizeof tagline, tags) ) {
 	if ( memcmp(tagline, tag, sztag) == 0 && tagline[sztag] == '\t' ) {
 	    filename = strtok(&tagline[sztag+1], "\t");
@@ -60,4 +61,41 @@ find_tag(char *tag, int sztag, Tag *ret)
     fclose(tags);
     errno = ENOENT;
     return 0;
+}
+
+
+#define NR_CAMEFROM 20
+static Camefrom tagstack[NR_CAMEFROM];
+static int tag_ptr = 0;
+
+
+void
+push_tag(int filenm, int curr)
+{
+    unless ( filenm > ERR )
+	return;
+
+    if ( tag_ptr >= NR_CAMEFROM )
+	moveleft(&tagstack[1], &tagstack[0], (tag_ptr-1) * sizeof tagstack[0]);
+
+    tagstack[tag_ptr].fileno = filenm;
+    tagstack[tag_ptr].cursor = curr;
+
+    if ( tag_ptr < NR_CAMEFROM )
+	++tag_ptr;
+}
+
+Camefrom *
+pop_tag()
+{
+    if ( tag_ptr <= 0 )
+	return 0;
+
+    return &tagstack[--tag_ptr];
+}
+
+void
+zero_tagstack()
+{
+    tag_ptr = 0;
 }

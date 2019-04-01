@@ -34,6 +34,22 @@ int	newend,		/* end position after change */
 	newc,		/* new cursor position for wierd cmds */
 	endY;		/* final yp for endp */
 
+
+/* called when we enter editcore or do something that invalidates the screen
+ */
+void
+maybe_refresh_screen(redraw)
+{
+    if (redraw) {
+	setpos(skipws(curr));		/* set cursor x position.. */
+	yp = settop(LINES / 2);		/* Y position */
+    }
+    if (redraw || zotscreen)		/* redisplay? */
+	redisplay(FALSE);
+    dgotoxy(xp, yp);			/* and move the cursor */
+}
+
+
 /* move a line of text right || left */
 
 void
@@ -220,14 +236,17 @@ execute(start, end)
     return ret;
 }
 
-bool
+void
 vitag()
 {
     int start, endd;
+    int wasmagic = magic;
+    int newfile;
+    Tag loc;
 
     if ( bufmax == 0 || (class(core[curr]) != wordset) ) {
 	error();
-	return NO;
+	return;
     }
 
     start = endd = curr;
@@ -241,13 +260,52 @@ vitag()
     while ( endd < bufmax && (class(core[endd]) == wordset) )
 	++endd;
 
-    --endd;
+    if ( oktoedit(autowrite) && find_tag(&core[start], endd-start, &loc) ) {
+	if ( (newfile = addarg(loc.filename)) > ERR ) {
 
-    strcpy(instring, ":tag ");
-    strncat(instring, &core[start], endd-start+1);
-    strcat(instring, "\r");
-    insertmacro(instring, 1);
-    return YES;
+	    push_tag(filenm, curr);
+	    if ( newfile == filenm ) {
+		findbounds(loc.pattern);
+		maybe_refresh_screen(0);
+	    }
+	    else {
+		magic = 0;
+		startcmd = loc.pattern;
+		clrprompt();
+		doinput(newfile);
+		magic = wasmagic;
+		maybe_refresh_screen(YES);
+	    }
+	    return;
+	}
+    }
+    error();
+}
+
+
+void
+goback()
+{
+    Camefrom *loc = pop_tag();
+
+    if ( loc ) {
+	logit("goback: newfile=%d (filenm=%d), curr=%d",
+		loc->fileno, filenm, loc->cursor);
+
+	if ( loc->fileno == filenm ) {
+	    curr = loc->cursor;
+	    maybe_refresh_screen(YES);
+	    return;
+	}
+	else if ( oktoedit(autowrite) ) {
+	    doinput(loc->fileno);
+	    curr = Min(bufmax-1, loc->cursor);
+	    maybe_refresh_screen(YES);
+	    return;
+	}
+    }
+    else
+	logit("nothing to pop");
 }
 
 void
@@ -603,13 +661,7 @@ editcore()
     
     /* rcb[0] = 0; rcp = rcb; */
 
-    if (redraw) {
-	setpos(skipws(curr));		/* set cursor x position.. */
-	yp = settop(LINES / 2);		/* Y position */
-    }
-    if (redraw || zotscreen)		/* redisplay? */
-	redisplay(FALSE);
-    dgotoxy(xp, yp);			/* and move the cursor */
+    maybe_refresh_screen(redraw);
 
     for (;;) {
 	s_wrapped = 0;
@@ -645,6 +697,10 @@ editcore()
 
 	  case TAG_C:
 	    vitag();
+	    break;
+
+	  case POP_TAG:
+	    goback();
 	    break;
 
 	  case REDO_C:

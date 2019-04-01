@@ -530,16 +530,12 @@ int dest,count;
 	    dest = fseekeol(dest) + 1;
 	    count--;
 	} while (count>0 && dest<bufmax);
-	if ( count > 0)
-	    return ERR_RANGE;
     }
     else {
 	do {
 	    dest = bseekeol(dest) - 1;
 	    count--;
 	} while (count>0 && dest>=0);
-	if ( count > 0)
-	    return ERR_RANGE;
 	dest = bseekeol(dest);
     }
     logit("nextline: advance=%d, start=%d, count=%d -> dest=%d",
