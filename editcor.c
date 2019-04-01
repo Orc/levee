@@ -260,24 +260,16 @@ vitag()
     while ( endd < bufmax && (class(core[endd]) == wordset) )
 	++endd;
 
-    clrprompt();
-    if ( oktoedit(autowrite) && find_tag(&core[start], endd-start, &loc) ) {
-	if ( (newfile = addarg(loc.filename)) > ERR ) {
+    if ( find_tag(&core[start], endd-start, &loc) &&
+	(newfile = addarg(loc.filename)) != F_UNSET ) {
 
+	clrprompt();
+	if ( newfile == filenm || oktoedit(autowrite) ) {
 	    push_tag(filenm, curr);
-	    if ( newfile == filenm ) {
-		findbounds(loc.pattern);
-		maybe_refresh_screen(0);
-	    }
-	    else {
-		magic = 0;
-		startcmd = loc.pattern;
-		doinput(newfile);
-		magic = wasmagic;
-		maybe_refresh_screen(YES);
-	    }
+	    maybe_refresh_screen(gototag(newfile, loc.pattern) != SAMEFILE);
 	    return;
 	}
+	dgotoxy(xp,yp);
     }
     error();
 }
@@ -297,12 +289,14 @@ goback()
 	    maybe_refresh_screen(YES);
 	    return;
 	}
-	else if ( oktoedit(autowrite) ) {
+	clrprompt();
+	if ( oktoedit(autowrite) ) {
 	    doinput(loc->fileno);
 	    curr = Min(bufmax-1, loc->cursor);
 	    maybe_refresh_screen(YES);
 	    return;
 	}
+	dgotoxy(xp,yp);
     }
     error();
 }

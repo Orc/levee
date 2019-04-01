@@ -322,6 +322,10 @@ typedef struct _tag {
 } Tag;
 
 extern int find_tag(char *, int, Tag *);
+extern int gototag(int, char*);
+
+#define DIFFERENTFILE 0
+#define SAMEFILE 1
 
 /* tag backlink stack
  */

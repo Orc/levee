@@ -643,15 +643,15 @@ int writeold;	/* automatically write out changes? */
 	errmsg(fisro);
 	return NO;
     }
-    if (writeold) {			/* autowrite? */
-	if ( filenm == F_UNSET ) {	/* no filename? No. */
-	    errmsg(fismod);
-	    return NO;
-	}
-	unless (outputf(args.gl_pathv[filenm], YES))
-	    return NO;			/* write error?  No. */
-	prints(", ");
+
+    unless ( writeold && (filenm != F_UNSET) ) {
+					/* no autowrite or filename?  No. */
+	errmsg(fismod);
+	return NO;
     }
+    unless (outputf(args.gl_pathv[filenm], YES))
+	return NO;			/* write error?  No. */
+    prints(", ");
     return YES;				/* otherwise?  Yes. */
 } /* oktoedit */
 
@@ -752,16 +752,8 @@ dotag()
 
     fileptr = addarg(result.filename);
 
-    magic = 0;
-    if ( fileptr == filenm ) {
-	findbounds(result.pattern);
+    if ( gototag(fileptr, result.pattern) == SAMEFILE )
 	fixupline(bseekeol(curr));
-    }
-    else if ( fileptr != F_UNSET ) {
-	startcmd = result.pattern;
-	doinput(fileptr);
-    }
-    magic = wasmagic;
 }
 
 
@@ -979,7 +971,8 @@ exec_type *mode;
 	++indirect;
 	while (fgets(line,120,fp) && indirect) {
 	    strtok(line, "\n");
-	    if (*line && !exec(line,mode) )
+	    logit("do_file: exec [%s]", line);
+	    if (*line && exec(line,mode) )
 		break;
 	}
 	fclose(fp);

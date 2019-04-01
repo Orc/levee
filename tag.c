@@ -64,6 +64,24 @@ find_tag(char *tag, int sztag, Tag *ret)
 }
 
 
+int
+gototag(int fileptr, char *pattern)
+{
+    int samefile = (fileptr == filenm);
+    int wasmagic = magic;
+    
+    magic = 0;
+    if ( samefile )
+	findbounds(pattern);
+    else if ( fileptr != F_UNSET ) {
+	startcmd = pattern;
+	doinput(fileptr);
+    }
+    magic = wasmagic;
+    return samefile ? SAMEFILE : DIFFERENTFILE;
+}
+
+
 #define NR_CAMEFROM 20
 static Camefrom tagstack[NR_CAMEFROM];
 static int tag_ptr = 0;
@@ -72,7 +90,7 @@ static int tag_ptr = 0;
 void
 push_tag(int filenm, int curr)
 {
-    unless ( filenm > ERR )
+    if ( filenm == F_UNSET )
 	return;
 
     if ( tag_ptr >= NR_CAMEFROM )

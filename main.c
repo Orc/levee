@@ -110,14 +110,8 @@ char **argv;
 		break;
 	    case 't':	/* edit file containing a tag */
 		if ( find_tag(optarg, strlen(optarg), &tag) ) {
-		    if (addarg(tag.filename) > ERR) { /* we will be file 0 */
-			int wasmagic = magic;
-
-			magic = 0;
-			startcmd = tag.pattern;
-			doinput(0);
-			magic = wasmagic;
-		    }
+		    if (addarg(tag.filename) != F_UNSET)
+			gototag(0, tag.pattern); /* we will be file 0 */
 		}
 		else {
 		    dgotoxy(0,LINES-1);
