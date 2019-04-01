@@ -260,6 +260,7 @@ vitag()
     while ( endd < bufmax && (class(core[endd]) == wordset) )
 	++endd;
 
+    clrprompt();
     if ( oktoedit(autowrite) && find_tag(&core[start], endd-start, &loc) ) {
 	if ( (newfile = addarg(loc.filename)) > ERR ) {
 
@@ -271,7 +272,6 @@ vitag()
 	    else {
 		magic = 0;
 		startcmd = loc.pattern;
-		clrprompt();
 		doinput(newfile);
 		magic = wasmagic;
 		maybe_refresh_screen(YES);

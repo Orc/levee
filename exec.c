@@ -584,17 +584,25 @@ char *name;
 
 
 bool
-outputf(fname)
+outputf(fname, entire_file)
 char *fname;
 {
     bool whole;
     FILE *f;
     int status;
     zerostack(&undo);		/* undo doesn't survive past write */
-    if (high < 0)
-	high = (low < 0) ? (bufmax-1) : (fseekeol(low));
-    if (low < 0)
-	low  = 0;
+    if ( entire_file ) {
+	high = bufmax-1;
+	low = 0;
+    }
+    else  {
+	if (high < 0)
+	    high = (low < 0) ? (bufmax-1) : (fseekeol(low));
+	if (low < 0)
+	    low  = 0;
+    }
+
+    logit("outputf: entire_file = %d, low=%d, high=%d", entire_file, low, high);
 
     high++;
     printch('"');
@@ -640,9 +648,9 @@ int writeold;	/* automatically write out changes? */
 	    errmsg(fismod);
 	    return NO;
 	}
-	unless (outputf(args.gl_pathv[filenm]))
+	unless (outputf(args.gl_pathv[filenm], YES))
 	    return NO;			/* write error?  No. */
-	printch(',');
+	prints(", ");
     }
     return YES;				/* otherwise?  Yes. */
 } /* oktoedit */
@@ -663,7 +671,7 @@ writefile()
 	return NO;
     }
 
-    unless (outputf(name))
+    unless (outputf(name, NO))
 	return NO;
 
     if ( (filenm == F_UNSET) && ((fileptr=addarg(name)) == F_UNSET) )
