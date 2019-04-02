@@ -94,7 +94,9 @@ push_tag(int filenm, int curr)
 	return;
 
     if ( tag_ptr >= NR_CAMEFROM )
-	moveleft(&tagstack[1], &tagstack[0], (tag_ptr-1) * sizeof tagstack[0]);
+	moveleft((void*)&tagstack[1],
+		 (void*)&tagstack[0],
+		 (tag_ptr-1) * sizeof tagstack[0]);
 
     tagstack[tag_ptr].fileno = filenm;
     tagstack[tag_ptr].cursor = curr;

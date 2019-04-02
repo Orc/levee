@@ -3,7 +3,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <strings.h>
 #if HAVE_ERRNO_H
 #include <errno.h>
 #endif
