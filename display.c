@@ -22,7 +22,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #if HAVE_TERMCAP_H
 #include <termcap.h>

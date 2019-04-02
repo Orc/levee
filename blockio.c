@@ -20,8 +20,6 @@
 #include "levee.h"
 #include "extern.h"
 
-#include <unistd.h>
-
 /* read in a file -- return TRUE -- read file
 			    FALSE-- file too big
 */

@@ -20,9 +20,7 @@
 #include "levee.h"
 #include "extern.h"
 #include <stdlib.h>
-#include <unistd.h>
 #include <ctype.h>
-#include <fcntl.h>
     
 /* do some undoable modification */
 
