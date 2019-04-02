@@ -37,7 +37,8 @@ char **argv;
 /* initialize: set up everything I can in levee */
 {
     int i;
-    int xmode = E_INIT, xquit;
+    exec_type xmode = E_INIT;
+    int xquit;
     char *p;
     Tag tag;
     int opt;

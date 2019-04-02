@@ -32,6 +32,7 @@ int	newend,		/* end position after change */
 	newc,		/* new cursor position for wierd cmds */
 	endY;		/* final yp for endp */
 
+extern int affirm;	/* override file is modified checks (exec.c) */
 
 /* called when we enter editcore or do something that invalidates the screen
  */
@@ -198,7 +199,7 @@ execute(start, end)
     char scratch[200];
     bool ret = FALSE;
     int size;
-    pid_t child;
+    os_pid_t child;
     static char tferror[] = "[tempfile error]";
 
     unless (os_mktemp(scratch, sizeof scratch, "lv")) {
@@ -262,6 +263,7 @@ vitag()
 	(newfile = addarg(loc.filename)) != F_UNSET ) {
 
 	clrprompt();
+	affirm = NO;
 	if ( newfile == filenm || oktoedit(autowrite) ) {
 	    push_tag(filenm, curr);
 	    maybe_refresh_screen(gototag(newfile, loc.pattern) != SAMEFILE);
@@ -288,6 +290,7 @@ goback()
 	    return;
 	}
 	clrprompt();
+	affirm = NO;
 	if ( oktoedit(autowrite) ) {
 	    doinput(loc->fileno);
 	    curr = Min(bufmax-1, loc->cursor);

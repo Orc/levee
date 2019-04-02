@@ -646,7 +646,10 @@ int writeold;	/* automatically write out changes? */
 	return NO;
     }
 
-    unless ( writeold && (filenm != F_UNSET) ) {
+    if (affirm)				/* :{cmd}! ? Yes. */
+	return YES;
+
+    unless (writeold && (filenm != F_UNSET) ) {
 					/* no autowrite or filename?  No. */
 	errmsg(fismod);
 	return NO;

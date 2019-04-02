@@ -23,9 +23,9 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-int amatch();
-int locate();
-void patsize();
+int amatch(char*,char*,char*);
+int locate(char*,char*);
+void patsize(char**);
 
 static int arg;		/* arguments inside of a RE */
 
