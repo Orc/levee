@@ -38,9 +38,10 @@
 
 
 #if LOGGING
-extern void logit(char *, ...);
+extern void logger(char *, ...);
+#define logit(x) logger x
 #else
-#define logit(...)
+#define logit(x) 1
 #endif
 
 #ifndef TRUE

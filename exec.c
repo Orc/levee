@@ -93,7 +93,7 @@ findbounds(ip)
 char *ip;
 {
     /* get the low address */
-    logit("findbounds: low (%d,&[%s],0)", curr, ip);
+    logit(("findbounds: low (%d,&[%s],0)", curr, ip));
     if ( (low = findparse(curr, &ip, 0)) > ERR )
 	low = bseekeol(low);		/* at start of line */
     else if (low != ERR_UNKNOWN) {
@@ -112,7 +112,7 @@ char *ip;
 	else if ( *ip == '?' || *ip == '-' )
 	    offset=-1;
 
-	logit("findbound: high (%d, &[%s], %d", low, ip, offset);
+	logit(("findbound: high (%d, &[%s], %d", low, ip, offset));
 
 	unless ( (high = findparse(curr, &ip, offset)) > ERR ) {
 	    exprintln();
@@ -121,7 +121,7 @@ char *ip;
 	}
 	high = fseekeol(high);
     }
-    logit("findbounds: low=%d, high=%d", low, high);
+    logit(("findbounds: low=%d, high=%d", low, high));
     return(ip);
 }
 
@@ -132,10 +132,10 @@ show_args()
 {
     register int i;
     dgotoxy(0, -1);
-    logit("show_args: there %s %d argument%s",
+    logit(("show_args: there %s %d argument%s",
 	(args.gl_pathc == 1) ? "is" : "are",
 	args.gl_pathc,
-	(args.gl_pathc == 1) ? "." : "s.");
+	(args.gl_pathc == 1) ? "." : "s."));
     for (i=0; i < args.gl_pathc; i++) {
 	if (curpos.x+strlen(args.gl_pathv[i]) >= COLS)
 	    exprintln();
@@ -389,7 +389,7 @@ cutandpaste()
     register char *dp;
 
     zerostack(&undo);
-    logit("cutandpaste: [%s]", execstr);
+    logit(("cutandpaste: [%s]", execstr));
     ip = execstr;
     if (*ip != '&') {
 	delim = *ip++;
@@ -404,7 +404,7 @@ cutandpaste()
 	}
 	*dp = 0;
 
-	logit("cutandpaste: replacement = [%s]", dst);
+	logit(("cutandpaste: replacement = [%s]", dst));
 
 	if (*ip == delim) {
 	    while (*++ip)
@@ -439,7 +439,7 @@ cutandpaste()
 	    low = 1+fseekeol(low);
 
 	if ( low < lastlow ) {
-	    logit("low went backwards: lastlow=%d, low=%d", lastlow, low);
+	    logit(("low went backwards: lastlow=%d, low=%d", lastlow, low));
 	    errmsg("low went backwards?");
 	    break;
 	}
@@ -603,7 +603,7 @@ char *fname;
 	    low  = 0;
     }
 
-    logit("outputf: entire_file = %d, low=%d, high=%d", entire_file, low, high);
+    logit(("outputf: entire_file = %d, low=%d, high=%d", entire_file, low, high));
 
     high++;
     printch('"');
@@ -648,8 +648,8 @@ int writeold;	/* automatically write out changes? */
     if (affirm)				/* :{cmd}! ? Yes. */
 	return YES;
 
-    unless (writeold && (filenm != F_UNSET) ) {
 					/* no autowrite or filename?  No. */
+    unless (writeold && (filenm != F_UNSET) ) {
 	errmsg(fismod);
 	return NO;
     }
@@ -698,12 +698,12 @@ editfile()
 
     if ((name = getarg()) && *name == '+') {
 	startcmd = name[1] ? 1+name : "$";
-	logit("editfile: startcmd=%s",startcmd);
+	logit(("editfile: startcmd=%s",startcmd));
 	name = getarg();
     }
 
     if ( name ) {
-	logit(":edit %s", name);
+	logit((":edit %s", name));
 	if ((newpc = addarg(name)) == F_UNSET) {
 	    errmsg(noalloc);
 	    return;
@@ -716,7 +716,7 @@ editfile()
 #endif
     }
     else {
-	logit(":edit with no args: filenm=%d", filenm);
+	logit((":edit with no args: filenm=%d", filenm));
 	if ( filenm == F_UNSET ) {
 	    errmsg("Nothing to edit");
 	    return;
@@ -744,12 +744,12 @@ dotag()
 	errmsg("No tag");
 	return;
     }
-    logit("dotag: tag %s", tag);
+    logit(("dotag: tag %s", tag));
     unless ( find_tag(tag, strlen(tag), &result) ) {
 	errmsg("Can't find tag");
 	return;
     }
-    logit("dotag: filename=%s, pattern=%s", result.filename, result.pattern);
+    logit(("dotag: filename=%s, pattern=%s", result.filename, result.pattern));
 
     push_tag(filenm, curr);
     clrmsg();
@@ -840,8 +840,9 @@ bool prev;
 	    errmsg("(no prev files)");
 	    return;
 	}
-	else if ( oktoedit(autowrite) )
-	    --current;
+	unless ( oktoedit(autowrite) )
+	    return;
+	--current;
     }
     else if ( name == 0 ) {
 	/* :n w/o argument; move forward
@@ -850,8 +851,9 @@ bool prev;
 	    errmsg("(no more files)");
 	    return;
 	}
-	else if ( oktoedit(autowrite) )
-	    current++;
+	unless ( oktoedit(autowrite) )
+	    return;
+	current++;
     }
     else {
 	/* :n file {...}
@@ -975,7 +977,7 @@ exec_type *mode;
 	++indirect;
 	while (fgets(line,120,fp) && indirect) {
 	    strtok(line, "\n");
-	    logit("do_file: exec [%s]", line);
+	    logit(("do_file: exec [%s]", line));
 	    if (*line && exec(line,mode) )
 		break;
 	}
@@ -1063,7 +1065,7 @@ char *default_cmd;
     if (j==0)
 	return ERR;
 
-    logit("parse: cmd is [%.*s]", j, cmd);
+    logit(("parse: cmd is [%.*s]", j, cmd));
     for (k=0; excmds[k].name; k++)
 	if (excmds[k].active && strncmp(cmd, excmds[k].name, j) == 0)
 	    return k;
@@ -1123,7 +1125,7 @@ expand_line(char *cmd)
      */
     size += (count_percent*sz_fileptr) + (count_hash*sz_altptr);
 
-    logit("expand_line: needed size = %d", size);
+    logit(("expand_line: needed size = %d", size));
 
     if ( size > sz_expanded ) {
 	if ( expanded )
@@ -1155,7 +1157,7 @@ expand_line(char *cmd)
 	    *r++ = *cp;
     }
     *r = 0;
-    logit("expand_line: expanded = %s", expanded);
+    logit(("expand_line: expanded = %s", expanded));
 
     return expanded;
 }

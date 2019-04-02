@@ -173,7 +173,7 @@ int *y;
 	    if (tty.ts_lines) (*y)=tty.ts_lines;
 	    if (tty.ts_cols)  (*x)=tty.ts_cols;
 
-	    logit("os_screensize: col=%d,row=%d", tty.ts_cols, tty.ts_lines);
+	    logit(("os_screensize: col=%d,row=%d", tty.ts_cols, tty.ts_lines));
 	    return 1;
 	}
 #elif defined(TIOCGWINSZ)
@@ -182,7 +182,7 @@ int *y;
 	    if (tty.ws_row) (*y)=tty.ws_row;
 	    if (tty.ws_col) (*x)=tty.ws_col;
 
-	    logit("os_screensize: col=%d,row=%d", tty.ws_col, tty.ws_row);
+	    logit(("os_screensize: col=%d,row=%d", tty.ws_col, tty.ws_row));
 	    return 1;
 	}
 #endif
@@ -280,9 +280,9 @@ os_glob(const char* pattern, int flags, glob_t *result)
 
 #if LOGGING
     if ( result->gl_flags & GLOB_APPEND )
-	logit("os_glob: add %s to arglist", pattern);
+	logit(("os_glob: add %s to arglist", pattern));
     else
-	logit("os_glob: create new arglist, initialized with %s", pattern);
+	logit(("os_glob: create new arglist, initialized with %s", pattern));
 #endif
 
     if ( result->gl_pathc == 0 )
@@ -365,14 +365,14 @@ os_tilde(char *path)
     char *dir = 0;
     struct passwd *user=0;
 
-    logit("os_tilde %s", path);
+    logit(("os_tilde %s", path));
     unless ( path && (path[0] == '~') )
 	return 0;
 
     /* ~ by itself gets special handling; $HOME, then getpwuid */
     if ( path[1] == '/' ) {
 
-	logit("os_tilde: just ~");
+	logit(("os_tilde: just ~"));
 
 	slash = 1+path;
 	unless (dir = getenv("HOME")) {
@@ -382,7 +382,7 @@ os_tilde(char *path)
 	}
     }
     else {
-	logit("os_tilde: ~name");
+	logit(("os_tilde: ~name"));
 
 	/* ourself or someone else? */
 	unless ( slash = strchr(path, '/') )
@@ -404,14 +404,14 @@ os_tilde(char *path)
 	dir = user->pw_dir;
     }
 
-    logit("os_tilde: dir is [%s]", dir);
+    logit(("os_tilde: dir is [%s]", dir));
 
     if (expanded = malloc(strlen(dir)+strlen(slash)+2)) {
 	strcpy(expanded, dir);
 	strcat(expanded, "/");
 	strcat(expanded, slash+1);
 
-	logit("os_expand -> %s", expanded);
+	logit(("os_expand -> %s", expanded));
     }
 
     return expanded;
@@ -575,7 +575,7 @@ getKey()
 
 
 #if USING_STDIO
-    logit("getKey: flush stdout");
+    logit(("getKey: flush stdout"));
     fflush(stdout);
 #endif
     /* we're using Unix select() to wait for input, so lets hope that
@@ -594,7 +594,7 @@ getKey()
 
 	select(1, &input, 0, 0, 0);
 	if( read(0,c,1) == 1) {
-	    logit("getKey -> %c", c[0]);
+	    logit(("getKey -> %c", c[0]));
 	    return c[0];
 	}
     }

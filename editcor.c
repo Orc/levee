@@ -281,8 +281,7 @@ goback()
     Camefrom *loc = pop_tag();
 
     if ( loc ) {
-	logit("goback: newfile=%d (filenm=%d), curr=%d",
-		loc->fileno, filenm, loc->cursor);
+	logit(("goback: newfile=%d (filenm=%d), curr=%d", loc->fileno, filenm, loc->cursor));
 
 	if ( loc->fileno == filenm ) {
 	    curr = loc->cursor;
@@ -483,9 +482,7 @@ cmdtype cmd;
 	setpos((newc<0)?newend:newc);
 	newmaxY = setend();
 
-	logit("modification (%d) -> %d: endY = %d, setY(newend) = %d, "
-	      "oldmaxY = %d, newmaxY = %d", 
-	      cmd, ok, endY, setY(newend), oldmaxY, newmaxY);
+	logit(("modification (%d) -> %d: endY = %d, setY(newend) = %d, " "oldmaxY = %d, newmaxY = %d",  cmd, ok, endY, setY(newend), oldmaxY, newmaxY));
 
 	if (curr < ptop || curr > pend) {
 	    yp = settop(LINES/2);

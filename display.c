@@ -51,7 +51,7 @@ dgotoxy(x,y)
     unless ( os_gotoxy(x,y) ) {
 #if 0
 	char *gt = tgoto(CM, x, y);
-	logit("dgotoxy(%d,%s) -> <%s>", x, y, gt);
+	logit(("dgotoxy(%d,%s) -> <%s>", x, y, gt));
 #else
 	dputs(tgoto(CM,x,y));
 #endif
@@ -84,7 +84,7 @@ char *s;
 	return;
 
     unless ( os_write(s, len) ) {
-	logit("dwrite <%.*s>(%d)", len, s, len);
+	logit(("dwrite <%.*s>(%d)", len, s, len));
 #if USING_STDIO
 	fwrite(s, len, 1, stdout);
 #elif USING_TPUTS
@@ -239,7 +239,7 @@ dinitialize()
 	    HO = strdup(goto0);
     }
 
-    logit("CM=%s", CM);
+    logit(("CM=%s", CM));
 
     CL = tgetstr("cl", &bufp);
     CE = tgetstr("ce", &bufp);

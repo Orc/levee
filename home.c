@@ -9,10 +9,10 @@ expandfopen(char *f, char *mode)
     char *fqname;
     FILE *it;
 
-    logit("expandfopen %s", f);
+    logit(("expandfopen %s", f));
 
     if ( fqname = os_tilde(f) ) {
-	logit("expandfopen -> %s", fqname);
+	logit(("expandfopen -> %s", fqname));
 	it = fopen(fqname, mode);
 	free(fqname);
 	return it;

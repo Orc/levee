@@ -125,7 +125,7 @@ char *ptr;
 {
     DWORD result;
 
-    logit("os_write(\"%.*s\",%d)", size, ptr, size);
+    logit(("os_write(\"%.*s\",%d)", size, ptr, size));
     fwrite(ptr, size, 1, stdout);
     return 1;
 }
@@ -296,12 +296,12 @@ int *y;
     if (GetConsoleScreenBufferInfo(console_out.fd, &xyzzy)) {
 	(*y) = xyzzy.srWindow.Bottom - xyzzy.srWindow.Top + 1;
 	(*x) = xyzzy.srWindow.Right - xyzzy.srWindow.Left + 1;
-	logit("os_screensize -> (%d, %d)", (*x), (*y));
+	logit(("os_screensize -> (%d, %d)", (*x), (*y)));
     }
     else {
 	(*y) = 24;
 	(*x) = 80;
-	logit("os_screensize: -> DEFAULT (%d,%d)", (*x), (*y));
+	logit(("os_screensize: -> DEFAULT (%d,%d)", (*x), (*y)));
     }
     return 1;
 }
@@ -383,7 +383,7 @@ os_initialize()
     if ( (console_out.fd = GetStdHandle(STD_OUTPUT_HANDLE)) != NOPE ) {
 	DWORD written;
 	GetConsoleMode(console_out.fd, &console_out.mode);
-	logit("output mode=%016x", console_out.mode);
+	logit(("output mode=%016x", console_out.mode));
 	console_out.set = 1;
 
 	/* and and the tty dimensions */
@@ -453,11 +453,11 @@ glob_addfile(char *file, int count, glob_t *result)
 {
     char **newlist;
 
-    logit("os_glob: adding %s", file);
+    logit(("os_glob: adding %s", file));
     if ( count >= result->gl_pathalloc ) {
 	result->gl_pathalloc += 50;
-	logit("os_glob: expanding gl_pathv (old pathv=%p, count=%d, pathc=%d)",
-		    result->gl_pathv, count, result->gl_pathc);
+	logit(("os_glob: expanding gl_pathv (old pathv=%p, count=%d, pathc=%d)",
+		    result->gl_pathv, count, result->gl_pathc));
 	if ( result->gl_pathv )
 	    newlist = realloc(result->gl_pathv,
 			      result->gl_pathalloc * sizeof result->gl_pathv[0]);
@@ -479,8 +479,8 @@ glob_addfile(char *file, int count, glob_t *result)
     result->gl_pathv[count] = 0;
     result->gl_pathc++;
     result->gl_matchc = 1;
-    logit("os_glob: count=%d, pathc=%d,matchc=%d",
-	    count, result->gl_pathc, result->gl_matchc);
+    logit(("os_glob: count=%d, pathc=%d,matchc=%d",
+	    count, result->gl_pathc, result->gl_matchc));
     return 0;
 }
 
@@ -538,7 +538,7 @@ glob_t *dta;
     }
 
     do {
-	logit("glob_wildcard: file=%s", entry.name);
+	logit(("glob_wildcard: file=%s", entry.name));
 	if (entry.name[0] == '.' && !isdotpattern)
 	    continue;
 
@@ -551,7 +551,7 @@ glob_t *dta;
 	}
 	++count;
 	st = _findnext(find_ctx, &entry);
-	logit("glob_wildcard: find_next -> %d", st);
+	logit(("glob_wildcard: find_next -> %d", st));
     } while ( st == 0 );
     //} while ( _findnext(find_ctx, &entry) == 0 );
     _findclose(find_ctx);
@@ -570,9 +570,9 @@ os_glob(const char* pattern, int flags, glob_t *result)
 
 #if LOGGING
     if ( result->gl_flags & GLOB_APPEND )
-	logit("os_glob: add %s to arglist", pattern);
+	logit(("os_glob: add %s to arglist", pattern));
     else
-	logit("os_glob: create new arglist, initialized with %s", pattern);
+	logit(("os_glob: create new arglist, initialized with %s", pattern));
 #endif
 
     if ( result->gl_pathc == 0 )
@@ -629,7 +629,7 @@ os_tilde(char *path)
     char *expanded;
     char *disk,*dir;
 
-    logit("os_tilde %s", path);
+    logit(("os_tilde %s", path));
 
     /* ~ only for now
      */
@@ -649,7 +649,7 @@ os_tilde(char *path)
 	strcat(expanded, 2+path);
 #endif
 
-	logit("os_tilde -> %s", expanded);
+	logit(("os_tilde -> %s", expanded));
     }
 
     return expanded;
@@ -734,7 +734,7 @@ getKey()
 		key = &console_in.events[idx].Event.KeyEvent;
 
 		if ( key->bKeyDown ) {
-		    logit("getkey -> %c", key->uChar.AsciiChar);
+		    logit(("getkey -> %c", key->uChar.AsciiChar));
 		    return key->uChar.AsciiChar;
 		}
 	    }

@@ -402,7 +402,7 @@ char **bufp;
 	    }
 	}
 	unless ( pos > ERR ) {
-	    logit("search: error %d", pos);
+	    logit(("search: error %d", pos));
 	    return pos;
 	}
 	start = pos;
@@ -496,7 +496,7 @@ char **bufp;
 
     c = **bufp;
 
-    logit("initial fragment: addr=%d, c=%c", addr, c);
+    logit(("initial fragment: addr=%d, c=%c", addr, c));
 
     while ( c == '+' || c == '-' ) {
 	++(*bufp);
@@ -507,7 +507,7 @@ char **bufp;
 	if ( addr > ERR )
 	    start = addr;
 	else if ( addr == ERR_UNKNOWN ) {
-	    logit("after+ ERR_UNKNOWN (next char %d)", **bufp);
+	    logit(("after+ ERR_UNKNOWN (next char %d)", **bufp));
 	    return nextline( (offset > 0), start, 1);
 	}
 	else
@@ -538,8 +538,8 @@ int dest,count;
 	} while (count>0 && dest>=0);
 	dest = bseekeol(dest);
     }
-    logit("nextline: advance=%d, start=%d, count=%d -> dest=%d",
-		 advance, start, ocount, dest);
+    logit(("nextline: advance=%d, start=%d, count=%d -> dest=%d",
+		 advance, start, ocount, dest));
     return(dest);
 }
 

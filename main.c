@@ -22,6 +22,9 @@
 #include "extern.h"
 
 #include <stdlib.h>
+#if HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 static void
 copyright()
@@ -203,7 +206,7 @@ exec_type emode;
 	else
 	    more = (mode == E_EDIT);
 
-	logit("execmode: mode=%d, more=%d", mode, more);
+	logit(("execmode: mode=%d, more=%d", mode, more));
 	if (mode != E_VISUAL && curpos.x > 0)
 	  println();
     } while (more);

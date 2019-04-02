@@ -6,7 +6,7 @@
 static FILE *logfile = 0;
 
 void
-logit(char *fmt, ...)
+logger(char *fmt, ...)
 {
     va_list args;
     char *line, *p;
