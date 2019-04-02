@@ -22,11 +22,11 @@
 
 #include <ctype.h>
 
-int findcol();
-int moveword();
-int sentence();
-int match();
-int fchar(), bchar();
+int findcol(int,int);
+int moveword(int,bool,bool);
+int sentence(int,bool);
+int match(int);
+int fchar(int,int), bchar(int,int);
 
 /* driver for movement commands */
 

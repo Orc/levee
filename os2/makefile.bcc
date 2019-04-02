@@ -1,0 +1,48 @@
+# makefile for Levee, using pellesc
+
+CC=bcc
+
+CFLAGS=-I\bcc\include -Ios2 -wnone
+
+OBJS = main.obj blockio.obj display.obj editcor.obj exec.obj find.obj \
+    wincall.obj globals.obj insert.obj misc.obj \
+    modify.obj move.obj ucsd.obj undo.obj home.obj \
+    version.obj tag.obj getopt.obj
+
+lev.exe: $(OBJS)
+	$(CC) $(LDFLAGS) $(OBJS)
+
+version.c: VERSION mkversio.exe
+	mkversio
+
+clean:
+	del *.obj lev.exe
+
+distclean spotless: clean
+	del Makefile config.cmd config.sub config.h config.mak config.sed config.md config.log
+
+# Dependencies
+
+version.obj    : version.c
+mkversio.exe  : mkversio.c
+logit.obj      : logit.c
+blockio.obj    : levee.h extern.h blockio.c config.h
+display.obj    : levee.h extern.h display.c config.h
+editcor.obj    : levee.h extern.h editcor.c config.h
+exec.obj       : levee.h extern.h exec.c config.h
+find.obj       : levee.h extern.h grep.h find.c config.h
+globals.obj    : levee.h globals.c config.h
+insert.obj     : levee.h extern.h insert.c config.h
+main.obj       : levee.h extern.h main.c config.h
+misc.obj       : levee.h extern.h misc.c config.h
+modify.obj     : levee.h extern.h grep.h modify.c config.h
+move.obj       : levee.h extern.h move.c config.h
+rmxcall.obj    : levee.h rmxcall.c config.h
+ucsd.obj       : levee.h extern.h ucsd.c config.h
+undo.obj       : levee.h extern.h undo.c config.h
+wincall.obj    : levee.h extern.h wincall.c config.h
+tag.obj        : levee.h tag.c config.h
+home.obj       : levee.h extern.h home.c config.h
+
+getopt.obj     : os2/getopt.c os2/getopt.h
+	$(CC) $(CFLAGS) -c os2/getopt.c
