@@ -241,13 +241,13 @@ extern int EOL;
 		    /*macros*/
 #define SOFTMACRO	100
 #define INSMACRO	101
-#define cmdtype		char
+#define cmdtype		int
 
 		/* exec mode states */
 #define E_VISUAL 0
 #define E_INIT	 1
 #define E_EDIT	 2
-#define exec_type	char
+#define exec_type	int
 
 		/* various sizes */
 #define INSSIZE	 ((int)80)		/* Insert string size */

@@ -215,50 +215,98 @@ cmdtype movemap[];
 #define index(s,c)	strchr((s),(c))
 #endif
 
-extern findstates findCP();
-extern exec_type editcore();
-extern void maybe_refresh_screen(), doinput();
-extern char *findbounds();
-extern int oktoedit(), addarg();
+extern findstates findCP(int curp, int *newpos, cmdtype cmd);
+extern exec_type editcore(void);
+extern void maybe_refresh_screen(int redraw),
+	    doinput(int fileptr);
+extern char *findbounds(char *ip);
+extern int oktoedit(int writeold),
+	   findarg(register char *name),
+	   addarg(register char *name);
 
-extern char line(), peekc(), readchar();
-extern char *expr_errstring();
-extern char *makepat();
-extern int findparse();
+extern char line(char *s, int start, int endd, int *size),
+	    peekc(void),
+	    readchar(void);
+extern char *expr_errstring(int errno),
+	    *makepat(char *string, int delim);
+extern int findparse(int start, char **bufp, int offset);
 
-extern bool lvgetline();
-extern bool putfile();
-extern bool doyank(), deletion(), putback();
-extern bool pushb(),pushi(),pushmem(),uputcmd(), delete_to_undo();
-extern bool ok_to_scroll(), move_to_undo();
+extern bool lvgetline(char *str, int size);
+extern bool putfile(FILE*,int,int);
+extern bool doyank(int low, int high),
+	    deletion(int low, int high),
+	    putback(int start, int *newend);
+extern bool pushmem(struct undostack *u, int start, int size),
+	    uputcmd(struct undostack *u, int size, int start, int cmd),
+	    delete_to_undo(struct undostack *u, int start, int lump);
+extern bool ok_to_scroll(int top, int bottom),
+	    move_to_undo(struct undostack *u, int start, int lump);
 
-extern int fseekeol(), bseekeol(), settop();
-extern int scan(), findDLE(), setY(), skipws(), nextline(), setX();
-extern int insertion(), chop(), fixcore(), lookup(), to_index();
-extern int doaddwork(), addfile(), expandargs(), to_line();
-extern int findfwd(), findback(), lvgetcontext(), getKey();
-extern int insertfile(), do_file(), setend();;
+extern int fseekeol(int origin),
+	   bseekeol(int origin),
+	   settop(int lines),
+	   scan(int length, int tst, int ch, register char *src),
+	   findDLE(int start, int *endd, int limit, int dle),
+	   setY(int cp),
+	   skipws(int loc),
+	   nextline(bool advance, int dest, int count),
+	   setX(int cp),
+	   insertion(int count, int openflag, int *dp, int *yp, bool visual),
+	   chop(int start, int *endd, bool visual, bool *query),
+	   fixcore(int *topp),
+	   lookup(int c),
+	   to_index(int line),
+	   addfile(FILE*,int,int,int*),
+	   to_line(int cp),
+	   findfwd(char *pattern, int start, int endp),
+	   findback(char *pattern, int start, int endp),
+	   lvgetcontext(int c, bool begline),
+	   getKey(void),
+	   insertfile(FILE*,int,int,int*),
+	   do_file(char *fname, exec_type *mode),
+	   setend(void);
 
-extern void strput(), numtoa(), clrprompt(), error();
-extern void insert_to_undo(), resetX(), zerostack(), swap();
-extern void mvcur(), printch(), prints(), writeline(), refresh();
-extern void redisplay(), scrollback(), scrollforward(), prompt();
-extern void setpos(), resetX(), insertmacro(), wr_stat();
-extern void movearound(), printi(), println(), killargs();
-extern void initcon(), fixcon(), version(), setcmd();
-extern void toedit(), doinput(), inputf(), fixmarkers(), errmsg();
-extern void setarg();
-extern int exec();
-extern char *class();
+extern void numtoa(char *str, int num),
+	    clrprompt(void),
+	    error(void),
+	    insert_to_undo(struct undostack *u, int start, int size),
+	    resetX(void),
+	    zerostack(struct undostack *u),
+	    swap(int *a, int *b),
+	    printch(int c),
+	    prints(char *s),
+	    writeline(int y, int x, int start),
+	    refresh(int y, int x, int start, int endd, bool rest),
+	    redisplay(bool flag),
+	    scrollback(int curr),
+	    scrollforward(int curr),
+	    prompt(bool toot, char *s),
+	    setpos(int loc),
+	    resetX(void),
+	    insertmacro(char *cmdstr, int count),
+	    wr_stat(void),
+	    movearound(cmdtype cmd),
+	    printi(int num),
+	    println(void),
+	    version(void),
+	    setcmd(void),
+	    toedit(int count),
+	    doinput(int fileptr),
+	    inputf(register char *fname, bool newbuf),
+	    fixmarkers(int base, int offset),
+	    errmsg(char *msg),
+	    setarg(char *s);
+extern int exec(char *cmd, exec_type *mode);
+extern char *class(int c);
 
 #ifndef moveleft
-extern void moveleft();
+extern void moveleft(register char *src, register char *dest, register int length);
 #endif
 #ifndef moveright
-extern void moveright();
+extern void moveright(register char *src, register char *dest, register int length);
 #endif
 #ifndef fillchar
-extern void fillchar();
+extern void fillchar(char*,int,char);
 #endif
 
 
@@ -266,38 +314,36 @@ extern void dwrite(char *, int);
 extern void dputs(char *);
 extern void dputc(char);
 extern void dgotoxy(int,int);
-extern void dclear_to_eol();
-extern void dclearscreen();
-extern void dnewline();
-extern void dscrollback();
-extern void dopenline();
+extern void dclear_to_eol(void);
+extern void dclearscreen(void);
+extern void dnewline(void);
+extern void dopenline(void);
 extern void d_cursor(int);
 extern void d_highlight(int);
-extern void dinitialize();
+extern void dinitialize(void);
 extern void dscreensize(int *, int *);
-extern void drestore();
-extern void Ping();
+extern void drestore(void);
+extern void Ping(void);
 
-extern int os_initialize();
-extern int os_restore();
-extern int os_cangotoxy();
-extern int os_clear_to_eol();
-extern int os_clearscreen();
+extern int os_initialize(void);
+extern int os_restore(void);
+extern int os_clear_to_eol(void);
+extern int os_clearscreen(void);
 extern int os_cursor(int);
 extern int os_highlight(int);
 extern int os_write(char *, int);
 extern int os_gotoxy(int,int);
-extern int os_initialize();
-extern int os_openline();
+extern int os_initialize(void);
+extern int os_openline(void);
 extern int os_screensize(int *, int *);
-extern int os_scrollback();
-extern int os_newline();
-extern int os_Ping();
+extern int os_scrollback(void);
+extern int os_newline(void);
+extern int os_Ping(void);
 
 
-extern void set_input();
-extern void reset_input();
-extern char *dotfile();
+extern void set_input(void);
+extern void reset_input(void);
+extern char *dotfile(void);
 
 extern int os_mktemp(char *, int, const char *);
 extern int os_unlink(char *);
