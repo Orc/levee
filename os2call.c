@@ -26,32 +26,142 @@
 
 #if OS_OS2
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <ctype.h>
 #include <signal.h>
+#include <errno.h>
 
 #define INCL_DOSFILEMGR
 #include <os2.h>
-#include <ctype.h>
+#include <io.h>
+#include <conio.h>
 
 
-os_dwrite(s,len)
-char *s;
+FILEDESC
+OPEN_OLD(char *name)
 {
+    int fd = open(name, O_RDONLY|O_BINARY);
+
+    return (fd == -1) ? NOWAY : (FILEDESC)fd;
+}
+
+FILEDESC
+OPEN_NEW(char *name)
+{
+    int fd = open(name, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY, 0666);
+
+    return (fd == -1) ? NOWAY : (FILEDESC)fd;
+}
+
+
+CLOSE_FILE(FILEDESC f)
+{
+    return close((int)f);
+}
+
+long
+SEEK_POSITION(FILEDESC f, long offset, int mode)
+{
+    return lseek((int)f, offset, mode);
+}
+
+int
+READ_TEXT(FILEDESC f, void *buf, int size)
+{
+    return read((int)f, buf, size);
+}
+
+int
+WRITE_TEXT(FILEDESC f, void *buf, int size)
+{
+    return write((int)f, buf, size);
+}
+
+int
+os_mktemp(char *dest, int size, const char *template)
+{
+    char *p;
+    char lastchar;
+    int required;
+
+static char Xes[] = ".XXXXXX";
+
+    required = sizeof(Xes) + strlen(template) + 1;
+
+    if (p=getenv("TMP")) {
+
+	unless ( size > strlen(p) + required ) {
+	    errno = E2BIG;
+	    return 0;
+	}
+
+	strcpy(dest, p);
+
+	lastchar = dest[strlen(dest)-1];
+
+	if ( lastchar != '/' && lastchar != '\\' && lastchar != ':' )
+	    strcat(dest, "/");
+    }
+    else {
+	unless ( size > required ) {
+	    errno = E2BIG;
+	    return 0;
+	}
+	dest[0] = 0;
+    }
+#if USING_STDIO
+    sprintf(dest+strlen(dest), "%s%s", template, Xes);
+
+    return mktemp(dest) != 0;
+#else
+    strcat(s, template);
+    numtoa(dest+strlen(dest), getpid());
+
+    return 1;
+#endif
+}
+
+
+static int onconsole = NO;	/* console or telnet? */
+
+int
+os_initialize()
+{
+    char *term = getenv("TERM");
+
+    /* if $TERM is not set, we're probably on the OS/2 console
+     * and can treat the whole world like an ansi
+     */
+    unless (term) {
+	onconsole = YES;
+	putenv("TERM=ansi");
+    }
+
     return 0;
 }
 
-
-os_initialize()
+int
+os_screensize(int *cols, int *lines)
 {
-    Erasechar = '\b';	/* ^H */
-    Eraseline = 21;	/* ^U */
+    struct text_info tty;
 
-    return 1;
+    unless ( onconsole )
+	return 0;	/* use curses */
+
+    /* if we're on the console, try to ask the OS our window size
+     */
+    gettextinfo(&tty);
+
+    cols = tty.screenwidth;
+    lines = tty.screenheight;
 }
-
 
 /* get a key, mapping certain control sequences
  */
 
+int
 getKey()
 {
     register c;
@@ -162,6 +272,7 @@ glob_addfile(char *file, int count, glob_t *result)
     result->gl_pathv[count] = 0;
     result->gl_pathc++;
     result->gl_matchc = 1;
+    lowercase(result->gl_pathv[count-1]);
     logit(("os_glob: count=%d, pathc=%d,matchc=%d",
 	    count, result->gl_pathc, result->gl_matchc));
     return 0;
@@ -180,14 +291,13 @@ glob_t *dta;
     char *path_bfr;		/* full pathname to return */
     char *file_part;		/* points at file - for filling */
 
-    static FILEFINDBUF3 finfo[50];/* OS/2 dta */
+    FILEFINDBUF3 finfo[50];	/* OS/2 dta */
     int dir;			/* directory handle */
     register result;		/* status from DosFindxxx */
 
     ULONG wanted;
 
-    static char isdotpattern;	/* looking for files starting with . */
-    static char isdotordotdot;	/* special case . or .. */
+    char isdotpattern;		/* looking for files starting with . */
     int idx;			/* for looping through finfo */
 
     unless (path)
@@ -315,10 +425,60 @@ os_globfree(glob_t *collection)
 
 
 char *
+dotfile()
+{
+    static char *dot = 0;
+    static char lvrc[] = "/levee.rc";
+    char *etc;
+
+    if ( dot )
+	return dot;
+
+    unless (etc = getenv("ETC"))
+	etc="/etc";
+
+    unless (dot = malloc(strlen(etc) + sizeof lvrc + 1))
+	return lvrc;
+
+    strcpy(dot, etc);
+    strcat(dot, lvrc);
+
+    return dot;
+}
+
+
+char *
 os_tilde(char *name)
 {
     /* OS/2 is a single-user system with no home directory (sigh) */
     return 0;
+}
+
+
+/*
+ * make a backup file name
+ */
+char *
+os_backupname(char *file)
+{
+    char *p, *base, *ext;
+    int size;
+    int filelen;
+    static char bkp_extension[] = ".bkp";
+
+    base = basename(file);
+    ext = strrchr(base, '.');
+    filelen = strlen(file);
+
+    /* backup buffer length is 1 + |file| + |bkp_extension| - |ext|
+     */
+    size = 1 + strlen(file) + sizeof bkp_extension  - (ext ? strlen(ext) : 0);
+
+    if ( p = calloc(1, size) ) {
+	strcpy(p, file);
+	strcpy(&p[filelen - (ext ? strlen(ext) : 0)], bkp_extension);
+    }
+    return p;
 }
 
 
@@ -332,6 +492,113 @@ unsigned int c;
     if (c & 0x80)
 	return CC_OTHER;
     return CC_PRINT;
+}
+
+int
+os_unlink(char *file)
+{
+    return unlink(file);
+}
+
+FILE *
+os_cmdopen(char *command, char *input, os_pid_t *child)
+{
+    return 0;
+}
+
+int
+os_cmdclose(FILE *f, os_pid_t child)
+{
+    return 0;
+}
+
+
+int
+os_rename(char *src, char *dest)
+{
+    return rename(src, dest);
+}
+
+
+int
+os_subshell(char *commandline)
+{
+    return system(commandline);
+}
+
+
+/* dummy functions to tell display.c that it's okay to use the
+ * standard unix i/o & display functions
+ */
+os_dwrite(s,len)
+char *s;
+{
+    return 0;
+}
+
+int
+os_Ping()
+{
+    return 0;
+}
+
+int os_write()
+{
+    return 0;
+}
+
+int
+os_gotoxy(int x, int y)
+{
+    return 0;
+}
+
+int
+os_openline()
+{
+    return 0;
+}
+
+int
+os_newline()
+{
+    return 0;
+}
+
+int
+os_clearscreen()
+{
+    return 0;
+}
+
+int
+os_clear_to_eol()
+{
+    return 0;
+}
+
+int
+os_cursor(int vis)
+{
+    return 0;
+}
+
+int
+os_highlight(int vis)
+{
+    return 0;
+}
+
+int
+os_scrollback()
+{
+    return 0;
+}
+
+int
+os_restore()
+{
+    return 0;
 }
 
 #endif
