@@ -208,11 +208,13 @@ os_screensize(int *cols, int *lines)
 	if ( /*getKey() == '\033' &&*/ getKey() == '[' ) {
 	    x=0;
 	    while ( (c = getKey()) >= '0' && c <= '9' )
-		x = (y*10) + (c-'0');
+		x = (x*10) + (c-'0');
+	    logit(("inquiry: x = %d", x));
 	    if ( c == ';' ) {
 		y = 0;
 		while ( (c = getKey()) >= '0' && c <= '9' )
 		    y = (y*10) + (c-'0');
+		logit(("inquiry: y = %d", y));
 		if ( (c == 'R') && x && y ) {
 		    *lines = x;
 		    *cols = y;
