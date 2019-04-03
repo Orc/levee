@@ -295,7 +295,7 @@ cmdtype movemap[256]={
     /*7 */ BAD_COMMAND,
     /*8 */ BAD_COMMAND,
     /*9 */ BAD_COMMAND,
-    /*: */ COLIN_C,
+    /*: */ COLON_C,
     /*; */ BAD_COMMAND,
     /*< */ ADJUST_C,
     /*= */ BAD_COMMAND,

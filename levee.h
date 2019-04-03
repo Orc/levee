@@ -234,7 +234,7 @@ extern int EOL;
 #define MARKER_C	78
 #define REDO_C		79
 #define EDIT_C		80
-#define COLIN_C		81
+#define COLON_C		81
 #define TAG_C		82
 #define FULL_REDRAW_C	83
 #define POP_TAG		84

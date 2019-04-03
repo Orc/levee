@@ -720,7 +720,7 @@ editcore()
 	  case EDIT_C:		/* drop into line mode */
 	    return E_EDIT;
 
-	  case COLIN_C:		/* do one exec mode command */
+	  case COLON_C:		/* do one exec mode command */
 	    return E_VISUAL;
 
 	  case HARDMACRO:
