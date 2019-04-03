@@ -216,6 +216,11 @@ dinitialize()
 #endif
     char *term, *bufp;
     
+#if USING_STDIO
+    fflush(stdout);
+    setvbuf(stdout, iob, _IOFBF, sizeof iob);
+#endif
+
     if (os_initialize())
 	return;
 
@@ -264,11 +269,6 @@ dinitialize()
     canUPSCROLL = (UpS != NULL);
     CA = (CM != NULL);
     canOL = (OL != NULL);
-
-#if USING_STDIO
-    fflush(stdout);
-    setvbuf(stdout, iob, _IOFBF, sizeof iob);
-#endif
 }
 
 
