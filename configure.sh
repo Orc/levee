@@ -139,6 +139,8 @@ AC_CHECK_HEADERS pwd.h && AC_CHECK_HEADERS uuid/uuid.h
 
 AC_CHECK_FUNCS basename && AC_CHECK_HEADERS libgen.h
 
+AC_CHECK_FUNCS vasprintf
+
 AC_CHECK_HEADERS sys/wait.h errno.h
 
 AC_CHECK_HEADERS sys/types.h unistd.h
