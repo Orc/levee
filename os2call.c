@@ -163,6 +163,11 @@ os_initialize()
     TERMNAME = "OS/2 ANSI";
     canUPSCROLL = 0;
     CA = canOL = 1;
+    
+    /* disable ! command in visual mode
+     */
+    movemap['!'] = BAD_COMMAND;
+
 
     return 1;
 }
@@ -175,7 +180,7 @@ os_screensize(int *cols, int *lines)
     char c;
     char *term = getenv("TERM");
     char *li, *co;
-    static char inquiry[] = "\033[400;400H\033[6n";
+    static char inquiry[] = "\033[s\033[400;400H\033[6n\033[u\r";
 
 
     /* if term is NOT set, we are most likely on the console */
@@ -384,6 +389,7 @@ glob_t *dta;
     char isdotpattern;		/* looking for files starting with . */
     int idx;			/* for looping through finfo */
 
+    logit(("glob_wildcard \"%s\", %d, %d, dta", path, permit_nomatch, count));
     unless (path)
 	return -1;
 
@@ -410,12 +416,13 @@ glob_t *dta;
 
     }
 
-#define OS_FINDFLAGS	0x39
+#define OS_FINDFLAGS	FILE_READONLY|FILE_HIDDEN|FILE_SYSTEM|FILE_ARCHIVED
 
     wanted = sizeof finfo / sizeof finfo[0];
     result = DosFindFirst(path, &dir, OS_FINDFLAGS,
 			finfo, wanted, &wanted, FIL_STANDARD);
 
+    logit(("DosFindFirst -> %d (wanted -> %d)", result, wanted));
     if ( result != 0 ) {
 	free(path_bfr);
 	DosFindClose(dir);
