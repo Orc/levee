@@ -9,9 +9,13 @@ void
 logger(char *fmt, ...)
 {
     va_list args;
-    char *line, *p;
-    size_t size;
-
+    char *p, *endp;
+#if HAVE_VASPRINTF
+    char *line;
+#else
+    char biglogbuf[1024];
+#endif
+    int size;
 
     if ( logfile == 0 ) {
 	logfile = fopen("levee.log", "w");
@@ -20,14 +24,28 @@ logger(char *fmt, ...)
 
     va_start(args, fmt);
 
-    if ( vasprintf(&line, fmt, args) >= 0 ) {
-	for (p=line; *p ; p++ ) {
+#if HAVE_VASPRINTF
+    if ( (size = vasprintf(&line, fmt, args)) > 0 ) {
+	p = line;
+	endp = &line[size];
+    }
+#else
+    if ( (size = vsprintf(biglogbuf, fmt, args)) > 0 ) {
+	p = biglogbuf;
+	endp = &biglogbuf[size];
+    }
+#endif
+
+    if (size > 0) {
+	for ( ; p < endp; p++ ) {
 	    if ( *p >= ' ' && *p < 127 )
 		fputc(*p, logfile);
 	    else
 		fprintf(logfile, "%%%02x", (unsigned int)(*p));
 	}
 	fputc('\n', logfile);
+#if HAVE_VASPRINTF
 	free(line);
+#endif
     }
 }
