@@ -173,19 +173,65 @@ os_screensize(int *cols, int *lines)
     struct text_info tty;
     int count;
     char c;
+    char *term = getenv("TERM");
+    char *li, *co;
+    static char inquiry[] = "\033[400;400H\033[6n";
 
 
-    memset(&tty, 0, sizeof tty);
-    gettextinfo(&tty);
+    /* if term is NOT set, we are most likely on the console */
+
+    if ( term == 0 ) {
+	memset(&tty, 0, sizeof tty);
+	gettextinfo(&tty);
     
-    if ( tty.screenwidth > 0 && tty.screenheight > 0 ) {
-	*cols = tty.screenwidth;
-	*lines = tty.screenheight;
+	if ( tty.screenwidth > 0 && tty.screenheight > 0 ) {
+	    *cols = tty.screenwidth;
+	    *lines = tty.screenheight;
+	    logit(("tty screensize = %d %d", *lines, *cols));
+	    return 1;
+	}
     }
-    else {
-	*cols = 80;
-	*lines = 25;
+
+    /* otherwise we're hopefully on an ansi telnet session.  Check
+     * $TERM to make sure.  if it's prefixed with ansi, vt100, or
+     * xterm, then we can do an ansi inquiry to find out what it
+     * is.
+     */
+#define ISEQ(s,y)	(strncmp(s,y,strlen(y)) == 0)
+
+    if ( ISEQ(term, "ansi") || ISEQ(term, "vt100") || ISEQ(term, "xterm") ) {
+	int x, y;
+
+	dwrite(inquiry, sizeof inquiry);
+
+	/* OS/2 eats incoming escapes after a console inquiry? */
+	if ( /*getKey() == '\033' &&*/ getKey() == '[' ) {
+	    x=0;
+	    while ( (c = getKey()) >= '0' && c <= '9' )
+		x = (y*10) + (c-'0');
+	    if ( c == ';' ) {
+		y = 0;
+		while ( (c = getKey()) >= '0' && c <= '9' )
+		    y = (y*10) + (c-'0');
+		if ( (c == 'R') && x && y ) {
+		    *lines = x;
+		    *cols = y;
+		    logit(("inquiry screensize = %d %d", *lines, *cols));
+		    return 1;
+		}
+	    }
+	}
     }
+
+    
+    li = getenv("LINES");
+    co = getenv("COLS");
+
+    *lines = li ? atoi(li) : 25;
+    *cols = co ? atoi(co) : 80;
+
+    logit(("!tty screensize = %d %d", *lines, *cols));
+    return 1;
 }
 
 /* get a key, mapping certain control sequences

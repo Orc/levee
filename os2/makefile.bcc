@@ -10,7 +10,7 @@ OBJS = main.obj blockio.obj display.obj editcor.obj exec.obj find.obj \
     version.obj tag.obj getopt.obj logit.obj
 
 lev.exe: $(OBJS)
-	$(CC) $(LDFLAGS) $(OBJS) $(LIBS)
+	$(CC) -e lev.exe $(LDFLAGS) $(OBJS) $(LIBS)
 
 version.c: VERSION mkversio.exe
 	mkversio
@@ -24,7 +24,7 @@ distclean spotless: clean
 # Dependencies
 
 version.obj    : version.c
-mkversio.exe  : mkversio.c
+mkversio.exe   : mkversio.c
 logit.obj      : logit.c
 blockio.obj    : levee.h extern.h blockio.c config.h
 display.obj    : levee.h extern.h display.c config.h
