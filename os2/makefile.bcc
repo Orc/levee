@@ -5,7 +5,7 @@ CC=bcc
 CFLAGS=-I\bcc\include -Ios2 -wnone
 
 OBJS = main.obj blockio.obj display.obj editcor.obj exec.obj find.obj \
-    wincall.obj globals.obj insert.obj misc.obj \
+    os2call.obj globals.obj insert.obj misc.obj \
     modify.obj move.obj ucsd.obj undo.obj home.obj \
     version.obj tag.obj getopt.obj
 
@@ -40,7 +40,7 @@ move.obj       : levee.h extern.h move.c config.h
 rmxcall.obj    : levee.h rmxcall.c config.h
 ucsd.obj       : levee.h extern.h ucsd.c config.h
 undo.obj       : levee.h extern.h undo.c config.h
-wincall.obj    : levee.h extern.h wincall.c config.h
+os2call.obj    : levee.h extern.h os2call.c config.h
 tag.obj        : levee.h tag.c config.h
 home.obj       : levee.h extern.h home.c config.h
 

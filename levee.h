@@ -79,7 +79,7 @@ extern int LINES, COLS;
 
 #define UPARROW	11
 #define DNARROW	10
-#define LTARROW	erase
+#define LTARROW	Erasechar
 #define RTARROW	12
 
 /* nospecific stuff */
