@@ -151,18 +151,18 @@ int tgetent(char *buf, char *term)
 }
 #endif
 
-static int onconsole = NO;	/* console or telnet? */
-
 int
 os_initialize()
 {
-    static char obuf[4096];
 
-    fflush(stdout);
-    setvbuf(stdout, obuf, _IOFBF, sizeof obuf);
+    setmode(fileno(stdout), O_BINARY);
+
+    Erasechar = '\177';
+    Eraseline = '\025';
 
     TERMNAME = "OS/2 ANSI";
-    canUPSCROLL = CA = canOL = 1;
+    canUPSCROLL = 0;
+    CA = canOL = 1;
 
     return 1;
 }
@@ -171,17 +171,20 @@ int
 os_screensize(int *cols, int *lines)
 {
     struct text_info tty;
+    int count;
+    char c;
 
-    gettextinfo(&tty);
 
     memset(&tty, 0, sizeof tty);
+    gettextinfo(&tty);
+    
     if ( tty.screenwidth > 0 && tty.screenheight > 0 ) {
 	*cols = tty.screenwidth;
 	*lines = tty.screenheight;
     }
     else {
 	*cols = 80;
-	*lines = 24;
+	*lines = 25;
     }
 }
 
@@ -193,10 +196,10 @@ getKey()
 {
     register c;
 
+#if USING_STDIO
     fflush(stdout);
+#endif
     c = getch();
-
-    logit(("getkey %c", c));
 
 #if 0
     if (c == 0 || c == 0xe0)
