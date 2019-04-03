@@ -7,10 +7,10 @@ CFLAGS=-I\bcc\include -Ios2 -wnone
 OBJS = main.obj blockio.obj display.obj editcor.obj exec.obj find.obj \
     os2call.obj globals.obj insert.obj misc.obj \
     modify.obj move.obj ucsd.obj undo.obj home.obj \
-    version.obj tag.obj getopt.obj
+    version.obj tag.obj getopt.obj logit.obj
 
 lev.exe: $(OBJS)
-	$(CC) $(LDFLAGS) $(OBJS)
+	$(CC) $(LDFLAGS) $(OBJS) $(LIBS)
 
 version.c: VERSION mkversio.exe
 	mkversio

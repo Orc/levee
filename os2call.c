@@ -35,7 +35,6 @@
 
 #define INCL_DOSFILEMGR
 #include <os2.h>
-#include <io.h>
 #include <conio.h>
 
 
@@ -123,23 +122,49 @@ static char Xes[] = ".XXXXXX";
 #endif
 }
 
+/* *** termcap stubs if we build w/o termcap (display.c assumes
+ * *** the existence of a termcap library and I don't want to
+ * *** put an os ifdef into that code.  plus this will let me
+ * *** do a version of win32 levee that supports terminals other
+ * *** than ansi console emulation if I can find a way to get
+ * *** a cleartext telnet session into a windows box
+ */
+#if !USING_TERMCAP
+char *tgoto(char *cap, int x, int y)
+{
+    return 0;
+}
+
+int tgetnum(char *cap)
+{
+    return 0;
+}
+
+char *tgetstr(char *cap, char **bfr)
+{
+    return 0;
+}
+
+int tgetent(char *buf, char *term)
+{
+    return 0;
+}
+#endif
 
 static int onconsole = NO;	/* console or telnet? */
 
 int
 os_initialize()
 {
-    char *term = getenv("TERM");
+    static char obuf[4096];
 
-    /* if $TERM is not set, we're probably on the OS/2 console
-     * and can treat the whole world like an ansi
-     */
-    unless (term) {
-	onconsole = YES;
-	putenv("TERM=ansi");
-    }
+    fflush(stdout);
+    setvbuf(stdout, obuf, _IOFBF, sizeof obuf);
 
-    return 0;
+    TERMNAME = "OS/2 ANSI";
+    canUPSCROLL = CA = canOL = 1;
+
+    return 1;
 }
 
 int
@@ -147,15 +172,17 @@ os_screensize(int *cols, int *lines)
 {
     struct text_info tty;
 
-    unless ( onconsole )
-	return 0;	/* use curses */
-
-    /* if we're on the console, try to ask the OS our window size
-     */
     gettextinfo(&tty);
 
-    cols = tty.screenwidth;
-    lines = tty.screenheight;
+    memset(&tty, 0, sizeof tty);
+    if ( tty.screenwidth > 0 && tty.screenheight > 0 ) {
+	*cols = tty.screenwidth;
+	*lines = tty.screenheight;
+    }
+    else {
+	*cols = 80;
+	*lines = 24;
+    }
 }
 
 /* get a key, mapping certain control sequences
@@ -166,8 +193,12 @@ getKey()
 {
     register c;
 
+    fflush(stdout);
     c = getch();
 
+    logit(("getkey %c", c));
+
+#if 0
     if (c == 0 || c == 0xe0)
 	switch (c=getch()) {
 	case 'K': return LTARROW;
@@ -178,7 +209,9 @@ getKey()
 	case 'Q': return 'D'-'@';	/* page-down */
 	default : return 0;
 	}
-    return c;
+#endif
+
+    return c & 0x7f;
 }
 
 
@@ -188,7 +221,7 @@ getKey()
 void
 set_input()
 {
-    signal(SIGINT, SIG_IGN);
+    //signal(SIGINT, SIG_IGN);
 } /* nointr */
 
 
@@ -198,7 +231,7 @@ set_input()
 void
 reset_input()
 {
-    signal(SIGINT, SIG_DFL);
+    //signal(SIGINT, SIG_DFL);
 } /* allowintr */
 
 
@@ -527,78 +560,98 @@ os_subshell(char *commandline)
 }
 
 
-/* dummy functions to tell display.c that it's okay to use the
- * standard unix i/o & display functions
- */
-os_dwrite(s,len)
-char *s;
+int
+os_write(ptr, size)
+char *ptr;
 {
-    return 0;
+    logit(("os_write(\"%.*s\",%d)", size, ptr, size));
+    fwrite(ptr, size, 1, stdout);
+    return 1;
 }
+
+
+os_openline()
+{
+    dputs("\033[1L");
+    return 1;
+}
+
+
+os_clearscreen()
+{
+    dputs("\033[3J\033[2J");
+    return 1;
+}
+
+
+int
+os_cursor(visible)
+{
+    dputs(visible ? "\033[?25h" : "\033[?25l");
+    return 1;
+}
+
+
+int
+os_highlight(int visible)
+{
+    //dputs(visible ? "\033[27m" : "\033[7m");
+    return 1;
+}
+
 
 int
 os_Ping()
 {
-    return 0;
+    dputs("\007");
+    return 1;
 }
 
-int os_write()
-{
-    return 0;
-}
 
-int
-os_gotoxy(int x, int y)
-{
-    return 0;
-}
-
-int
-os_openline()
-{
-    return 0;
-}
-
-int
 os_newline()
 {
-    return 0;
+#if 0
+    dputs("\033[1T");
+#else
+    dputs("\r\n");
+#endif
+    return 1;
 }
 
-int
-os_clearscreen()
-{
-    return 0;
-}
-
-int
-os_clear_to_eol()
-{
-    return 0;
-}
-
-int
-os_cursor(int vis)
-{
-    return 0;
-}
-
-int
-os_highlight(int vis)
-{
-    return 0;
-}
 
 int
 os_scrollback()
 {
-    return 0;
+#if 0
+    dputs("\033[1S");
+#endif
+    return 1;
+}
+
+
+int
+os_clear_to_eol()
+{
+    dputs("\033[0K");
+    return 1;
+}
+
+
+int
+os_gotoxy(x, y)
+{
+    char gt[40];
+
+    sprintf(gt, "\033[%d;%dH", y+1, x+1);
+    dputs(gt);
+    return 1;
 }
 
 int
 os_restore()
 {
-    return 0;
+    fflush(stdout);
+    return 1;
 }
 
 #endif
