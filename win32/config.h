@@ -9,7 +9,7 @@
 
 
 #define OS_WINDOWS 1
-#define os_pid_t pid_t
+#define os_pid_t int
 #define GLOB_REQUIRED 1
 #define USING_STDIO 1
 #define LOGGING 1
@@ -25,5 +25,6 @@
 #define USE_TERMCAP 1
 #define GLOB_REQUIRED 1
 #define HAVE_STRDUP 1
+#define HAVE_GETOPT_H 1
 
 #endif/* __AC_LEVEE_D */

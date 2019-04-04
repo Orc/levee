@@ -8,7 +8,7 @@ LDFLAGS=-Go -Ze
 OBJS = blockio.obj display.obj editcor.obj exec.obj find.obj \
     wincall.obj globals.obj insert.obj main.obj misc.obj \
     modify.obj move.obj ucsd.obj undo.obj home.obj \
-    logit.obj version.c tag.o
+    logit.obj version.obj tag.obj
 
 lev.exe: $(OBJS)
 	$(CC) $(LDFLAGS) -olev.exe $(OBJS)
@@ -29,7 +29,7 @@ mkversio.exe   : mkversio.c
 logit.obj      : logit.c
 blockio.obj    : levee.h extern.h blockio.c config.h
 display.obj    : levee.h extern.h termcap.i display.c config.h
-editcor.obj    : levee.h extern.h editcor.c config.h external.h
+editcor.obj    : levee.h extern.h editcor.c config.h
 exec.obj       : levee.h extern.h exec.c config.h
 find.obj       : levee.h extern.h grep.h find.c config.h
 globals.obj    : levee.h globals.c config.h
