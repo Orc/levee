@@ -1,4 +1,4 @@
-My tiny (~58k on osx/x86_64; smaller on 32 bit machines) & ancient
+My tiny (~54k on osx/x86_64; smaller on 32 bit machines) & ancient
 (first written sometime in 1979 (in USCD pascal; I converted it to C
  sometime in the early 1980s)) almost-vi-clone.
 
@@ -17,11 +17,17 @@ Over its life it's been built on
 * Flexos
 * iRMX
 * OS/2
-* Linux
+* Linux (the first version to make it into SCCS, in 1993, after 13 or
+  14 years of use, porting, and development)
 * FreeBSD
 * NetBSD
 * Macosx
 * Windows 10
+
+And it's currently (version 4) being built on Unixes (osx,*bsd,Linux),
+Windows 10, and OS/2 v4 (both windows 10 & OS/2 are using their
+respective console ANSI emulation, both of which have issues.))
+
 
 The configuration options are
 

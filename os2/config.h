@@ -26,6 +26,5 @@
 #define USE_TERMCAP 1
 #define GLOB_REQUIRED 1
 #define HAVE_STRDUP 1
-#define LOGGING 1
 
 #endif/* __AC_LEVEE_D */
