@@ -69,7 +69,7 @@ gototag(int fileptr, char *pattern)
 {
     int samefile = (fileptr == filenm);
     int wasmagic = magic;
-    
+
     magic = 0;
     if ( samefile )
 	findbounds(pattern);

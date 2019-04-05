@@ -41,7 +41,7 @@ OPEN_OLD(char *file)
     return (fd < 0) ? NOWAY : (FILEDESC)fd;
 }
 
-    
+
 FILEDESC
 OPEN_NEW(char *file)
 {
@@ -70,7 +70,7 @@ READ_TEXT(FILEDESC f, void *buffer, int size)
 {
     return gemdos(0x3f,(int)f,(long)(size),buffer);
 }
-    
+
 
 int
 WRITE_TEXT(FILEDESC f, void *buffer,int size)
@@ -108,7 +108,7 @@ os_initialize()
 
     Erasechar = '\b';	/* ^H */
     Eraseline = 21;	/* ^U */
-    
+
     return 1;
 }
 
@@ -186,7 +186,7 @@ static char sound[] = {
 typedef char srdef[4];
 
 static srdef *SOUND = (srdef *)SADDR;
-    
+
 /* Make the Atari ST bell sound by stuffing a chord into the sound chip
  */
 static void
@@ -224,7 +224,7 @@ unsigned int c;
 
     if (c == 127 || c < 32 )
 	return CC_CTRL;
-    
+
     return CC_PRINT;
 }
 

@@ -67,7 +67,7 @@ int length;
 register char tst,ch,*src;
 {
     register int inc,l;
-    
+
     if (length < 0)
 	inc = -1;
     else

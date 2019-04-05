@@ -129,7 +129,7 @@ char **argv;
 
     argc -= optind;
     argv += optind;
-    
+
     if (argc > 0 && **argv == '+') {
 	char *p = *argv;
 	startcmd = p[1] ? &p[1] : "$";
@@ -195,7 +195,7 @@ exec_type emode;
 	    exit_now = exec(instring, &mode);
 	if ( exit_now )
 	    return NO;
-	
+
 	indirect = FALSE;
 	if (mode == E_VISUAL && zotscreen && !exit_now) {
 	    prints(" [more]");

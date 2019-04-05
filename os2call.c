@@ -163,7 +163,7 @@ os_initialize()
     TERMNAME = "OS/2 ANSI";
     canUPSCROLL = 0;
     CA = canOL = 1;
-    
+
     /* disable ! command in visual mode
      */
     movemap['!'] = BAD_COMMAND;
@@ -188,7 +188,7 @@ os_screensize(int *cols, int *lines)
     if ( term == 0 ) {
 	memset(&tty, 0, sizeof tty);
 	gettextinfo(&tty);
-    
+
 	if ( tty.screenwidth > 0 && tty.screenheight > 0 ) {
 	    *cols = tty.screenwidth;
 	    *lines = tty.screenheight;
@@ -230,7 +230,7 @@ os_screensize(int *cols, int *lines)
 	}
     }
 
-    
+
     li = getenv("LINES");
     co = getenv("COLS");
 

@@ -95,12 +95,12 @@ int
 os_mktemp(char *dest, int size, char *template)
 {
     static char Xes[] = ".XXXXXX";
-    
+
     unless ( size > strlen(dest) + sizeof(Xes) ) {
 	errno = E2BIG;
 	return 0;
     }
-	
+
 #if USING_STDIO
     sprintf(dest, "%s%s", template, Xes);
 
@@ -161,7 +161,7 @@ os_initialize()
     CURon = "\033e";
     SO    = "\033p";
     SE    = "\033q";
-    
+
 
     CA = 1;
     canUPSCROLL=0;

@@ -26,7 +26,7 @@ Over its life it's been built on
 
 And it's currently (version 4) being built on Unixes (osx,*bsd,Linux),
 Windows 10, and OS/2 v4 (both windows 10 & OS/2 are using their
-respective console ANSI emulation, both of which have issues.))
+respective console ANSI emulation, both of which have issues.)
 
 
 The configuration options are

@@ -181,7 +181,7 @@ int start, size;
     }
     return(ok);
 }
-	
+
 /* delete (I)nserted text */
 
 bool
@@ -201,7 +201,7 @@ struct undostack *save_undo;
 int *curp;
 {
     int lump;
-    
+
     return popw(&undo, curp) && popw(&undo, &lump)
 			     && move_to_undo(save_undo, *curp, lump)
 			     && popmem(&undo, *curp, lump);
@@ -213,7 +213,7 @@ struct undostack *save_undo;
 int *curp;
 {
     int lump;
-    
+
     if (popw(&undo,curp) && popw(&undo,&lump) && (bufmax+lump < EDITSIZE)) {
 	insert_to_undo(save_undo, *curp, lump);
 	moveright(&core[*curp], &core[*curp+lump], bufmax-*curp);
@@ -235,7 +235,7 @@ int *topp;
     static struct undostack save_undo;
     bool closeio, ok;
     int cch;
-    
+
     if (undo.blockp > 0 || undo.ptr > 0) {
 	closeio = (undo.blockp > 0);
 	if (closeio) {			/* save diskfile */

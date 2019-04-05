@@ -293,7 +293,7 @@ back_up(c)
 char c;
 {
     int original_xp = ixp, count;
-    
+
     switch (os_cclass(c)) {
 	case CC_TAB:
 	    ixp = tabstack[--tabptr];
@@ -308,11 +308,11 @@ char c;
 	    ixp -= 3;
 	    break;
     }
-    
+
     count = original_xp - ixp;
-    
+
     dgotoxy(ixp, -1);
-    
+
     if ( count > 0 ) {
 	do {
 	    dwrite("        ", count%8);

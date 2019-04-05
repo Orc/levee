@@ -42,7 +42,7 @@ cmdtype cmd;
 
     *newpos = ERR;
     switch (cmd) {			/* move around */
-    
+
     case GO_LEFT:
 	pos = Max(lstart, curp-Max(count,1));
 	break;
@@ -179,7 +179,7 @@ cmdtype cmd;
 
 	unless ( (pos = findparse(curp, &ip, 0)) > ERR )
 	    prompt(pos == ERR_PATTERN, expr_errstring(pos) );
-	
+
 	lsearch = tsearch;	/* fixup for N, n */
 	break;
     }
@@ -197,7 +197,7 @@ movearound(cmd)
 cmdtype cmd;
 {
     int cp;
-    
+
     switch (findCP(curr, &cp, cmd)) {
 	case LEGALMOVE:
 	    if (cp < bufmax) {
@@ -244,13 +244,13 @@ cmdtype cmd;
     }
     dgotoxy(xp, yp);
 }
-    
+
 int
 findcol(ip, col)
 int ip, col;
 {
     int tcol, endd;
-    
+
     ip = bseekeol(ip);			/* start search here */
     endd = fseekeol(ip);		/* end search here */
 
@@ -283,7 +283,7 @@ int p;
 {
     char srcchar, dstchar;
     int lev, step;
-    
+
     while((lev = scan(6,'=',core[p],srcpatt)) >= 6 && core[p] != EOL)
 	p++;
     if (lev < 6) {
@@ -348,7 +348,7 @@ bool forwd, toword;
 {
     int step;
     char *ccl;
-    
+
     step = setstep[forwd];	/* set direction to move.. */
     if (!toword)
 	cp += step;		/* advance one character */

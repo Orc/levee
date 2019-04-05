@@ -33,7 +33,7 @@ int low, high;
 {
     FILEDESC f;
     register int sz;
-    
+
     yank.size = high - low;
     moveleft(&core[low], yank.stuff, Min(yank.size, SBUFSIZE));
     if (yank.size > SBUFSIZE) {
@@ -67,7 +67,7 @@ int start, *newend;
 {
     int siz, st;
     FILEDESC f;
-    
+
     if (yank.size+bufmax < EDITSIZE && yank.size > 0) {
 	*newend = start + yank.size;
 	if (start < bufmax)
@@ -147,7 +147,7 @@ bool visual, *query;
   <<<<*/
     char dest[DSIZE];
     register int len, dlen;
-    
+
     retval = -1;
     /*dlen = strlen(dst);*/
 restart:

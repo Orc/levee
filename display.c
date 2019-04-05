@@ -47,7 +47,7 @@ dgotoxy(x,y)
 	curpos.x = x;
     if (x >= COLS)
 	x = COLS-1;
-    
+
     unless ( os_gotoxy(x,y) ) {
 #if 0
 	char *gt = tgoto(CM, x, y);
@@ -188,7 +188,7 @@ int *x;
 int *y;
 {
     int li, co;
-    
+
     unless ( os_screensize(x,y) ) {
 	li = tgetnum("li");
 	co = tgetnum("co");
@@ -215,7 +215,7 @@ dinitialize()
     static char iob[4096];
 #endif
     char *term, *bufp;
-    
+
 #if USING_STDIO
     fflush(stdout);
     setvbuf(stdout, iob, _IOFBF, sizeof iob);
@@ -227,10 +227,10 @@ dinitialize()
     /* default initialize assumes termcap, so
      * read in the termcap entry for this terminal.
      */
-    
+
     unless ( term=getenv("TERM") )
 	term = "dumb";
-    
+
     tgetent(tcbuf, term);
 
     TERMNAME = term;
@@ -256,7 +256,7 @@ dinitialize()
 #endif
     OL = tgetstr("al", &bufp);
     UpS = tgetstr("sr", &bufp);
-	
+
     CURon = tgetstr("ve", &bufp);
     CURoff = tgetstr("vi", &bufp);
 
@@ -325,7 +325,7 @@ int num;
 {
     char nb[10];
     register int size;
-    
+
     numtoa(nb,num);
     size = Min(strlen(nb),COLS-curpos.x);
     if (size > 0) {
@@ -431,7 +431,7 @@ int y,x,start;
     register int size;
     char buf[MAXCOLS+1];
     register int bi = 0;
-    
+
     endd = fseekeol(start);
     if (start==0 || core[start-1] == EOL)
 	dgotoxy(0, y);
@@ -463,10 +463,10 @@ int y,x,start,endd;
 bool rest;
 {
     int sp;
-    
+
 
     d_cursor(0);
-	
+
     sp = start;
     while (sp <= endd) {
 	writeline(y, x, sp);
@@ -484,7 +484,7 @@ bool rest;
 		    dnewline();
 	    }
 	}
-    
+
     d_cursor(1);
 }
 
@@ -499,7 +499,7 @@ bool flag;
 	clrprompt();
     refresh(0, 0, ptop, pend, TRUE);
 }
-    
+
 void 
 scrollback(curr)
 int curr;
@@ -533,7 +533,7 @@ ok_to_scroll(top,bottom)
 int top,bottom;
 {
     int nl, i;
-    
+
     nl = dofscroll;
     i = top;
     do

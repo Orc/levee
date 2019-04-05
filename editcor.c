@@ -21,7 +21,7 @@
 #include "extern.h"
 #include <stdlib.h>
 #include <ctype.h>
-    
+
 /* do some undoable modification */
 
 /* These variables make docommand nonrecursive */
@@ -109,7 +109,7 @@ int count;
 {
     bool ok;
     int lp, first;
-    
+
     if (lend < bufmax) {	/* are we in the buffer? */
 	disp = lend;				/* start redraw here */
 	newc = lend;
@@ -140,7 +140,7 @@ char c;
 bool dorepl;
 {
     int i;
-    
+
     if (endp >= curr) {
 	ok = move_to_undo(&undo,curr,endp-curr+1);
 	if (ok) {
@@ -163,7 +163,7 @@ void
 bigreplace()
 {
     int len, tsiz;
-    
+
     tsiz = lend-curr;
     if (move_to_undo(&undo, curr, tsiz))
 	if (EDITSIZE - bufmax > tsiz) {	/* enough room for temp copy? */
@@ -206,12 +206,12 @@ execute(start, end)
 	errmsg(tferror);
 	return FALSE;
     }
-    
+
     if ( (tf = OPEN_NEW(scratch)) == NOWAY ) {
 	prints(tferror);
 	return FALSE;
     }
-    
+
     clrprompt();
     printch('!');
     unless ( lvgetline(instring, sizeof instring) )
@@ -228,10 +228,10 @@ execute(start, end)
     }
     else
 	prints(tferror);
-	
+
     CLOSE_FILE(tf);
     os_unlink(scratch);
-    
+
     return ret;
 }
 
@@ -239,7 +239,6 @@ void
 vitag()
 {
     int start, endd;
-    int wasmagic = magic;
     int newfile;
     Tag loc;
 
@@ -379,7 +378,7 @@ cmdtype cmd;
 		goto killredo;
 	    }
 	}
-	
+
 	endY = setY(endp);
 	newend = curr;
 	disp = curr;
@@ -616,7 +615,7 @@ bool down;
 	count = dofscroll;
 
     d_cursor(0);
-    
+
     if (down) {
 	curr = Min(bufmax-1, nextline(TRUE, curr, count));
 	i = Min(bufmax-1, nextline(TRUE, pend, count));
@@ -636,9 +635,9 @@ bool down;
 	    }
 	}
     }
-    
+
     d_cursor(1);
-    
+
     setpos(skipws(curr));	/* initialize new position - first nonwhite */
     yp = setY(curr);
     dgotoxy(xp, yp);		/* go there */
@@ -649,7 +648,7 @@ editcore()
 {
     cmdtype cmd;
     extern bool s_wrapped;
-    
+
     /* rcb[0] = 0; rcp = rcb; */
 
     maybe_refresh_screen(redraw);

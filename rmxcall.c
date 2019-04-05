@@ -70,7 +70,7 @@ READ_TEXT(FILESPEC f, char *buffer, int size)
 {
     return read((int)f,buffer, size);
 }
-    
+
 int
 WRITE_TEXT(FILESPEC f, char *buffer, int size)
 {
@@ -116,7 +116,7 @@ os_initialize()
 {
     Erasechar = 127;	/* ^? */
     Eraseline = 21;	/* ^U */
-    
+
     return 1;
 }
 
@@ -130,12 +130,12 @@ os_restore()
 os_set_input()
 {
     unsigned dummy;
-	    
+
     dq$special(1,&fileno(stdin),&dummy);
-		
+
     /* turn off control character assignments */
     strput("\033]T:C15=0,C18=0,C20=0,C21=0,C23=0\033\\");
-			
+
     return 1;
 }
 
@@ -192,7 +192,7 @@ char *s;
 	rq$c$send$command(cp,string(s),&status,&error);
 	rq$c$delete$command$connection(cp,&dummy);
     }
-    
+
     return error?(error|0x8000):(status&0x7fff);
 }
 

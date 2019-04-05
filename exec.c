@@ -735,8 +735,6 @@ dotag()
     char *tag;
     Tag result;
     int fileptr;
-    int wasmagic = magic;
-
     unless (oktoedit(autowrite))
 	return;
 
