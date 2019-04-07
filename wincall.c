@@ -365,8 +365,10 @@ os_initialize()
     /* set cursor movement keys to zero for now */
     FkL = CurRT = CurLT = CurUP = CurDN = EOF;
 
-    /* yes we can do all these things */
-    canUPSCROLL = CA = canOL = 1;
+    /* no upscrolling doesn't work */
+    canUPSCROLL = 0;
+    /* but yes we can do all these other things */
+    CA = canOL = 1;
 
     /* grab the tty input handle */
 
@@ -734,8 +736,11 @@ getKey()
 		key = &console_in.events[idx].Event.KeyEvent;
 
 		if ( key->bKeyDown ) {
-		    logit(("getkey -> %c", key->uChar.AsciiChar));
-		    return key->uChar.AsciiChar;
+		    if ( key->uChar.AsciiChar ) {
+			logit(("getkey -> %c", key->uChar.AsciiChar));
+			return key->uChar.AsciiChar;
+		    }
+		    logit(("getKey nul?"));
 		}
 	    }
 	}
