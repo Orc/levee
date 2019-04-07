@@ -121,7 +121,7 @@ char **argv;
 		    dgotoxy(0,LINES-1);
 		    errmsg("Can't find tag <");
 		    prints(optarg);
-		    printf(">");
+		    prints(">");
 		}
 		return;
 	}
