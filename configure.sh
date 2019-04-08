@@ -13,6 +13,7 @@ ac_help="
 --tputs			Use tputs() to slow down tty output
 --logging		Log tty output to levee.log
 --noglob		Don't use system glob() even if it exists
+--ucsd			Read UCSD pascal-formatted files
 --win10			compile for windows 8+
 --dos			compile for ms-dos or old versions of microsoft windows
 --tos			compile for the Atari ST
@@ -34,6 +35,7 @@ Z--stdio)   USING_STDIO=1;;
 Z--tputs)   USING_TPUTS=1;;
 Z--logging) USING_LOGGING=1;;
 Z--noglob)  NO_GLOB=1;;
+Z--ucsd)    UCSD_COMPAT=1;;
 *)          ac_error=1;;
 esac;shift'
 
@@ -62,6 +64,7 @@ else
     AC_SUB LOGGER	''
 fi
 
+test -n "$UCSD_COMPAT" && AC_DEFINE UCSD_COMPAT 1
 test -n "$USING_STDIO" && AC_DEFINE USING_STDIO 1
 test -n "$USING_TPUTS" && AC_DEFINE USING_TPUTS 1
 

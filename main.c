@@ -93,7 +93,7 @@ char **argv;
 
     fillchar(&args, sizeof args, 0);
 
-#if SOFT_EOL
+#if UCSD_COMPAT
 #  define OPTIONS "eprt:"
 #else
 #  define OPTIONS "ert:"
@@ -101,7 +101,7 @@ char **argv;
 
     while ( (opt=getopt(argc, argv, OPTIONS)) != EOF ) {
 	switch (opt) {
-#if SOFT_EOL
+#if UCSD_COMPAT
 	    case 'p': /* UCSD-style EOL */
 		EOL = '\r';
 		break;
