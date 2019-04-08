@@ -428,28 +428,19 @@ writeline(y,x,start)
 int y,x,start;
 {
     int endd,oxp;
-    register int size;
-    char buf[MAXCOLS+1];
-    register int bi = 0;
 
     endd = fseekeol(start);
     if (start==0 || core[start-1] == EOL)
 	dgotoxy(0, y);
     else
 	dgotoxy(x, y);
-    oxp = curpos.x;
 
-    while (start < endd && curpos.x < COLS) {
-    	size = format(&buf[bi],core[start++]);
-    	bi += size;
-    	curpos.x += size;
-    }
-    if (list) {
-    	buf[bi++] = '$';
-    	curpos.x++;
-    }
-    size = Min(bi,COLS-oxp);
-    dwrite(buf, size);
+    while (start < endd && curpos.x < COLS)
+	printch(core[start++]);
+
+    if (list)
+	printch('$');
+
     if (curpos.x < COLS)
 	dclear_to_eol();
 }
