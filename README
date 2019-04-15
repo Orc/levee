@@ -38,6 +38,8 @@ The configuration options are
 *  --stdio; use stdio for buffered i/o whenever practical
 *  --logging; write copious logs to levee.log (in the startup directory)
 *  --tputs; write control strings using the pacing functions in termcap
+*  --noglob; don't use the system glob() function to expand wildcards
+*  --ucsd; enable reading ucsd pascal .text files (via the -p option)
 *  --dos; build for ms-dos
 *  --tos; build for TOS
 *  --rmx; build for iRMX

@@ -97,7 +97,6 @@ char *ip;
     if ( (low = findparse(curr, &ip, 0)) > ERR )
 	low = bseekeol(low);		/* at start of line */
     else if (low != ERR_UNKNOWN) {
-	exprintln();
 	prints(expr_errstring(low));
 	return 0;
     }
@@ -115,7 +114,6 @@ char *ip;
 	logit(("findbound: high (%d, &[%s], %d", low, ip, offset));
 
 	unless ( (high = findparse(curr, &ip, offset)) > ERR ) {
-	    exprintln();
 	    prints(expr_errstring(high));
 	    return 0;
 	}

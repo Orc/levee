@@ -116,7 +116,7 @@ static char Xes[] = ".XXXXXX";
     return mktemp(dest) != 0;
 #else
     strcat(s, template);
-    numtoa(dest+strlen(dest), getpid());
+    strcat(s, ntoa(getpid()));
 
     return 1;
 #endif

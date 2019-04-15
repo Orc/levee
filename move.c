@@ -110,12 +110,12 @@ cmdtype cmd;
 	if (ch == ESC)
 	    return ESCAPED;
 	if (cmd<=UPTO_CHAR) {
-	    pos = fchar(curp,pos);
+	    pos = fchar(curp,EOF);
 	    if (cmd==UPTO_CHAR && pos>=0)
 		pos = Max(curp, pos-1);
 	}
 	else {
-	    pos = bchar(curp,pos);
+	    pos = bchar(curp,EOF);
 	    if (cmd==BACKTO_CHAR && pos>=0)
 		pos = Min(curp, pos+1);
 	}
@@ -397,8 +397,9 @@ bchar(pos,npos)
 int pos,npos;
 {
     do
-	pos += scan(-pos+lstart+1,'=',ch, &core[pos-1]) - 1;
+	pos += scan(-pos+lstart/*+1*/,'=',ch, &core[pos-1]) - 1;
     while (--count>0 && pos>=lstart);
+    logit(("bchar() pos = %d, lstart=%d, count=%d", pos, lstart, count));
     if (pos>=lstart)
 	return(pos);
     return(npos);

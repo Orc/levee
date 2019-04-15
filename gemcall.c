@@ -168,7 +168,7 @@ char *template;
     return mktemp(dest) != 0;
 #else
     strcat(s, template);
-    numtoa(&s[strlen(s)], getpid());
+    strcat(s, ntoa(getpid()));
 
     return 1;
 #endif

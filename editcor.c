@@ -39,6 +39,11 @@ extern int affirm;	/* override file is modified checks (exec.c) */
 void
 maybe_refresh_screen(redraw)
 {
+    logit(("maybe_refresh_screen(%d) curr = %d, ptop = %d, pend = %d", redraw, curr, ptop, pend));
+
+    if ( curr < ptop || curr > pend )
+	redraw = TRUE;
+
     if (redraw) {
 	setpos(skipws(curr));		/* set cursor x position.. */
 	yp = settop(LINES / 2);		/* Y position */
@@ -239,7 +244,7 @@ void
 vitag()
 {
     int start, endd;
-    int newfile;
+    int newfile, rc;
     Tag loc;
 
     if ( bufmax == 0 || (class(core[curr]) != wordset) ) {
@@ -258,6 +263,8 @@ vitag()
     while ( endd < bufmax && (class(core[endd]) == wordset) )
 	++endd;
 
+    logit(("vitag: tag %.*s", endd-start, &core[start]));
+
     if ( find_tag(&core[start], endd-start, &loc) &&
 	(newfile = addarg(loc.filename)) != F_UNSET ) {
 
@@ -265,8 +272,12 @@ vitag()
 	affirm = NO;
 	if ( newfile == filenm || oktoedit(autowrite) ) {
 	    push_tag(filenm, curr);
-	    maybe_refresh_screen(gototag(newfile, loc.pattern) != SAMEFILE);
-	    return;
+	    rc = gototag(newfile, loc.pattern);
+	    if ( rc != ERR ) {
+		maybe_refresh_screen(rc != SAMEFILE);
+		return;
+	    }
+	    pop_tag();
 	}
 	dgotoxy(xp,yp);
     }
@@ -333,7 +344,7 @@ cmdtype cmd;
 	if (redoing != TRUE) {
 	    rcp = rcb;		/* point at start of redo buffer */
 	    if (count > 1) {	/* put in a count? */
-		numtoa(rcb,count);
+		strcpy(rcb, ntoa(count));
 		rcp += strlen(rcb);
 	    }
 	    *rcp++ = cmdch;	/* the command char goes in... */
@@ -569,7 +580,7 @@ void
 macrocommand()
 {
     if (count > 1)
-	numtoa(gcb,count);
+	strcpy(gcb, ntoa(count));
     else
 	gcb[0] = 0;
     switch (ch) { /* which macro? */

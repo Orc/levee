@@ -257,7 +257,7 @@ os_mktemp(char *dest, int size, const char *template)
 #else
     strcpy(dest, tmp);
     strcat(dest, template);
-    numtoa(&dest[strlen(dest)], getpid());
+    strcat(dest, ntoa(getpid()));
 
     return 1;
 #endif

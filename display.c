@@ -32,7 +32,7 @@
 
 /* do a gotoXY -- allowing -1 for same row/column
  */
-void 
+void
 dgotoxy(x,y)
 {
     if (y == -1)
@@ -76,7 +76,7 @@ char c;
 #endif
 
 
-void 
+void
 dwrite(s,len)
 char *s;
 {
@@ -98,7 +98,7 @@ char *s;
 
 /* write a string to our display
  */
-void 
+void
 dputs(s)
 char *s;
 {
@@ -109,7 +109,7 @@ char *s;
 
 /* write a character to our display
  */
-void 
+void
 dputc(char c)
 {
     char s[1];
@@ -120,7 +120,7 @@ dputc(char c)
 
 /* add a blank line to the screen at our current row
  */
-void 
+void
 dopenline()
 {
     unless ( os_openline() )
@@ -130,7 +130,7 @@ dopenline()
 
 /* spit out a newline
  */
-void 
+void
 dnewline()
 {
     unless ( os_newline() )
@@ -140,7 +140,7 @@ dnewline()
 
 /* clear the screen
  */
-void 
+void
 dclearscreen()
 {
     unless ( os_clearscreen() )
@@ -150,7 +150,7 @@ dclearscreen()
 
 /* clear to end of line
  */
-void 
+void
 dclear_to_eol()
 {
     unless ( os_clear_to_eol() )
@@ -160,7 +160,7 @@ dclear_to_eol()
 
 /* turn the cursor off or on
  */
-void 
+void
 d_cursor(visible)
 {
     unless ( os_cursor(visible) )
@@ -170,7 +170,7 @@ d_cursor(visible)
 
 /* highlight text
  */
-void 
+void
 d_highlight(yes_or_no)
 {
     unless ( os_highlight(yes_or_no) ) {
@@ -182,7 +182,7 @@ d_highlight(yes_or_no)
 
 /* get the screensize
  */
-void 
+void
 dscreensize(x,y)
 int *x;
 int *y;
@@ -295,50 +295,39 @@ Ping()
 
 /* convert a number to a string, w/o using sprintf
  */
-void 
-numtoa(str,num)
-char *str;
-int num;
+char *
+ntoa (int n)
 {
-    int i = 10;			/* I sure hope that str is 10 bytes long... */
-    bool neg = (num < 0);
+    static char bfr[(7+(8*sizeof(int)))/3] = { 0 };
+    int i;
+    int neg = n < 0;
+    char *q = bfr + sizeof bfr;
 
-    if (neg)
-	num = -num;
+    if ( neg )
+	n = -n;
 
-    str[--i] = 0;
-    do{
-	str[--i] = (num%10)+'0';
-	num /= 10;
-    }while (num > 0);
-    if (neg)
-	str[--i] = '-';
-    moveleft(&str[i], str, 10-i);
+    for ( *--q = '0' + (n%10);  ((n /= 10) > 0); )
+	*--q = '0' + (n%10);
+
+    if ( neg )
+	*--q = '-';
+    return q;
 }
 
 
 /* print out a number, w/o using printf
  */
-void 
+void
 printi(num)
 int num;
 {
-    char nb[10];
-    register int size;
-
-    numtoa(nb,num);
-    size = Min(strlen(nb),COLS-curpos.x);
-    if (size > 0) {
-	nb[size] = 0;
-	dwrite(nb, size);
-	curpos.x += size;
-    }
+    prints(ntoa(num));
 }
 
 
 /* do a newline, updating x & y
  */
-void 
+void
 println()
 {
     curpos.x = 0;
@@ -352,7 +341,7 @@ println()
  *    spaces for <tab>
  *    normal for everything else
  */
-int 
+int
 format(out,c)
 register char *out;
 register unsigned c;
@@ -375,16 +364,39 @@ register unsigned c;
 	    return 1;
     default:
 	    out[0] = '\\';
-           out[1] = hexdig[(c>>4)&017];
-           out[2] = hexdig[c&017];
-           return 3;
+	    out[1] = hexdig[(c>>4)&017];
+	    out[2] = hexdig[c&017];
+	    return 3;
+    }
+}
+
+
+/* print a formatted block of text
+ */
+void
+printbuf(s, len)
+char *s;
+{
+    int size,oxp = curpos.x;
+    char buf[MAXCOLS+1];
+    register int bi = 0;
+
+    while (len > 0 && curpos.x < COLS) {
+	size = format(&buf[bi],*s++);
+	bi += size;
+	curpos.x += size;
+	--len;
+    }
+    size = Min(bi,COLS-oxp);
+    if (size > 0) {
+	dwrite(buf, size);
     }
 }
 
 
 /* print a formatted character
  */
-void 
+void
 printch(c)
 char c;
 {
@@ -401,29 +413,17 @@ char c;
 
 /* print a formatted string
  */
-void 
+void
 prints(s)
 char *s;
 {
-    int size,oxp = curpos.x;
-    char buf[MAXCOLS+1];
-    register int bi = 0;
-
-    while (*s && curpos.x < COLS) {
-    	size = format(&buf[bi],*s++);
-    	bi += size;
-    	curpos.x += size;
-    }
-    size = Min(bi,COLS-oxp);
-    if (size > 0) {
-	dwrite(buf, size);
-    }
+    printbuf(s, strlen(s));
 }
 
 
 /* print a line of editor content
  */
-void 
+void
 writeline(y,x,start)
 int y,x,start;
 {
@@ -435,10 +435,9 @@ int y,x,start;
     else
 	dgotoxy(x, y);
 
-    while (start < endd && curpos.x < COLS)
-	printch(core[start++]);
+    printbuf(&core[start], endd-start);
 
-    if (list)
+    if ( list )
 	printch('$');
 
     if (curpos.x < COLS)
@@ -448,7 +447,7 @@ int y,x,start;
 
 /* redraw && refresh the screen
  */
-void 
+void
 refresh(y,x,start,endd,rest)
 int y,x,start,endd;
 bool rest;
@@ -482,7 +481,7 @@ bool rest;
 
 /* redraw everything */
 
-void 
+void
 redisplay(flag)
 bool flag;
 {
@@ -491,7 +490,7 @@ bool flag;
     refresh(0, 0, ptop, pend, TRUE);
 }
 
-void 
+void
 scrollback(curr)
 int curr;
 {
@@ -505,7 +504,7 @@ int curr;
     setend();
 }
 
-void 
+void
 scrollforward(curr)
 int curr;
 {
@@ -519,7 +518,7 @@ int curr;
 
 /* find if the number of lines between top && bottom is less than dofscroll */
 
-bool 
+bool
 ok_to_scroll(top,bottom)
 int top,bottom;
 {
@@ -533,14 +532,14 @@ int top,bottom;
     return(nl>0);
 }
 
-void 
+void
 clrprompt()
 {
     dgotoxy(0, LINES-1);
     dclear_to_eol();
 }
 
-void 
+void
 prompt(toot,s)
 bool toot;
 char *s;

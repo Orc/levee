@@ -279,7 +279,7 @@ os_mktemp(char *dest, int size, const char *template)
 	strcat(dest, "\\");
     }
     strcat(dest, template);
-    numtoa(&dest[strlen(dest)], getpid());
+    strcat(dest, ntoa(getpid()));
 #endif
     return 1;
 }

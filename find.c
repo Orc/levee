@@ -402,7 +402,7 @@ char **bufp;
 	    }
 	}
 	unless ( pos > ERR ) {
-	    logit(("search: error %d", pos));
+	    logit(("search: error %s", expr_errstring(pos)));
 	    return pos;
 	}
 	start = pos;

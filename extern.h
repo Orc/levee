@@ -266,8 +266,7 @@ extern int fseekeol(int origin),
 	   do_file(char *fname, exec_type *mode),
 	   setend(void);
 
-extern void numtoa(char *str, int num),
-	    clrprompt(void),
+extern void clrprompt(void),
 	    error(void),
 	    insert_to_undo(struct undostack *u, int start, int size),
 	    resetX(void),
@@ -297,7 +296,8 @@ extern void numtoa(char *str, int num),
 	    errmsg(char *msg),
 	    setarg(char *s);
 extern int exec(char *cmd, exec_type *mode);
-extern char *class(int c);
+extern char *ntoa(int num),
+	    *class(int c);
 
 #ifndef moveleft
 extern void moveleft(register char *src, register char *dest, register int length);

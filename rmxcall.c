@@ -105,7 +105,7 @@ char *template;
 #else
     strcpy(s, Xes);
     strcat(s, template);
-    numtoa(&s[strlen(s)], rq$get$task$tokens(0,&dummy));
+    strcat(s, ntoa(rq$get$task$tokens(0,&dummy)));
 #endif
 
     return 1;

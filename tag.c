@@ -70,9 +70,15 @@ gototag(int fileptr, char *pattern)
     int samefile = (fileptr == filenm);
     int wasmagic = magic;
 
+    extern int low;	/* from editcor.c, which is where findbounds lives */
+
     magic = 0;
-    if ( samefile )
+    if ( samefile ) {
 	findbounds(pattern);
+	if ( low < 0 )
+	    return EOF;
+	curr = low;
+    }
     else if ( fileptr != F_UNSET ) {
 	startcmd = pattern;
 	doinput(fileptr);
