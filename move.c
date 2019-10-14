@@ -131,7 +131,7 @@ cmdtype cmd;
 
     case PAGE_MIDDLE:
 	curp = ptop;
-	count = 12;
+	count = screenlines/2;
 	while (count-- > 0 && curp < bufmax)
 	   curp = 1+fseekeol(curp);
 	pos = skipws(curp);

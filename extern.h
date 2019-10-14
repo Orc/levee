@@ -172,7 +172,8 @@ int curr,		/* Global cursor pos */
     count,		/* Latest count */
     xp, yp,		/* Cursor window position */
     bufmax,		/* End of file here */
-    ptop, pend;		/* Top & bottom of CRT window */
+    ptop, pend,		/* Top & bottom of CRT window */
+    screenlines;	/* # of lines of content in the window */
 extern
 bool modified,		/* File has been modified */
      readonly,		/* is this file readonly? */

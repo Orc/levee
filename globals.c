@@ -213,7 +213,8 @@ int  bufmax = 0,		/* End of file here */
      ptop   = 0, pend = 0,	/* Top & bottom of CRT window */
      curr   = 0,		/* Global cursor pos */
      xp     = 0, yp   = 0,	/* Cursor window position */
-     count  = 0;		/* Latest count */
+     count  = 0,		/* Latest count */
+     screenlines = 0;		/* # of lines of content on the screen */
 
 bool modified= NO,		/* File has been modified */
      readonly= NO,		/* is this file readonly? */

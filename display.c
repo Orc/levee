@@ -453,6 +453,7 @@ int y,x,start,endd;
 bool rest;
 {
     int sp;
+    extern int screenlines;
 
 
     d_cursor(0);
@@ -464,6 +465,7 @@ bool rest;
 	y++;
 	x = 0;
     }
+    screenlines = y;
     if (rest && sp >= bufmax)
 	if ( y<LINES-1) {
 	    dgotoxy(0, y);
