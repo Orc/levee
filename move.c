@@ -131,7 +131,10 @@ cmdtype cmd;
 
     case PAGE_MIDDLE:
 	curp = ptop;
-	count = 12;
+	for (curp = ptop; curp < pend; curp=1+fseekeol(curp))
+		++count;
+	count /= 2;
+	curp = ptop;
 	while (count-- > 0 && curp < bufmax)
 	   curp = 1+fseekeol(curp);
 	pos = skipws(curp);
