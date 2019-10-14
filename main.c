@@ -107,6 +107,7 @@ char **argv;
 		break;
 #endif
 	    case 'r':	/* readonly */
+	    case 'R':
 		readonly = is_viewer = YES;
 		break;
 	    case 'e':	/* start in exec mode */
