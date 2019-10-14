@@ -1065,7 +1065,7 @@ char *default_cmd;
     for (k=0; excmds[k].name; k++)
 	if (excmds[k].active && strncmp(cmd, excmds[k].name, j) == 0)
 	    return k;
-    return ERR;
+    return EX_UNKNOWN;
 }
 
 
