@@ -271,6 +271,9 @@ int
 os_glob(const char* pattern, int flags, glob_t *result)
 {
 #if USING_GLOB
+    if ( result->gl_pathc == 0 )
+	flags &= ~GLOB_APPEND;
+
     return glob(pattern, flags|GLOB_NOSORT, 0, result);
 #else
     /* whoops.  No wildcards here.
