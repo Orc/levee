@@ -94,9 +94,9 @@ char **argv;
     fillchar(&args, sizeof args, 0);
 
 #if UCSD_COMPAT
-#  define OPTIONS "eprt:"
+#  define OPTIONS "eprRt:"
 #else
-#  define OPTIONS "ert:"
+#  define OPTIONS "erRt:"
 #endif
 
     while ( (opt=getopt(argc, argv, OPTIONS)) != EOF ) {
@@ -107,6 +107,7 @@ char **argv;
 		break;
 #endif
 	    case 'r':	/* readonly */
+	    case 'R':
 		readonly = is_viewer = YES;
 		break;
 	    case 'e':	/* start in exec mode */
