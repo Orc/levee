@@ -811,12 +811,26 @@ int count;
 void
 readfile()
 {
-    char *name;
-
-    if ( (name=getarg()) )
-	inputf(name,NO);
-    else
-	errmsg("no file to read");
+	while (isspace(*execstr))
+		++execstr;
+	switch (*execstr) {
+		case '\0': errmsg("no file to read"); break;
+		case '!' : {
+			++execstr;
+			int size=0;
+			FILE *f;
+			os_pid_t child;
+			if ( (f=os_cmdopen(execstr, NULL_FILE, &child)) ) {
+				insertfile(f, 1, curr, &size);
+				os_cmdclose(f, child);
+			}
+		}; break;
+		default : {
+			char *name;
+			name=getarg();
+			inputf(name,NO);
+		};
+	}
 }
 
 

@@ -63,6 +63,7 @@ extern FILE *expandfopen(char *f, char *mode);
 typedef void *FILEDESC;
 #define NOWAY ((FILEDESC)-1)
 
+extern char NULL_FILE[];
 extern FILEDESC OPEN_OLD(char *);
 extern FILEDESC OPEN_NEW(char *);
 extern int CLOSE_FILE(FILEDESC);

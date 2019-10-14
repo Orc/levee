@@ -48,6 +48,9 @@
 
 
 /* **** FILE IO ABSTRACTIONS **** */
+
+char NULL_FILE[] = "/dev/null";
+
 FILEDESC
 OPEN_OLD(char *name)
 {

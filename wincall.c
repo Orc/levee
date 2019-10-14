@@ -20,6 +20,9 @@
 #include <sys/wait.h>
 
 /* **** FILE IO ABSTRACTIONS **** */
+
+char*  NULL_FILE[] = "NUL";
+
 FILEDESC
 OPEN_OLD(char *name)
 {
