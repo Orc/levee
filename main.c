@@ -181,7 +181,7 @@ exec_type emode;
 {
     bool more;			/* used [more] at end of line */
     exec_type mode;
-    int exit_now;		/* exec says time to go */
+    int exit_now = 0;		/* exec says time to go */
 
     zotscreen = redraw = FALSE;
 
