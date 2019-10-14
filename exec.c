@@ -877,12 +877,17 @@ bool prev;
 	else {
 	    /* toss the old args; s-l-o-w-l-y copy the new ones in */
 	    os_globfree(&args);
-	    for ( i=0; i < files.gl_pathc; i++ ) {
-		rc = os_glob(files.gl_pathv[i], GLOB_APPEND|GLOB_NOMAGIC, &args);
-		if ( rc ) {
+		rc = os_glob(files.gl_pathv[0], GLOB_NOMAGIC, &args);
+		if ( rc ) 
 		    errmsg(noalloc);
-		    break;
-		}
+		else {
+			for ( i=1; i < files.gl_pathc; i++ ) {
+			rc = os_glob(files.gl_pathv[i], GLOB_APPEND|GLOB_NOMAGIC, &args);
+				if ( rc ) {
+					errmsg(noalloc);
+					break;
+				}
+			}
 	    }
 	    current = 0;
 	}
