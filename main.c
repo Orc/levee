@@ -94,9 +94,9 @@ char **argv;
     fillchar(&args, sizeof args, 0);
 
 #if UCSD_COMPAT
-#  define OPTIONS "eprt:"
+#  define OPTIONS "epRt:"
 #else
-#  define OPTIONS "ert:"
+#  define OPTIONS "eRt:"
 #endif
 
     while ( (opt=getopt(argc, argv, OPTIONS)) != EOF ) {
@@ -106,7 +106,7 @@ char **argv;
 		EOL = '\r';
 		break;
 #endif
-	    case 'r':	/* readonly */
+	    case 'R':	/* readonly */
 		readonly = is_viewer = YES;
 		break;
 	    case 'e':	/* start in exec mode */
@@ -123,6 +123,10 @@ char **argv;
 		    prints(optarg);
 		    prints(">");
 		}
+		return;
+	    default:
+		dgotoxy(0, LINES-1);
+		errmsg("Unknown option -- ");printch(optopt);
 		return;
 	}
     }
@@ -181,7 +185,7 @@ exec_type emode;
 {
     bool more;			/* used [more] at end of line */
     exec_type mode;
-    int exit_now;		/* exec says time to go */
+    int exit_now = 0;		/* exec says time to go */
 
     zotscreen = redraw = FALSE;
 
