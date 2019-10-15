@@ -813,7 +813,21 @@ readfile()
 {
     char *name;
 
-    if ( (name=getarg()) )
+    if ( *execstr == '!' ) {
+	int size=0;
+	FILE *f;
+	os_pid_t child;
+
+	if ( *++execstr ) {
+	    if ( (f=os_cmdopen(execstr, NULL, &child)) ) {
+		insertfile(f, 1, curr, &size);
+		os_cmdclose(f, child);
+	    }
+	}
+	else
+	    errmsg("usage :r[ead] !cmd");
+    }
+    else if ( (name=getarg()) )
 	inputf(name,NO);
     else
 	errmsg("no file to read");
