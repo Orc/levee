@@ -273,7 +273,6 @@ os_glob(const char* pattern, int flags, glob_t *result)
 #if USING_GLOB
     if ( result->gl_pathc == 0 )
 	flags &= ~GLOB_APPEND;
-
     return glob(pattern, flags|GLOB_NOSORT, 0, result);
 #else
     /* whoops.  No wildcards here.
@@ -352,8 +351,8 @@ os_globfree(glob_t *collection)
 	    free(collection->gl_pathv[start+x]);
     if ( collection->gl_pathc )
 	free(collection->gl_pathv);
-    memset(collection, 0, sizeof(collection[0]));
 #endif
+    memset(collection, 0, sizeof(collection[0]));
 }
 
 
@@ -478,7 +477,7 @@ os_cmdopen(char *cmdline, char *workfile, os_pid_t *child)
 	return NULL;
     else if ( job == 0 ) {
 	/* child */
-	int ifd = open(workfile, O_RDONLY);
+	int ifd = open(workfile ? workfile : "/dev/null", O_RDONLY);
 
 	close(io[0]);
 	if ( (ifd < 0) || (dup2(ifd, 0) < 0) ) {
