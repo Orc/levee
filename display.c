@@ -298,7 +298,7 @@ Ping()
 char *
 ntoa (int n)
 {
-    static char bfr[(7+(8*sizeof(int)))/3] = { 0 };
+    static char bfr[1+((7+(8*sizeof(int)))/3)];
     int i;
     int neg = n < 0;
     char *q = bfr + sizeof bfr;
@@ -306,6 +306,7 @@ ntoa (int n)
     if ( neg )
 	n = -n;
 
+    *--q = 0;
     for ( *--q = '0' + (n%10);  ((n /= 10) > 0); )
 	*--q = '0' + (n%10);
 
