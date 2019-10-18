@@ -75,8 +75,10 @@ gototag(int fileptr, char *pattern)
     magic = 0;
     if ( samefile ) {
 	findbounds(pattern);
-	if ( low < 0 )
+	if ( low < 0 ) {
+	    magic = wasmagic;
 	    return EOF;
+	}
 	curr = low;
     }
     else if ( fileptr != F_UNSET ) {
