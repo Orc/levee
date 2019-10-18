@@ -48,4 +48,5 @@ logger(char *fmt, ...)
 	free(line);
 #endif
     }
+    va_end(args);
 }
