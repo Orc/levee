@@ -530,7 +530,7 @@ glob_t *dta;
 
     }
 
-    unless (find_ctx = _findfirst(path, &entry)) {
+    if ( (find_ctx = _findfirst(path, &entry)) == -1 ) {
 	/* no matches for this pattern; if permit_nomatch,
 	 * add it verbatim to dta, otherwise fail
 	 */
