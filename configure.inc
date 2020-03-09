@@ -562,13 +562,18 @@ AC_INIT () {
 
 EOF
 
+    AC_PREFIX=${AC_PREFIX:-/usr/local}
+    AC_EXECDIR=${AC_EXECDIR:-$AC_PREFIX/bin}
+    AC_SBINDIR=${AC_SBINDIR:-$AC_PREFIX/sbin}
+    AC_LIBDIR=${AC_LIBDIR:-$AC_PREFIX/lib}
+    
     unset __share
     if [ -d $AC_PREFIX/share/man ]; then
+	ls "$AC_PREFIX/share/man"
 	for t in 1 2 3 4 5 6 7 8 9; do
 	    if [ -d $AC_PREFIX/share/man/man$t ]; then
 		__share=/share
-	    elif [ -d $AC_PREFIX/share/man/cat$t ]; then
-		__share=/share
+		break
 	    fi
 	done
     else
@@ -582,10 +587,6 @@ EOF
     fi
 
 
-    AC_PREFIX=${AC_PREFIX:-/usr/local}
-    AC_EXECDIR=${AC_EXECDIR:-$AC_PREFIX/bin}
-    AC_SBINDIR=${AC_SBINDIR:-$AC_PREFIX/sbin}
-    AC_LIBDIR=${AC_LIBDIR:-$AC_PREFIX/lib}
     AC_MANDIR=${AC_MANDIR:-$AC_PREFIX$__share/man}
     AC_LIBEXEC=${AC_LIBEXEC:-$AC_PREFIX/$__libexec}
     AC_CONFDIR=${AC_CONFDIR:-/etc}
