@@ -484,7 +484,7 @@ os_cmdopen(char *cmdline, char *workfile, os_pid_t *child)
 	dup2(io[1], 1);
 	dup2(1,2);
 
-	execl("/bin/sh", "sh", "-c", cmdline, 0L);
+	execl("/bin/sh", "sh", "-c", cmdline, NULL);
 	close(io[1]);
 	exit(1);
     }

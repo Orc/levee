@@ -231,7 +231,7 @@ main(int argc, char **argv)
 	switch (mode) {
 	default:do {
 		    mode = editcore();
-	case E_EDIT:1;
+	case E_EDIT: /* THIS SPACE FOR RENT */;
 		} while (execmode(mode));
 	}
     }
