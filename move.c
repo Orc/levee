@@ -31,9 +31,7 @@ int fchar(int,int), bchar(int,int);
 /* driver for movement commands */
 
 findstates
-findCP(curp,newpos,cmd)
-int curp, *newpos;
-cmdtype cmd;
+findCP(int curp,int  *newpos,cmdtype cmd)
 {
     static char chars[2] = {'/','?'};
     char tsearch;
@@ -193,8 +191,7 @@ cmdtype cmd;
 /* this procedure handles all movement in visual mode */
 
 void
-movearound(cmd)
-cmdtype cmd;
+movearound(cmdtype cmd)
 {
     int cp;
 
@@ -246,8 +243,7 @@ cmdtype cmd;
 }
 
 int
-findcol(ip, col)
-int ip, col;
+findcol(int ip,int col)
 {
     int tcol, endd;
 
@@ -278,8 +274,7 @@ char dstpatt[]="[](){}", srcpatt[]="][)(}{";
 /* find matching [], (), {} */
 
 int
-match(p)
-int p;
+match(int p)
 {
     char srcchar, dstchar;
     int lev, step;
@@ -304,9 +299,8 @@ int p;
 }
 
 char *
-class(c)
+class(int c)
 /* find the character class of a char -- for word movement */
-char c;
 {
     if (strchr(wordset,c))
 	return wordset;
@@ -317,11 +311,8 @@ char c;
 }
 
 int
-skip(chars,cp,step)
+skip(char *chars,register int cp,int step)
 /* skip past characters in a character class */
-char *chars;
-register int cp;
-int step;
 {
     while (cp >= 0 && cp < bufmax && strchr(chars,core[cp]))
 	cp += step;
@@ -329,10 +320,8 @@ int step;
 }
 
 int
-tow(cp,step)
+tow(register int cp,register int step)
 /* skip to the start of the next word */
-register int cp;
-register int step;
 {
     while (cp >= 0 && cp < bufmax
 		 && !(strchr(wordset,core[cp]) || strchr(spaces,core[cp])))
@@ -341,10 +330,8 @@ register int step;
 }
 
 int
-moveword(cp,forwd,toword)
+moveword(int cp,bool forwd,bool toword)
 /* word movement */
-int cp;
-bool forwd, toword;
 {
     int step;
     char *ccl;
@@ -379,8 +366,7 @@ bool forwd, toword;
 /* find a character forward on current line */
 
 int
-fchar(pos,npos)
-int pos,npos;
+fchar(int pos,int npos)
 {
     do
 	pos += scan(lend-pos-1,'=',ch, &core[pos+1]) + 1;
@@ -393,8 +379,7 @@ int pos,npos;
 /* find a character backward on the current line */
 
 int
-bchar(pos,npos)
-int pos,npos;
+bchar(int pos,int npos)
 {
     do
 	pos += scan(-pos+lstart/*+1*/,'=',ch, &core[pos-1]) - 1;
@@ -408,8 +393,7 @@ int pos,npos;
 /* look for the end of a sentence forward */
 
 int
-ahead(i)
-int i;
+ahead(int i)
 {
     char c;
 
@@ -425,8 +409,7 @@ int i;
 /* look for the end of a sentence backwards. */
 
 int
-back(i)
-int i;
+back(int i)
 {
     char c;
 
@@ -444,9 +427,7 @@ int i;
 */
 
 int
-sentence(start,forwd)
-int start;
-bool forwd;
+sentence(int start, bool forwd)
 {
     do {
 	if (forwd)

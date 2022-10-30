@@ -1687,9 +1687,7 @@ cat > ngc$$.c << \EOF
 #include <stdio.h>
 
 int
-main(argc, argv)
-int argc;
-char **argv;
+main(int argc,char **argv)
 {
     char *p;
     

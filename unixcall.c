@@ -91,29 +91,28 @@ WRITE_TEXT(FILEDESC f, void *buf, int size)
 
 /* *** UNIX-SPECIFIC CONSOLE I/O *** */
 int
-os_write(s,len)
-char *s;
+os_write(char *s,int len)
 {
     return 0;
 }
 
 
 int
-os_gotoxy(x,y)
+os_gotoxy(int x, int y)
 {
     return 0;
 }
 
 
 int
-os_clearscreen()
+os_clearscreen(void)
 {
     return 0;
 }
 
 
 int
-os_clear_to_eol()
+os_clear_to_eol(void)
 {
     return 0;
 }
@@ -127,21 +126,21 @@ os_cursor(int visible)
 
 
 int
-os_scrollback()
+os_scrollback(void)
 {
     return 0;
 }
 
 
 int
-os_newline()
+os_newline(void)
 {
     return 0;
 }
 
 
 int
-os_openline()
+os_openline(void)
 {
     return 0;
 }
@@ -155,7 +154,7 @@ os_highlight(int yes_or_no)
 
 
 int
-os_Ping()
+os_Ping(void)
 {
     return 0;
 }
@@ -163,9 +162,7 @@ os_Ping()
 /* get the screensize, if we can
  */
 int
-os_screensize(x,y)
-int *x;
-int *y;
+os_screensize(int *x,int *y)
 {
 #if defined(TIOCGSIZE)
 	struct ttysize tty;
@@ -200,7 +197,7 @@ static struct termios old;
 
 
 int
-os_initialize()
+os_initialize(void)
 {
     tcgetattr(0, &old);	/* get editing keys */
 
@@ -212,7 +209,7 @@ os_initialize()
 
 
 int
-os_restore()
+os_restore(void)
 {
     return 1;
 }
@@ -532,7 +529,7 @@ os_cclass(unsigned int c)
 /* put the terminal into raw mode
  */
 void
-set_input()
+set_input(void)
 {
     struct termios new = old;
 
@@ -547,7 +544,7 @@ set_input()
 /* reset the terminal to what is was before
  */
 void
-reset_input()
+reset_input(void)
 {
 #if USING_STDIO
     fflush(stdout);
@@ -559,7 +556,7 @@ reset_input()
 /* what does our dotfile look like
  */
 char *
-dotfile()
+dotfile(void)
 {
     /* should expand username */
 
@@ -570,7 +567,7 @@ dotfile()
 /* get a single keypress from the console
  */
 int
-getKey()
+getKey(void)
 {
     unsigned char c[1];
     fd_set input;

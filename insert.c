@@ -21,9 +21,7 @@
 #include "extern.h"
 
 int
-insertion(count, openflag, dp, yp, visual)
-int count, openflag, *dp, *yp;
-bool visual;
+insertion(int count,int openflag,int *dp,int *yp, bool visual)
 {
     char cmd, c;
     int rp;		/* number of spaces to diddle */

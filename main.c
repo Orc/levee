@@ -34,9 +34,7 @@ copyright()
 
 
 void
-initialize(argc, argv)
-int argc;
-char **argv;
+initialize(int argc,char **argv)
 /* initialize: set up everything I can in levee */
 {
     int i;
@@ -180,8 +178,7 @@ char **argv;
 }
 
 bool
-execmode(emode)
-exec_type emode;
+execmode(exec_type emode)
 {
     bool more;			/* used [more] at end of line */
     exec_type mode;
@@ -220,9 +217,7 @@ exec_type emode;
 }
 
 int
-main(argc,argv)
-int argc;
-char **argv;
+main(int argc, char **argv)
 {
     initialize(argc, argv);
 

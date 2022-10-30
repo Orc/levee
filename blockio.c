@@ -17,6 +17,7 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR
  * PURPOSE.
  */
+#include <stdio.h>
 #include "levee.h"
 #include "extern.h"
 
@@ -24,11 +25,8 @@
 			    FALSE-- file too big
 */
 
-int 
-addfile(f, start, endd, size)
-FILE *f;
-int start;
-int endd, *size;
+int
+addfile(FILE *f, int start, int endd,int *size)
 {
     register int chunk;
 
@@ -41,10 +39,8 @@ int endd, *size;
 
 /* write out a file -- return TRUE if ok. */
 
-bool 
-putfile(f, start, endd)
-register FILE *f;
-register int start, endd;
+bool
+putfile(register FILE *f, register int start,register int endd)
 {
     int size = (endd-start);
     int ok;

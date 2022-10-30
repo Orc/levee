@@ -28,8 +28,7 @@
 /* put stuff into the yank buffer */
 
 bool
-doyank(low, high)
-int low, high;
+doyank(int low,int high)
 {
     FILEDESC f;
     register int sz;
@@ -51,8 +50,7 @@ int low, high;
 }
 
 bool
-deletion(low, high)
-int low,high;
+deletion(int low,int high)
 {
     if (doyank(low, high))		/* fill yank buffer */
 	return delete_to_undo(&undo, low, high-low);
@@ -62,8 +60,7 @@ int low,high;
 /* move stuff from the yank buffer into core */
 
 bool
-putback(start, newend)
-int start, *newend;
+putback(int start,int *newend)
 {
     int siz, st;
     FILEDESC f;
@@ -95,10 +92,8 @@ int start, *newend;
 #define DSIZE 1024
 
 int
-makedest(str,start,ssize,size)
+makedest(char *str, int start,int ssize,int size)
 /* makedest: make the replacement string for an regular expression */
-char *str;
-int start, ssize, size;
 {
     char *fr = dst;
     char *to = str;
@@ -136,9 +131,7 @@ int start, ssize, size;
 }
 
 int
-chop(start,endd,visual,query)
-int start,*endd;
-bool visual, *query;
+chop(int start,int *endd,bool visual,bool *query)
 {
     int i,retval;
     char c;

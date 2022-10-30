@@ -24,8 +24,7 @@
 #include <errno.h>
 
 bool
-lvgetline(str, size)
-char *str;
+lvgetline(char *str,int size)
 {
     int len;
     char flag;
@@ -43,7 +42,7 @@ char *str;
 
 
 char
-readchar()
+readchar(void)
 {
     ch = peekc();		/* get the peeked character */
     needchar = TRUE;		/* force a read on next readchar/peekc */
@@ -59,7 +58,7 @@ readchar()
 
 /* look at next input character without actually using it */
 char
-peekc()
+peekc(void)
 {
     if (needchar) {				/* if buffer is empty, */
 	if (macro >= 0) {			/* if a macro */
@@ -84,8 +83,7 @@ peekc()
    endd is the last bit of whitespace found.
 */
 int
-findDLE(start, endd, limit, dle)
-int start, *endd, limit, dle;
+findDLE(int start,int *endd,int limit,int dle)
 {
     while ((core[start] == '\t' || core[start] == ' ') && start < limit) {
 	if (core[start] == '\t')
@@ -100,8 +98,7 @@ int start, *endd, limit, dle;
 
 
 int
-skipws(loc)
-int loc;
+skipws(int loc)
 {
     while ((core[loc] == '\t' || core[loc] == ' ') && loc <= bufmax)
 	loc++;
@@ -110,8 +107,7 @@ int loc;
 
 
 int
-setX(cp)
-int cp;
+setX(int cp)
 {
     int top, xp;
 
@@ -139,8 +135,7 @@ int cp;
 
 
 int
-setY(cp)
-int cp;
+setY(int cp)
 {
     int yp, ix;
 
@@ -156,8 +151,7 @@ int cp;
 
 
 int
-to_line(cp)
-int cp;
+to_line(int cp)
 {
     int tdx,line;
     tdx = 0;
@@ -171,8 +165,7 @@ int cp;
 
 
 int
-to_index(line)
-int line;
+to_index(int line)
 {
     int cp = 0;
     while (cp < bufmax && line > 1) {
@@ -184,8 +177,7 @@ int line;
 
 
 void
-swap(a,b)
-int *a,*b;
+swap(int *a,int *b)
 {
     int c;
 
@@ -196,7 +188,7 @@ int *a,*b;
 
 
 void
-error()
+error(void)
 {
     indirect = 0;
     macro = -1;
@@ -210,9 +202,7 @@ error()
 
 /* the dirty work to start up a macro */
 void
-insertmacro(cmdstr, count)
-char *cmdstr;
-int count;
+insertmacro(char *cmdstr, int count)
 {
     if (macro >= NMACROS)
 	error();
@@ -226,8 +216,7 @@ int count;
 
 
 int
-lookup(c)
-char c;
+lookup(int c)
 {
     int ix = MAXMACROS;
 
@@ -238,8 +227,7 @@ char c;
 
 
 void
-fixmarkers(base,offset)
-int base,offset;
+fixmarkers(int base,int offset)
 {
     unsigned char c;
 
@@ -254,7 +242,7 @@ int base,offset;
 
 
 void
-wr_stat()
+wr_stat(void)
 {
     clrprompt();
     if ( filenm != F_UNSET ) {
@@ -289,8 +277,7 @@ static int  tabptr,
 	    ixp;
 
 void
-back_up(c)
-char c;
+back_up(char c)
 {
     int original_xp = ixp, count;
 
@@ -331,9 +318,7 @@ char c;
  *    EOL : ended with an '\r'
  */
 char
-line(s, start, endd, size)
-char *s;
-int start, endd, *size;
+line(char *s, int start,int endd,int *size)
 {
     int col0,
 	ip;
@@ -404,8 +389,7 @@ int start, endd, *size;
 
 /* move to core[loc] */
 void
-setpos(loc)
-int loc;
+setpos(int loc)
 {
     lstart = bseekeol(loc);
     lend = fseekeol(loc);
@@ -415,7 +399,7 @@ int loc;
 
 
 void
-resetX()
+resetX(void)
 {
     if (deranged) {
 	xp = setX(curr);
@@ -427,7 +411,7 @@ resetX()
 
 /* set end of window */
 int
-setend()
+setend(void)
 {
     int bottom, count;
     int lines = 0;
@@ -448,8 +432,7 @@ setend()
  *  return the number of lines actually between curr && ptop.
  */
 int
-settop(lines)
-int lines;
+settop(int lines)
 {
     int top, yp;
 
@@ -468,7 +451,7 @@ int lines;
 
 
 int
-Max(a,b)
+Max(int a,int b)
 {
     return (a>b) ? a : b;
 }
@@ -476,7 +459,7 @@ Max(a,b)
 
 
 int
-Min(a,b)
+Min(int a,int b)
 {
     return (a<b) ? a : b;
 }
@@ -515,8 +498,7 @@ lvtempfile(char *template)
 
 #if !HAVE_STRDUP
 char *
-strdup(s)
-char *s;
+strdup(char *s)
 {
     char *p;
 

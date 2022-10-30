@@ -30,10 +30,13 @@
 
 #define MAXCOLS 320
 
+void
+dgotoxy(int x,int y);
+
 /* do a gotoXY -- allowing -1 for same row/column
  */
 void
-dgotoxy(x,y)
+dgotoxy(int x,int y)
 {
     if (y == -1)
 	y = curpos.y;
@@ -65,8 +68,7 @@ dgotoxy(x,y)
  * of stdio.
  */
 static int
-tputs_putc(c)
-char c;
+tputs_putc(char c)
 {
     char s[1];
     s[0] = c;
@@ -77,8 +79,7 @@ char c;
 
 
 void
-dwrite(s,len)
-char *s;
+dwrite(char *s,int len)
 {
     if ( len <= 0 )
 	return;
@@ -99,8 +100,7 @@ char *s;
 /* write a string to our display
  */
 void
-dputs(s)
-char *s;
+dputs(char *s)
 {
     if ( s )
 	dwrite(s, strlen(s));
@@ -161,7 +161,7 @@ dclear_to_eol()
 /* turn the cursor off or on
  */
 void
-d_cursor(visible)
+d_cursor(int visible)
 {
     unless ( os_cursor(visible) )
 	dputs(visible ? CURon : CURoff);
@@ -171,7 +171,7 @@ d_cursor(visible)
 /* highlight text
  */
 void
-d_highlight(yes_or_no)
+d_highlight(int yes_or_no)
 {
     unless ( os_highlight(yes_or_no) ) {
 	if ( SO && SE )
@@ -183,9 +183,7 @@ d_highlight(yes_or_no)
 /* get the screensize
  */
 void
-dscreensize(x,y)
-int *x;
-int *y;
+dscreensize(int *x,int *y)
 {
     int li, co;
 
@@ -275,7 +273,7 @@ dinitialize()
 /* restore everything back to normal
  */
 void
-drestore()
+drestore(void)
 {
     os_restore();
 }
@@ -284,7 +282,7 @@ drestore()
 /* ring the bell
  */
 void
-Ping()
+Ping(void)
 {
     unless (bell)	/* if the bell is turned off, do nothing */
 	return;
@@ -295,8 +293,8 @@ Ping()
 
 /* convert a number to a string, w/o using sprintf
  */
-char *
-ntoa (int n)
+char
+*ntoa (int n)
 {
     static char bfr[1+((7+(8*sizeof(int)))/3)];
     int i;
@@ -319,8 +317,7 @@ ntoa (int n)
 /* print out a number, w/o using printf
  */
 void
-printi(num)
-int num;
+printi(int num)
 {
     prints(ntoa(num));
 }
@@ -343,9 +340,7 @@ println()
  *    normal for everything else
  */
 int
-format(out,c)
-register char *out;
-register unsigned c;
+format(register char *out,register unsigned c)
 {
     static char hexdig[] = "0123456789ABCDEF";
     register int i;
@@ -375,8 +370,7 @@ register unsigned c;
 /* print a formatted block of text
  */
 void
-printbuf(s, len)
-char *s;
+printbuf(char *s,int len)
 {
     int size,oxp = curpos.x;
     char buf[MAXCOLS+1];
@@ -398,8 +392,7 @@ char *s;
 /* print a formatted character
  */
 void
-printch(c)
-char c;
+printch(int c)
 {
     register int size;
     char buf[MAXCOLS];
@@ -415,8 +408,7 @@ char c;
 /* print a formatted string
  */
 void
-prints(s)
-char *s;
+prints(char *s)
 {
     printbuf(s, strlen(s));
 }
@@ -425,8 +417,7 @@ char *s;
 /* print a line of editor content
  */
 void
-writeline(y,x,start)
-int y,x,start;
+writeline(int y,int x,int start)
 {
     int endd,oxp;
 
@@ -449,9 +440,7 @@ int y,x,start;
 /* redraw && refresh the screen
  */
 void
-refresh(y,x,start,endd,rest)
-int y,x,start,endd;
-bool rest;
+refresh(int y,int x,int start,int endd,bool rest)
 {
     int sp;
     extern int screenlines;
@@ -485,8 +474,7 @@ bool rest;
 /* redraw everything */
 
 void
-redisplay(flag)
-bool flag;
+redisplay(bool flag)
 {
     if (flag)
 	clrprompt();
@@ -494,8 +482,7 @@ bool flag;
 }
 
 void
-scrollback(curr)
-int curr;
+scrollback(int curr)
 {
     dgotoxy(0,0);		/* move to the top line */
     do {
@@ -508,8 +495,7 @@ int curr;
 }
 
 void
-scrollforward(curr)
-int curr;
+scrollforward(int curr)
 {
     do {
 	writeline(LINES-1, 0, pend+1);
@@ -522,8 +508,7 @@ int curr;
 /* find if the number of lines between top && bottom is less than dofscroll */
 
 bool
-ok_to_scroll(top,bottom)
-int top,bottom;
+ok_to_scroll(int top,int bottom)
 {
     int nl, i;
 
@@ -543,9 +528,7 @@ clrprompt()
 }
 
 void
-prompt(toot,s)
-bool toot;
-char *s;
+prompt(bool toot,char *s)
 {
     if (toot)
 	error();

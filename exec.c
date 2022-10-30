@@ -7,9 +7,9 @@
 #include <errno.h>
 #endif
 
-void undefine();
-void fixupline();
-void doinput();
+void undefine(int i);
+void fixupline(int dft);
+void doinput(int fileptr);
 
 /* CAUTION: these make exec not quite recursive */
 int  high,low;		/* low && high end of command range */
@@ -24,9 +24,7 @@ static char noalloc[] = " (out of memory)";
 #define exprintln()	(zotscreen=YES),println()
 
 void
-plural(num,string)
-int num;
-char *string;
+plural(int num, char *string)
 {
     printi(num);
     prints(string);
@@ -36,7 +34,7 @@ char *string;
 
 
 void
-clrmsg()
+clrmsg(void)
 {
     dgotoxy(0, -1);
     dclear_to_eol();
@@ -44,8 +42,7 @@ clrmsg()
 
 
 void
-errmsg(msg)
-char *msg;
+errmsg(char *msg)
 {
     dgotoxy(0, -1);
     prints(msg);
@@ -63,8 +60,8 @@ setarg(char *s)
     execstr = s;
 }
 
-static char *
-getarg()
+static
+char * getarg(void)
 {
     char *rv;
     rv = execstr;
@@ -80,7 +77,7 @@ getarg()
 
 
 void
-version()
+version(void)
 /* version: print which version of levee we are... */
 {
     errmsg("levee (c)");prints(codeversion);
@@ -89,8 +86,7 @@ version()
 
 /* figure out a address range for a command */
 char *
-findbounds(ip)
-char *ip;
+findbounds(char *ip)
 {
     /* get the low address */
     logit(("findbounds: low (%d,&[%s],0)", curr, ip));
@@ -125,7 +121,7 @@ char *ip;
 
 
 void
-show_args()
+show_args(void)
 /* show_args: print the argument list */
 {
     register int i;
@@ -146,7 +142,7 @@ show_args()
 } /* show_args */
 
 void
-setcmd()
+setcmd(void)
 {
     bool no = NO,b;
     char *arg, *num;
@@ -237,8 +233,7 @@ setcmd()
 
 /* print a macro */
 void
-printone(i)
-int i;
+printone(int i)
 {
     if (i >= 0) {
 	exprintln();
@@ -255,7 +250,7 @@ int i;
 
 /* print all the macros */
 void
-printall()
+printall(void)
 {
     int i;
     for (i = 0; i < MAXMACROS; i++)
@@ -266,8 +261,7 @@ printall()
 
 /* :map ch text */
 void
-map(insert)
-bool insert;
+map(bool insert)
 {
     char *macro, c;
     int i;
@@ -305,8 +299,7 @@ bool insert;
 
 
 void
-undefine(i)
-int i;
+undefine(int i)
 {
     char *p;
     if (i >= 0) {
@@ -320,7 +313,7 @@ int i;
 
 
 int
-unmap()
+unmap(void)
 {
     int i;
     char *arg;
@@ -343,8 +336,7 @@ unmap()
 
 /* return argument # of a filename */
 int
-findarg(name)
-register char *name;
+findarg(register char *name)
 {
     int j;
     for (j = 0; j < args.gl_pathc; j++)
@@ -356,8 +348,7 @@ register char *name;
 
 /* add a filename to the arglist */
 int
-addarg(name)
-register char *name;
+addarg(register char *name)
 {
     int where;
     int rc;
@@ -373,7 +364,7 @@ register char *name;
 /* s/[src]/dst[/options] */
 /* s& */
 void
-cutandpaste()
+cutandpaste(void)
 {
     bool askme  = NO,
 	 printme= NO,
@@ -487,9 +478,7 @@ insertfile(FILE *f, int insert, int at, int *fsize)
 
 
 void
-inputf(fname, newbuf)
-register char *fname;
-bool newbuf;
+inputf(register char *fname, bool newbuf)
 {
     FILE *f;
     int fsize,		/* bytes read in */
@@ -556,8 +545,7 @@ bool newbuf;
 
 /* Change a file's name (for autocopy). */
 void
-backup(name)
-char *name;
+backup(char *name)
 {
     char *back, *expanded;
     int ok = NO;
@@ -583,8 +571,7 @@ char *name;
 
 
 bool
-outputf(fname, entire_file)
-char *fname;
+outputf(char *fname,int entire_file)
 {
     bool whole;
     FILE *f;
@@ -631,9 +618,9 @@ char *fname;
 
 
 int
-oktoedit(writeold)
+oktoedit(int writeold)
 /* check and see if it is ok to edit a new file */
-int writeold;	/* automatically write out changes? */
+/* automatically write out changes? */
 {
     unless (modified)			/* no modifications?  Yes. */			/* otherwise?  Yes. */
 	return YES;
@@ -660,7 +647,7 @@ int writeold;	/* automatically write out changes? */
 
 /* write out all || part of a file */
 bool
-writefile()
+writefile(void)
 {
     char *name;
     int fileptr = filenm;
@@ -689,7 +676,7 @@ writefile()
 
 
 void
-editfile()
+editfile(void)
 {
     char *name;	/* file to edit */
     int newpc = F_UNSET;
@@ -728,7 +715,7 @@ editfile()
 
 
 void
-dotag()
+dotag(void)
 {
     char *tag;
     Tag result;
@@ -758,7 +745,7 @@ dotag()
 
 
 void
-poptag()
+poptag(void)
 {
     Camefrom *loc = pop_tag();
 
@@ -785,8 +772,7 @@ poptag()
 
 
 void
-doinput(fileptr)
-int fileptr;
+doinput(int fileptr)
 {
     inputf(args.gl_pathv[fileptr], YES);
 
@@ -798,8 +784,7 @@ int fileptr;
 
 
 void
-toedit(count)
-int count;
+toedit(int count)
 {
     if (count > 1) {
 	printi(count);
@@ -809,7 +794,7 @@ int count;
 
 
 void
-readfile()
+readfile(void)
 {
     char *name;
 
@@ -835,8 +820,7 @@ readfile()
 
 
 void
-nextfile(prev)
-bool prev;
+nextfile(bool prev)
 {
     char *name = getarg();
     int rc, i, current;
@@ -919,8 +903,7 @@ bool prev;
  * set up low, high; set dot to high
  */
 void
-fixupline(dft)
-int dft;
+fixupline(int dft)
 {
     int newpos;
 
@@ -948,7 +931,7 @@ int dft;
 
 
 void
-whatline()
+whatline(void)
 {
     printi(to_line((low < 0) ? (bufmax-1) : low));
     if (high >= 0) {
@@ -959,7 +942,7 @@ whatline()
 
 
 void
-print()
+print(void)
 {
     goto justwrite;
     do {
@@ -976,9 +959,7 @@ print()
 
 
 bool
-do_file(fname,mode)
-char *fname;
-exec_type *mode;
+do_file(char *fname,exec_type *mode)
 {
     char line[120];
     FILE *fp;
@@ -1001,8 +982,7 @@ exec_type *mode;
 
 
 void
-doins(flag)
-bool flag;
+doins(bool flag)
 {
     int i;
     curr = low;
@@ -1015,9 +995,7 @@ bool flag;
 
 /* parse the command line for lineranges && a command */
 static int
-parse(inp, default_cmd)
-char **inp;
-char *default_cmd;
+parse(char **inp, char *default_cmd)
 {
     int j,k;
     char *cmd, *token;
@@ -1176,9 +1154,7 @@ expand_line(char *cmd)
   * editing, FALSE if it received a quit command.
   */
 int
-exec(cmd, mode)
-char *cmd;
-exec_type *mode;
+exec(char *cmd,exec_type *mode)
 {
     int  what;
     int  exit_now = NO;

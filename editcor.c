@@ -37,7 +37,7 @@ extern int affirm;	/* override file is modified checks (exec.c) */
 /* called when we enter editcore or do something that invalidates the screen
  */
 void
-maybe_refresh_screen(redraw)
+maybe_refresh_screen(int redraw)
 {
     logit(("maybe_refresh_screen(%d) curr = %d, ptop = %d, pend = %d", redraw, curr, ptop, pend));
 
@@ -57,9 +57,7 @@ maybe_refresh_screen(redraw)
 /* move a line of text right || left */
 
 void
-adjuster(sleft, endd, sw)
-bool sleft;
-int endd, sw;
+adjuster(bool sleft,int endd,int sw)
 {
     bool noerror;
     int np, ts,
@@ -109,8 +107,7 @@ int endd, sw;
 /* join <count> lines together */
 
 void
-join(count)
-int count;
+join(int count)
 {
     bool ok;
     int lp, first;
@@ -139,10 +136,7 @@ int count;
 }
 
 void
-squiggle(endp, c, dorepl)
-int endp;
-char c;
-bool dorepl;
+squiggle(int endp, char c, bool dorepl)
 {
     int i;
 
@@ -165,7 +159,7 @@ bool dorepl;
 }
 
 void
-bigreplace()
+bigreplace(void)
 {
     int len, tsiz;
 
@@ -181,8 +175,7 @@ bigreplace()
 }
 
 bool
-put(before)
-bool before;
+put(bool before)
 {
     endY = setY(curr);
     if (!before)
@@ -197,7 +190,7 @@ bool before;
 }
 
 bool
-execute(start, end)
+execute(int start,int end)
 {
     FILEDESC tf;
     FILE *f;
@@ -241,7 +234,7 @@ execute(start, end)
 }
 
 void
-vitag()
+vitag(void)
 {
     int start, endd;
     int newfile, rc;
@@ -285,8 +278,9 @@ vitag()
 }
 
 
+
 void
-goback()
+goback(void)
 {
     Camefrom *loc = pop_tag();
 
@@ -312,7 +306,7 @@ goback()
 }
 
 void
-gcount()
+gcount(void)
 {
     do {
 	count = (count*10) + (ch-'0');
@@ -321,8 +315,7 @@ gcount()
 }
 
 void
-docommand(cmd)
-cmdtype cmd;
+docommand(cmdtype cmd)
 {
     cmdtype movecmd;	/* movement command for y, d, c */
     char    cmdch;
@@ -535,7 +528,7 @@ killredo:
 /* Initialize && execute a macro */
 
 void
-exmacro()
+exmacro(void)
 {
     int mp;
 
@@ -552,8 +545,7 @@ exmacro()
 /* redraw the screen w.r.t. the cursor */
 
 void
-zdraw(code)
-unsigned char code;
+zdraw(unsigned char code)
 {
     int nl = ERR,
 	np = (count>0)?to_index(count):curr;
@@ -577,7 +569,7 @@ unsigned char code;
 /* start up a built-in macro */
 
 void
-macrocommand()
+macrocommand(void)
 {
     if (count > 1)
 	strcpy(gcb, ntoa(count));
@@ -617,8 +609,7 @@ macrocommand()
 /* scroll the window up || down */
 
 void
-scroll(down)
-bool down;
+scroll(bool down)
 {
     int i;
 
@@ -655,7 +646,7 @@ bool down;
 }
 
 exec_type
-editcore()
+editcore(void)
 {
     cmdtype cmd;
     extern bool s_wrapped;

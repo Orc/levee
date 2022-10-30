@@ -25,8 +25,7 @@
 #define INDEX(x)	((1+x)>>1)
 
 bool
-pushblock(u)
-struct undostack *u;
+pushblock(struct undostack *u)
 {
     if (u->blockp == 0)
 	if ( (uwrite = OPEN_NEW(undobuf)) == NOWAY )
@@ -40,9 +39,7 @@ struct undostack *u;
 }
 
 bool
-pushw(u, i)
-struct undostack *u;
-int i;
+pushw(struct undostack *u, int i)
 {
     if (u->ptr >= PAGESIZE && !pushblock(u))
 	return FALSE;
@@ -51,9 +48,7 @@ int i;
 }
 
 bool
-pushmem(u, start, size)
-struct undostack *u;
-int start,size;
+pushmem(struct undostack *u, int start, int size)
 {
     int chunk;
     bool ok;
@@ -73,8 +68,7 @@ int start,size;
 }
 
 void
-zerostack(u)
-struct undostack *u;
+zerostack(struct undostack *u)
 {
     if (u->blockp > 0)
 	CLOSE_FILE(uwrite);
@@ -83,18 +77,13 @@ struct undostack *u;
 }
 
 bool
-uputcmd(u, size, start, cmd)
-struct undostack *u;
-int size,start;
-char cmd;
+uputcmd(struct undostack *u, int size, int start, int cmd)
 {
     return(pushw(u, size) && pushw(u, start) && pushw(u, cmd));
 }
 
 void
-insert_to_undo(u, start, size)
-struct undostack *u;
-int start,size;
+insert_to_undo(struct undostack *u, int start, int size)
 {
     if (uputcmd(u, size, start, U_DELC)) {
 	fixmarkers(start, size);
@@ -107,9 +96,7 @@ int start,size;
 /* delete stuff from the buffer && put it into the undo stack */
 
 bool
-delete_to_undo(u, start, lump)
-struct undostack *u;
-int start, lump;
+delete_to_undo(struct undostack *u, int start, int lump)
 {
     if (lump <= 0)
 	return TRUE;
@@ -126,16 +113,13 @@ int start, lump;
 /* copy stuff into the undo buffer */
 
 bool
-move_to_undo(u, start, lump)
-struct undostack *u;
-int start,lump;
+move_to_undo(struct undostack *u, int start, int lump)
 {
     return pushmem(u, start, lump) && uputcmd(u,lump,start,U_MOVEC);
 }
 
 bool
-popblock(u)
-struct undostack *u;
+popblock(struct undostack *u)
 {
     if (u->blockp > 0) {
 	if (SEEK_POSITION(uread, (long)((--u->blockp)*BUFSZ), 0) < 0)
@@ -149,9 +133,7 @@ struct undostack *u;
 }
 
 bool
-popw(u, i)
-struct undostack *u;
-int *i;
+popw(struct undostack *u, int *i)
 {
     if (u->ptr < 1 && !popblock(u))
 	return FALSE;
@@ -160,9 +142,7 @@ int *i;
 }
 
 bool
-popmem(u, start, size)
-struct undostack *u;
-int start, size;
+popmem(struct undostack *u, int start, int size)
 {
     int chunk, loc;
     bool ok;
@@ -185,9 +165,7 @@ int start, size;
 /* delete (I)nserted text */
 
 bool
-takeout(save_undo,curp)
-struct undostack *save_undo;
-int *curp;
+takeout(struct undostack *save_undo, int *curp)
 {
     int lump;
 
@@ -196,9 +174,7 @@ int *curp;
 }
 
 bool
-copyover(save_undo,curp)
-struct undostack *save_undo;
-int *curp;
+copyover(struct undostack *save_undo, int *curp)
 {
     int lump;
 
@@ -208,9 +184,7 @@ int *curp;
 }
 
 bool
-putin(save_undo,curp)
-struct undostack *save_undo;
-int *curp;
+putin(struct undostack *save_undo, int *curp)
 {
     int lump;
 
@@ -228,8 +202,7 @@ int *curp;
 /* driver for undo -- returns last address modified || -1 if error */
 
 int
-fixcore(topp)
-int *topp;
+fixcore(int *topp)
 {
     int curp;
     static struct undostack save_undo;

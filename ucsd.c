@@ -23,9 +23,7 @@
 #ifndef moveleft
 
 void
-moveleft(src,dest,length)
-register char *src,*dest;
-register int length;
+moveleft(register char *src, register char *dest, register int length)
 {
     while (--length >= 0)
 	*(dest++) = *(src++);
@@ -36,9 +34,7 @@ register int length;
 #ifndef moveright
 
 void
-moveright(src,dest,length)
-register char *src,*dest;
-register int length;
+moveright(register char *src, register char *dest, register int length)
 {
     src = &src[length];
     dest = &dest[length];
@@ -51,9 +47,7 @@ register int length;
 #ifndef fillchar
 
 void
-fillchar(src,length,ch)
-register char *src,ch;
-register int length;
+fillchar(register char *src, register char *ch,register int length)
 {
     while (--length >= 0)
 	*(src++) = ch;
@@ -62,9 +56,7 @@ register int length;
 #endif
 
 int
-scan(length,tst,ch,src)
-int length;
-register char tst,ch,*src;
+scan(int length, register int tst, register int ch,register char *src)
 {
     register int inc,l;
 

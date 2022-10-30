@@ -30,9 +30,7 @@ void patsize(char**);
 static int arg;		/* arguments inside of a RE */
 
 int
-REmatch(pattern, start, end)
-char *pattern;
-int start,end;
+REmatch(char *pattern, int start,int end)
 {
     char *endp = &core[end];
 
@@ -45,8 +43,7 @@ int start,end;
 }
 
 int
-omatch(pattern, cp, endp)
-char *pattern, **cp, *endp;
+omatch(char *pattern,char **cp,char *endp)
 {
     register int flag;
     extern int ignorecase;
@@ -94,8 +91,7 @@ char *pattern, **cp, *endp;
 }
 
 int
-amatch(pattern,start,endp)
-char *pattern, *endp, *start;
+amatch(char *pattern,char *endp,char *start)
 {
     int sarg = arg;	/* save old arg match count for errors */
 
@@ -135,8 +131,7 @@ char *pattern, *endp, *start;
 /*  increment pattern by the size of the token being scanned
  */
 void
-patsize(pattern)
-register char **pattern;
+patsize(register char **pattern)
 {
     register int count;
 
@@ -156,10 +151,8 @@ register char **pattern;
 }
 
 int
-locate(pattern,linep)
+locate(char *pattern,register char *linep)
 /* locate: find a character in a closure */
-char *pattern;
-register char *linep;
 {
     register char *p = 1+pattern;
     register int count;
@@ -174,17 +167,15 @@ register char *linep;
 char *p;
 
 void
-concatch(c)
+concatch(char c)
 /* add a character to the pattern */
-char c;
 {
     if (p < &pattern[MAXPAT-1])
 	*p++ = c;
 }
 
 char
-esc(s)
-char **s;
+esc(char **s)
 {
     if (**s != ESCAPE || *(1+*s) == 0)
 	return **s;
@@ -197,9 +188,8 @@ char **s;
 }
 
 char *
-dodash(src)
+dodash(char *src)
 /* parse the innards of a [] */
-char *src;
 {
     int k;
     char *start = src;
@@ -223,11 +213,10 @@ char *src;
 }
 
 char *
-badccl(src)
+badccl(char *src)
 /* a [] was encountered. is it a CCL (match one of the included
  *  characters); or is it a NCCL (match all but the included characters)?
  */
-char *src;
 {
     char *jstart;
 
@@ -248,8 +237,7 @@ char *src;
 char badclose[] = { LSTART, LEND, CLOSURE, 0 };
 
 char *
-makepat(string,delim)
-char *string, delim;
+makepat(char *string,int delim)
 /* make up the pattern string for find	-- ripped from 'Software Tools' */
 {
     char *cp = 0, *oldcp;
@@ -321,10 +309,8 @@ char *string, delim;
 }
 
 int
-findfwd(pattern,start,endp)
+findfwd(char *pattern,int start,int endp)
 /* look for a regular expression forward */
-char *pattern;
-int start, endp;
 {
     int ep;
 
@@ -337,10 +323,8 @@ int start, endp;
  }
 
 int
-findback(pattern,start,endp)
+findback(char *pattern,int start,int endp)
 /* look for a regular expression backwards */
-char *pattern;
-int start, endp;
 {
     int ep,i;
 
@@ -355,7 +339,7 @@ int start, endp;
 
 
 char *
-expr_errstring(errno)
+expr_errstring(int errno)
 {
     switch (errno) {
     case ERR_NOMATCH:	return "Pattern not found";
@@ -372,10 +356,9 @@ expr_errstring(errno)
 bool s_wrapped = 0;
 
 int
-search(start, bufp)
+search(int start,char **bufp)
 /* get a token for find & find it in the buffer
  */
-char **bufp;
 {
     int  pos;
     char marker = **bufp;
@@ -412,9 +395,8 @@ char **bufp;
 }
 
 static int
-address_fragment(start, bufp, offset)
+address_fragment(int start,char **bufp,int offset)
 /* parse part of an address (a /pattern/, ?pattern?, [0-9]*, 0, $) */
-char **bufp;
 {
     int addr;
 
@@ -472,8 +454,7 @@ char **bufp;
 
 
 int
-findparse(start, bufp, offset) /* driver for ?, /, && : lineranges */
-char **bufp;
+findparse(int start,char **bufp,int offset) /* driver for ?, /, && : lineranges */
 {
     int addr;
     char c;
@@ -518,9 +499,7 @@ char **bufp;
 }
 
 int
-nextline(advance,dest,count)
-bool advance;
-int dest,count;
+nextline(bool advance,int dest,int count)
 {
     int start = dest;
     int ocount= count;
@@ -544,8 +523,7 @@ int dest,count;
 }
 
 int
-fseekeol(origin)
-int origin;
+fseekeol(int origin)
 {
 #if 0
     char *res = memchr(core+origin, EOL, bufmax-origin);
@@ -560,8 +538,7 @@ int origin;
 }
 
 int
-bseekeol(origin)
-int origin;
+bseekeol(int origin)
 {
     return(origin + scan(-origin,'=',EOL,&core[origin-1]));
 }
@@ -569,9 +546,7 @@ int origin;
 /* get something from the context table */
 
 int
-lvgetcontext(c,begline)
-char c;
-bool begline;
+lvgetcontext(int c, bool begline)
 {
     int i;
 
