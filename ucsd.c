@@ -47,7 +47,7 @@ moveright(register char *src, register char *dest, register int length)
 #ifndef fillchar
 
 void
-fillchar(register char *src, register char *ch,register int length)
+fillchar(register char *src, register int length, register char ch)
 {
     while (--length >= 0)
 	*(src++) = ch;
