@@ -137,6 +137,8 @@ initialize(int argc,char **argv)
 
     fillchar(&args, sizeof args, 0);
 
+    argc -= optind;
+    argv += optind;
 
     if (argc > 0 && **argv == '+') {
 	char *p = *argv;
