@@ -49,50 +49,8 @@ initialize(int argc,char **argv)
     dscreensize(&COLS, &LINES);
     dofscroll = LINES/2;
 
-
-    /* initialize macro table */
-    for (i = 0;i < MAXMACROS;i++)
-	mbuffer[i].token = 0;
-    core[0] = EOL;
-
-    yank.size = ERR;		/* no yanks yet */
-
-    undo.blockp = undo.ptr = 0;
-
-    fillchar(adjcurr, sizeof(adjcurr), 0);
-    fillchar(adjendp, sizeof(adjendp), 0);
-
-    adjcurr[BTO_WD]	=	/* more practical to just leave dynamic */
-    adjcurr[SENT_BACK]	=
-    adjendp[BTO_WD]	=
-    adjendp[FORWD]	=
-    adjendp[MATCHEXPR]	=
-    adjendp[PATT_BACK]	=
-    adjendp[TO_CHAR]	=
-    adjendp[UPTO_CHAR]	=
-    adjendp[PAGE_BEGIN]	=
-    adjendp[PAGE_MIDDLE]=
-    adjendp[PAGE_END]	= TRUE;
-
-    fillchar(contexts, sizeof(contexts), -1);
-
-    undobuf = lvtempfile("$un");
-    yankbuf = lvtempfile("$ya");
-    undotmp = lvtempfile("$tm");
-
-    if ( p = getenv("LVRC") ) {
-	strncpy(instring, p, SZ_INSTRING-1);
-	instring[SZ_INSTRING-1] = 0;
-	setarg(instring);
-	setcmd();
-    }
-    else if ( p = dotfile() )
-	do_file(p, &xmode);
-
-    fillchar(&args, sizeof args, 0);
-
 #if UCSD_COMPAT
-#  define OPTIONS "epRt:"
+#  define OPTIONS "epRt:V"
 #else
 #  define OPTIONS "eRt:V"
 #endif
@@ -136,6 +94,49 @@ initialize(int argc,char **argv)
 
     argc -= optind;
     argv += optind;
+
+
+    /* initialize macro table */
+    for (i = 0;i < MAXMACROS;i++)
+	mbuffer[i].token = 0;
+    core[0] = EOL;
+
+    yank.size = ERR;		/* no yanks yet */
+
+    undo.blockp = undo.ptr = 0;
+
+    fillchar(adjcurr, sizeof(adjcurr), 0);
+    fillchar(adjendp, sizeof(adjendp), 0);
+
+    adjcurr[BTO_WD]	=	/* more practical to just leave dynamic */
+    adjcurr[SENT_BACK]	=
+    adjendp[BTO_WD]	=
+    adjendp[FORWD]	=
+    adjendp[MATCHEXPR]	=
+    adjendp[PATT_BACK]	=
+    adjendp[TO_CHAR]	=
+    adjendp[UPTO_CHAR]	=
+    adjendp[PAGE_BEGIN]	=
+    adjendp[PAGE_MIDDLE]=
+    adjendp[PAGE_END]	= TRUE;
+
+    fillchar(contexts, sizeof(contexts), -1);
+
+    undobuf = lvtempfile("$un");
+    yankbuf = lvtempfile("$ya");
+    undotmp = lvtempfile("$tm");
+
+    if ( p = getenv("LVRC") ) {
+	strncpy(instring, p, SZ_INSTRING-1);
+	instring[SZ_INSTRING-1] = 0;
+	setarg(instring);
+	setcmd();
+    }
+    else if ( p = dotfile() )
+	do_file(p, &xmode);
+
+    fillchar(&args, sizeof args, 0);
+
 
     if (argc > 0 && **argv == '+') {
 	char *p = *argv;
