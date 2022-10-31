@@ -30,7 +30,7 @@ void patsize(char**);
 static int arg;		/* arguments inside of a RE */
 
 int
-REmatch(char *pattern, int start,int end)
+REmatch(char *pattern, int start, int end)
 {
     char *endp = &core[end];
 
@@ -43,7 +43,7 @@ REmatch(char *pattern, int start,int end)
 }
 
 int
-omatch(char *pattern,char **cp,char *endp)
+omatch(char *pattern, char **cp, char *endp)
 {
     register int flag;
     extern int ignorecase;
@@ -91,7 +91,7 @@ omatch(char *pattern,char **cp,char *endp)
 }
 
 int
-amatch(char *pattern,char *endp,char *start)
+amatch(char *pattern,char *start,char *endp)
 {
     int sarg = arg;	/* save old arg match count for errors */
 
@@ -131,7 +131,7 @@ amatch(char *pattern,char *endp,char *start)
 /*  increment pattern by the size of the token being scanned
  */
 void
-patsize(register char **pattern)
+patsize(char **pattern)
 {
     register int count;
 
@@ -309,7 +309,7 @@ makepat(char *string,int delim)
 }
 
 int
-findfwd(char *pattern,int start,int endp)
+findfwd(char *pattern, int start, int endp)
 /* look for a regular expression forward */
 {
     int ep;
@@ -323,7 +323,7 @@ findfwd(char *pattern,int start,int endp)
  }
 
 int
-findback(char *pattern,int start,int endp)
+findback(char *pattern, int start, int endp)
 /* look for a regular expression backwards */
 {
     int ep,i;
@@ -356,7 +356,7 @@ expr_errstring(int errno)
 bool s_wrapped = 0;
 
 int
-search(int start,char **bufp)
+search(int start, char **bufp)
 /* get a token for find & find it in the buffer
  */
 {
@@ -395,7 +395,7 @@ search(int start,char **bufp)
 }
 
 static int
-address_fragment(int start,char **bufp,int offset)
+address_fragment(int start, char **bufp, int offset)
 /* parse part of an address (a /pattern/, ?pattern?, [0-9]*, 0, $) */
 {
     int addr;
@@ -454,7 +454,7 @@ address_fragment(int start,char **bufp,int offset)
 
 
 int
-findparse(int start,char **bufp,int offset) /* driver for ?, /, && : lineranges */
+findparse(int start, char **bufp, int offset) /* driver for ?, /, && : lineranges */
 {
     int addr;
     char c;
@@ -499,7 +499,7 @@ findparse(int start,char **bufp,int offset) /* driver for ?, /, && : lineranges 
 }
 
 int
-nextline(bool advance,int dest,int count)
+nextline(bool advance, int dest, int count)
 {
     int start = dest;
     int ocount= count;
