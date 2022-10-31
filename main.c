@@ -94,7 +94,7 @@ initialize(int argc,char **argv)
 #if UCSD_COMPAT
 #  define OPTIONS "epRt:"
 #else
-#  define OPTIONS "eRt:"
+#  define OPTIONS "eRt:V"
 #endif
 
     while ( (opt=getopt(argc, argv, OPTIONS)) != EOF ) {
@@ -122,6 +122,11 @@ initialize(int argc,char **argv)
 		    prints(">");
 		}
 		return;
+	    case 'V':
+		reset_input();
+		drestore();
+		printf("levee (c)%s %s\n", codeversion, codecomment);
+		exit(0);
 	    default:
 		dgotoxy(0, LINES-1);
 		errmsg("Unknown option -- ");printch(optopt);

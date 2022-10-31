@@ -132,6 +132,7 @@ char Erasechar,
 
 extern
 char codeversion[],		/* Editor version */
+     codecomment[],		/* editor version commentary, for levee --version */
      fismod[],			/* File is modified message */
      fisro[];			/* permission denied message */
      
