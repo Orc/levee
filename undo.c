@@ -102,8 +102,8 @@ delete_to_undo(struct undostack *u, int start, int lump)
 	return TRUE;
     else if (pushmem(u,start,lump) && uputcmd(u,lump,start,U_ADDC)) {
 	moveleft(&core[start+lump], &core[start], bufmax-(start+lump));
-	bufmax -= lump;
 	fixmarkers(start,-lump);
+	bufmax -= lump;
 	return TRUE;
     }
     else

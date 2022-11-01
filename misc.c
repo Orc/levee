@@ -233,7 +233,7 @@ fixmarkers(int base,int offset)
 
     for (c = 0;c<'z'-'`';c++)
 	if (contexts[c] > base) {
-	    if (contexts[c]+offset < base || contexts[c]+offset >= bufmax)
+	    if (contexts[c]+offset < base)
 		contexts[c] = -1;
 	    else
 		contexts[c] += offset;
