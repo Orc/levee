@@ -5,6 +5,7 @@
 A Screen Oriented Editor.
 .SH SYNOPSIS
 .B levee
+[\fI-V\fR]
 [\fI+address\fR] [\fIfile \fB...\fR]
 .SH DESCRIPTION
 Levee is a screen oriented  editor based on the  Unix editor
@@ -21,6 +22,9 @@ When you enter Levee,  you may specify  an  address to start
 editing at.  These addresses  are in the same  format as command
 mode addresses,  except that a naked + will put  you at the very
 end of the file.
+.PP
+Levee has one command line option;  if you use \fI-V\fR, it will
+write its version to stdout, then exit.
 .PP
 Levee is copyright (c) 1982-2015 by David L. Parsons. (See
 the notice at the end of this document for distribution terms.)
