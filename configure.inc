@@ -929,7 +929,7 @@ AC_WHATIS() {
 	    echo "#include <${x}>"
 	done
 
-	echo "main() { printf(\"${MACRO}=\\\"${__fmt}\\\"\\n\", ${MACRO}); }" )  > _ngc$$.c
+	echo "int main() { printf(\"${MACRO}=\\\"${__fmt}\\\"\\n\", ${MACRO}); }" )  > _ngc$$.c
 
     if $AC_CC $AC_CFLAGS -o _ngc$$ _ngc$$.c; then
 	./_ngc$$
@@ -1529,7 +1529,7 @@ AC_PROG_INSTALL () {
     fi
 
     # see if we can strip binaries
-    echo 'main() { puts("hello, sailor!"); }' > ngc$$.c
+    echo 'int main() { puts("hello, sailor!"); }' > ngc$$.c
     if $AC_CC -o ngc$$ ngc$$.c; then
 	if $PROG_INSTALL -s -m 444 ngc$$ inst$$; then
 	    _strip="-s"
